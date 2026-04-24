@@ -296,6 +296,138 @@ const hintStateStore = createHintStateStore();
 await hintStateStore.init();
 await hintStateStore.bootstrapFromFilesIfNeeded();
 
+function createArtifactStore() {
+  const connectionString = resolvePostgresConnection();
+  const canUsePostgres = storage.driver === 'postgres' && Boolean(connectionString);
+  const { Pool } = pg;
+  const state = { pool: null, flushChain: Promise.resolve() };
+
+  function ensurePool() {
+    if (!canUsePostgres) return null;
+    if (!state.pool) {
+      state.pool = new Pool({
+        connectionString,
+        ssl: shouldUsePostgresSsl(connectionString)
+          ? { rejectUnauthorized: String(process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED || 'false').trim().toLowerCase() === 'true' }
+          : false,
+        max: Math.max(1, Number(process.env.PG_POOL_MAX || 3)),
+        idleTimeoutMillis: Math.max(1000, Number(process.env.PG_IDLE_TIMEOUT_MS || 10000)),
+        connectionTimeoutMillis: Math.max(1000, Number(process.env.PG_CONNECT_TIMEOUT_MS || 5000)),
+        allowExitOnIdle: true,
+      });
+    }
+    return state.pool;
+  }
+
+  function queueFlush(task) {
+    if (!canUsePostgres) return;
+    state.flushChain = state.flushChain
+      .then(task)
+      .catch((error) => console.error('[artifact-store] postgres sync failed:', error?.message || error));
+  }
+
+  return {
+    canUsePostgres,
+
+    saveArtifact(sessionId, payload, markdown) {
+      queueFlush(async () => {
+        const pool = ensurePool();
+        await pool.query(
+          `insert into session_artifacts (session_id, payload, markdown, saved_at, updated_at)
+           values ($1, $2::jsonb, $3, $4, now())
+           on conflict (session_id) do update
+           set payload = excluded.payload,
+               markdown = excluded.markdown,
+               saved_at = excluded.saved_at,
+               updated_at = now()`,
+          [sessionId, JSON.stringify(payload), markdown, payload.saved_at || new Date().toISOString()]
+        );
+      });
+    },
+
+    saveLog(session) {
+      queueFlush(async () => {
+        const pool = ensurePool();
+        const date = String(session.finished_at || new Date().toISOString()).slice(0, 10);
+        await pool.query(
+          `insert into session_logs (session_id, finished_date, payload, updated_at)
+           values ($1, $2, $3::jsonb, now())
+           on conflict (session_id) do update
+           set finished_date = excluded.finished_date,
+               payload = excluded.payload,
+               updated_at = now()`,
+          [session.session_id, date, JSON.stringify(session)]
+        );
+      });
+    },
+
+    async listArtifacts() {
+      if (!canUsePostgres) return null;
+      const pool = ensurePool();
+      const result = await pool.query(
+        'select payload from session_artifacts order by saved_at desc'
+      );
+      if (result.rowCount === 0) return null;
+      return result.rows.map(({ payload }) => ({
+        session_id: payload.session_id,
+        saved_at: payload.saved_at,
+        started_at: payload.started_at,
+        finished_at: payload.finished_at,
+        seller_username: payload.seller_username,
+        persona: payload.persona,
+        signal_card: payload.signal_card,
+        dialogue_type: payload.dialogue_type,
+        verdict: payload.assessment?.verdict || null,
+      })).filter((a) => a.session_id);
+    },
+
+    async loadArtifactJson(sessionId) {
+      if (!canUsePostgres) return null;
+      const pool = ensurePool();
+      const result = await pool.query(
+        'select payload from session_artifacts where session_id = $1',
+        [sessionId]
+      );
+      return result.rows[0]?.payload ?? null;
+    },
+
+    async loadArtifactMarkdown(sessionId) {
+      if (!canUsePostgres) return null;
+      const pool = ensurePool();
+      const result = await pool.query(
+        'select markdown from session_artifacts where session_id = $1',
+        [sessionId]
+      );
+      const md = result.rows[0]?.markdown;
+      return (typeof md === 'string' && md.length > 0) ? md : null;
+    },
+
+    async loadArtifactsBulk(ids) {
+      if (!canUsePostgres) return null;
+      const pool = ensurePool();
+      const result = await pool.query(
+        'select session_id, payload from session_artifacts where session_id = any($1::text[]) order by saved_at desc',
+        [ids]
+      );
+      if (result.rowCount === 0) return null;
+      return result.rows.map(({ payload }) => payload).filter(Boolean);
+    },
+
+    async listArtifactIds(limit) {
+      if (!canUsePostgres) return null;
+      const pool = ensurePool();
+      const sql = limit
+        ? 'select session_id from session_artifacts order by saved_at desc limit $1'
+        : 'select session_id from session_artifacts order by saved_at desc';
+      const result = await pool.query(sql, limit ? [limit] : []);
+      if (result.rowCount === 0) return null;
+      return result.rows.map((row) => row.session_id).filter(Boolean);
+    },
+  };
+}
+
+const artifactStore = createArtifactStore();
+
 function visibleDialogueMessages(session) {
   return (session?.transcript || []).filter((entry) => entry.role !== 'system');
 }
@@ -2984,13 +3116,16 @@ function buildHintMemorySummary(personaId = null) {
 }
 
 function logFinishedRun(session) {
-  const date = (session.finished_at || now()).slice(0, 10);
-  const dayDir = path.join(logsDir, date);
-  fs.mkdirSync(dayDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(dayDir, `${session.session_id}.json`),
-    JSON.stringify(session, null, 2)
-  );
+  artifactStore.saveLog(session);
+  if (storage.driver === 'file') {
+    const date = (session.finished_at || now()).slice(0, 10);
+    const dayDir = path.join(logsDir, date);
+    fs.mkdirSync(dayDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dayDir, `${session.session_id}.json`),
+      JSON.stringify(session, null, 2)
+    );
+  }
 }
 
 function saveArtifact(session) {
@@ -3034,7 +3169,7 @@ function saveArtifact(session) {
     };
 
     const jsonPath = path.join(artifactsDir, `artifact_${sid}.json`);
-    fs.writeFileSync(jsonPath, JSON.stringify(artifact, null, 2));
+    if (storage.driver === 'file') fs.writeFileSync(jsonPath, JSON.stringify(artifact, null, 2));
 
     const criteriaLines = (a.criteria || []).map((c) =>
       `- ${c.id}. ${c.label || c.name || c.id}: ${c.status}${c.short_reason ? ` — ${c.short_reason}` : ''}`
@@ -3073,8 +3208,11 @@ function saveArtifact(session) {
       transcriptLines
     ].filter((line) => line !== undefined && line !== false).join('\n').replace(/\n{3,}/g, '\n\n').trimEnd();
 
-    const mdPath = path.join(artifactsDir, `artifact_${sid}.md`);
-    fs.writeFileSync(mdPath, md);
+    artifactStore.saveArtifact(sid, artifact, md);
+    if (storage.driver === 'file') {
+      const mdPath = path.join(artifactsDir, `artifact_${sid}.md`);
+      fs.writeFileSync(mdPath, md);
+    }
   } catch (err) {
     console.error(`[artifacts] Failed to save artifact for session ${session.session_id}:`, err.message);
   }
@@ -7790,6 +7928,7 @@ app.get('/api/meta', async (_req, res) => {
     version: APP_VERSION,
     storage: await storage.getInfo(),
     aux_storage: await hintStateStore.getInfo(),
+    artifact_storage: { driver: artifactStore.canUsePostgres ? 'postgres' : 'file' },
     runtime: {
       node: process.version,
       vercel: Boolean(process.env.VERCEL),
@@ -8281,10 +8420,16 @@ app.post('/api/sessions/bulk-download', async (req, res) => {
 });
 
 // GET /api/artifacts — list all saved artifacts (metadata only, no transcript)
-app.get('/api/artifacts', (_req, res) => {
+app.get('/api/artifacts', async (_req, res) => {
   try {
-    const files = fs.readdirSync(artifactsDir)
-      .filter((f) => f.startsWith('artifact_') && f.endsWith('.json'));
+    const pgArtifacts = await artifactStore.listArtifacts();
+    if (pgArtifacts !== null) {
+      return res.json({ artifacts: pgArtifacts, total: pgArtifacts.length });
+    }
+
+    const files = fs.existsSync(artifactsDir)
+      ? fs.readdirSync(artifactsDir).filter((f) => f.startsWith('artifact_') && f.endsWith('.json'))
+      : [];
 
     const artifacts = files.map((f) => {
       try {
@@ -8298,7 +8443,7 @@ app.get('/api/artifacts', (_req, res) => {
           persona: raw.persona,
           signal_card: raw.signal_card,
           dialogue_type: raw.dialogue_type,
-          verdict: raw.assessment?.verdict || null
+          verdict: raw.assessment?.verdict || null,
         };
       } catch {
         return null;
@@ -8318,38 +8463,76 @@ app.get('/api/artifacts', (_req, res) => {
 });
 
 // GET /api/artifacts/:id/download — download single artifact as JSON file
-app.get('/api/artifacts/:id/download', (req, res) => {
-  const jsonPath = path.join(artifactsDir, `artifact_${req.params.id}.json`);
-  if (!fs.existsSync(jsonPath)) return res.status(404).json({ error: 'Artifact not found' });
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.json"`);
-  res.send(fs.readFileSync(jsonPath));
+app.get('/api/artifacts/:id/download', async (req, res) => {
+  try {
+    const pgPayload = await artifactStore.loadArtifactJson(req.params.id);
+    if (pgPayload !== null) {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.json"`);
+      return res.json(pgPayload);
+    }
+    const jsonPath = path.join(artifactsDir, `artifact_${req.params.id}.json`);
+    if (!fs.existsSync(jsonPath)) return res.status(404).json({ error: 'Artifact not found' });
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.json"`);
+    res.send(fs.readFileSync(jsonPath));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load artifact', detail: err.message });
+  }
 });
 
 // GET /api/artifacts/:id/export — download single artifact as Markdown
-app.get('/api/artifacts/:id/export', (req, res) => {
-  const mdPath = path.join(artifactsDir, `artifact_${req.params.id}.md`);
-  if (!fs.existsSync(mdPath)) return res.status(404).json({ error: 'Artifact not found' });
-  res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.md"`);
-  res.send(fs.readFileSync(mdPath, 'utf8'));
+app.get('/api/artifacts/:id/export', async (req, res) => {
+  try {
+    const pgMd = await artifactStore.loadArtifactMarkdown(req.params.id);
+    if (pgMd !== null) {
+      res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.md"`);
+      return res.send(pgMd);
+    }
+    const mdPath = path.join(artifactsDir, `artifact_${req.params.id}.md`);
+    if (!fs.existsSync(mdPath)) return res.status(404).json({ error: 'Artifact not found' });
+    res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.md"`);
+    res.send(fs.readFileSync(mdPath, 'utf8'));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load artifact', detail: err.message });
+  }
 });
 
 // POST /api/artifacts/bulk-download — bulk download as single JSON file.
 // Streams to avoid V8 string-length limits when many artifacts are selected.
-app.post('/api/artifacts/bulk-download', (req, res) => {
+app.post('/api/artifacts/bulk-download', async (req, res) => {
   const { ids } = req.body || {};
   const BULK_LIMIT = 500;
-  let targetIds;
 
   try {
+    const date = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-conversations-${date}.json"`);
+
+    let targetIds;
     if (Array.isArray(ids) && ids.length > 0) {
-      targetIds = ids;
+      targetIds = ids.slice(0, BULK_LIMIT);
     } else {
-      targetIds = fs.readdirSync(artifactsDir)
-        .filter((f) => f.startsWith('artifact_') && f.endsWith('.json'))
-        .map((f) => f.replace(/^artifact_/, '').replace(/\.json$/, ''))
-        .slice(0, BULK_LIMIT);
+      targetIds = await artifactStore.listArtifactIds(BULK_LIMIT);
+      if (targetIds === null) {
+        targetIds = fs.existsSync(artifactsDir)
+          ? fs.readdirSync(artifactsDir)
+            .filter((f) => f.startsWith('artifact_') && f.endsWith('.json'))
+            .map((f) => f.replace(/^artifact_/, '').replace(/\.json$/, ''))
+            .slice(0, BULK_LIMIT)
+          : [];
+      }
+    }
+
+    const pgArtifacts = await artifactStore.loadArtifactsBulk(targetIds);
+    if (pgArtifacts !== null && pgArtifacts.length > 0) {
+      res.write(`{"generated_at":${JSON.stringify(new Date().toISOString())},"count":${pgArtifacts.length},"conversations":[\n`);
+      pgArtifacts.forEach((artifact, i) => {
+        res.write(JSON.stringify(artifact) + (i < pgArtifacts.length - 1 ? ',\n' : '\n'));
+      });
+      return res.end(']}');
     }
 
     const artifactPaths = targetIds
@@ -8357,10 +8540,6 @@ app.post('/api/artifacts/bulk-download', (req, res) => {
       .filter((p) => fs.existsSync(p));
 
     if (artifactPaths.length === 0) return res.status(404).json({ error: 'No artifacts found' });
-
-    const date = new Date().toISOString().slice(0, 10);
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-conversations-${date}.json"`);
 
     res.write(`{"generated_at":${JSON.stringify(new Date().toISOString())},"count":${artifactPaths.length},"conversations":[\n`);
     artifactPaths.forEach((p, i) => {
