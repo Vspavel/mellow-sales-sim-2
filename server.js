@@ -71,6 +71,7 @@ function createHintStateStore() {
   const state = {
     memoryRecords: [],
     recencyOpeners: [],
+    tuningData: { openers: {}, concerns: {}, next_steps: {} },
     flushChain: Promise.resolve(),
     pool: null,
   };
@@ -153,28 +154,39 @@ function createHintStateStore() {
     async init() {
       state.memoryRecords = readHintMemoryFile();
       state.recencyOpeners = readHintRecencyFile();
+      state.tuningData = readTuningFile();
       if (!canUsePostgres) return;
 
       const pool = ensurePool();
-      const [{ rows: memoryRows }, recencyBlob] = await Promise.all([
+      const [{ rows: memoryRows }, recencyBlob, tuningBlob] = await Promise.all([
         pool.query('select payload from hint_memory_records order by created_at asc, id asc'),
         readBlob(pool, 'hint_recency'),
+        readBlob(pool, 'sdr_hint_tuning'),
       ]);
 
       const dbMemory = memoryRows.map((row) => row.payload).filter(Boolean);
       const dbRecency = Array.isArray(recencyBlob?.openers) ? recencyBlob.openers : [];
+      const dbTuning = tuningBlob && typeof tuningBlob === 'object'
+        ? {
+            openers: normalizeTuningMap(tuningBlob.openers),
+            concerns: normalizeTuningMap(tuningBlob.concerns),
+            next_steps: normalizeTuningMap(tuningBlob.next_steps),
+          }
+        : null;
 
       if (dbMemory.length > 0) state.memoryRecords = dbMemory;
       if (dbRecency.length > 0) state.recencyOpeners = dbRecency;
+      if (dbTuning) state.tuningData = dbTuning;
     },
     async bootstrapFromFilesIfNeeded() {
       if (!canUsePostgres) return;
       const pool = ensurePool();
-      const [{ rows: memoryRows }, recencyBlob] = await Promise.all([
+      const [{ rows: memoryRows }, recencyBlob, tuningBlob] = await Promise.all([
         pool.query('select id from hint_memory_records limit 1'),
         readBlob(pool, 'hint_recency'),
+        readBlob(pool, 'sdr_hint_tuning'),
       ]);
-      if (memoryRows.length > 0 && recencyBlob !== null) return;
+      if (memoryRows.length > 0 && recencyBlob !== null && tuningBlob !== null) return;
 
       const client = await pool.connect();
       try {
@@ -195,6 +207,9 @@ function createHintStateStore() {
         }
         if (recencyBlob === null) {
           await writeBlob(client, 'hint_recency', { openers: state.recencyOpeners.slice(-HINT_RECENCY_MAX) });
+        }
+        if (tuningBlob === null) {
+          await writeBlob(client, 'sdr_hint_tuning', state.tuningData);
         }
         await client.query('commit');
       } catch (error) {
@@ -252,7 +267,27 @@ function createHintStateStore() {
       });
     },
     getTuning() {
-      return readTuningFile();
+      return state.tuningData;
+    },
+    saveTuning(data) {
+      state.tuningData = {
+        openers: normalizeTuningMap(data?.openers),
+        concerns: normalizeTuningMap(data?.concerns),
+        next_steps: normalizeTuningMap(data?.next_steps),
+      };
+      queueFlush(async () => {
+        const pool = ensurePool();
+        await writeBlob(pool, 'sdr_hint_tuning', state.tuningData);
+      });
+      return state.tuningData;
+    },
+    async getInfo() {
+      return {
+        driver: canUsePostgres ? 'postgres' : 'file',
+        hint_memory_records: state.memoryRecords.length,
+        hint_recency_count: state.recencyOpeners.length,
+        sdr_tuning_source: canUsePostgres ? 'postgres-blob' : 'file',
+      };
     }
   };
 }
@@ -7754,6 +7789,7 @@ app.get('/api/meta', async (_req, res) => {
     app: APP_NAME,
     version: APP_VERSION,
     storage: await storage.getInfo(),
+    aux_storage: await hintStateStore.getInfo(),
     runtime: {
       node: process.version,
       vercel: Boolean(process.env.VERCEL),
