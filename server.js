@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
+import pg from 'pg';
 import { createStorage } from './storage/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -44,6 +45,222 @@ const HINT_RECENCY_MAX = 8;
 const UCB_C = Number(process.env.HINT_UCB_C ?? 1.0);
 const MAX_DIALOGUE_MESSAGES = 20;
 
+function resolvePostgresConnection() {
+  return process.env.DATABASE_URL
+    || process.env.POSTGRES_URL
+    || process.env.POSTGRES_PRISMA_URL
+    || process.env.POSTGRES_URL_NON_POOLING
+    || '';
+}
+
+function shouldUsePostgresSsl(connectionString) {
+  if (!connectionString) return false;
+  try {
+    const url = new URL(connectionString);
+    if (url.searchParams.get('sslmode') === 'disable') return false;
+    return !['localhost', '127.0.0.1'].includes(url.hostname);
+  } catch {
+    return !/localhost|127\.0\.0\.1/.test(connectionString);
+  }
+}
+
+function createHintStateStore() {
+  const connectionString = resolvePostgresConnection();
+  const canUsePostgres = storage.driver === 'postgres' && Boolean(connectionString);
+  const { Pool } = pg;
+  const state = {
+    memoryRecords: [],
+    recencyOpeners: [],
+    flushChain: Promise.resolve(),
+    pool: null,
+  };
+
+  function ensurePool() {
+    if (!canUsePostgres) return null;
+    if (!state.pool) {
+      state.pool = new Pool({
+        connectionString,
+        ssl: shouldUsePostgresSsl(connectionString)
+          ? { rejectUnauthorized: String(process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED || 'false').trim().toLowerCase() === 'true' }
+          : false,
+        max: Math.max(1, Number(process.env.PG_POOL_MAX || 3)),
+        idleTimeoutMillis: Math.max(1000, Number(process.env.PG_IDLE_TIMEOUT_MS || 10000)),
+        connectionTimeoutMillis: Math.max(1000, Number(process.env.PG_CONNECT_TIMEOUT_MS || 5000)),
+        allowExitOnIdle: true,
+      });
+    }
+    return state.pool;
+  }
+
+  function queueFlush(task) {
+    if (!canUsePostgres) return;
+    state.flushChain = state.flushChain
+      .then(task)
+      .catch((error) => console.error('[hint-store] postgres sync failed:', error?.message || error));
+  }
+
+  async function readBlob(pool, key) {
+    const result = await pool.query('select payload from hint_state_blobs where blob_key = $1', [key]);
+    return result.rows[0]?.payload ?? null;
+  }
+
+  async function writeBlob(client, key, payload) {
+    await client.query(`
+      insert into hint_state_blobs (blob_key, payload, updated_at)
+      values ($1, $2::jsonb, now())
+      on conflict (blob_key) do update
+      set payload = excluded.payload,
+          updated_at = now()
+    `, [key, JSON.stringify(payload)]);
+  }
+
+  function readHintMemoryFile() {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(hintMemoryFile, 'utf8'));
+      return Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed?.records)
+        ? parsed.records
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function readHintRecencyFile() {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(hintRecencyFile, 'utf8'));
+      return Array.isArray(parsed?.openers) ? parsed.openers : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function readTuningFile() {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(sdrHintTuningFile, 'utf8'));
+      return {
+        openers: normalizeTuningMap(parsed?.openers),
+        concerns: normalizeTuningMap(parsed?.concerns),
+        next_steps: normalizeTuningMap(parsed?.next_steps),
+      };
+    } catch {
+      return { openers: {}, concerns: {}, next_steps: {} };
+    }
+  }
+
+  return {
+    async init() {
+      state.memoryRecords = readHintMemoryFile();
+      state.recencyOpeners = readHintRecencyFile();
+      if (!canUsePostgres) return;
+
+      const pool = ensurePool();
+      const [{ rows: memoryRows }, recencyBlob] = await Promise.all([
+        pool.query('select payload from hint_memory_records order by created_at asc, id asc'),
+        readBlob(pool, 'hint_recency'),
+      ]);
+
+      const dbMemory = memoryRows.map((row) => row.payload).filter(Boolean);
+      const dbRecency = Array.isArray(recencyBlob?.openers) ? recencyBlob.openers : [];
+
+      if (dbMemory.length > 0) state.memoryRecords = dbMemory;
+      if (dbRecency.length > 0) state.recencyOpeners = dbRecency;
+    },
+    async bootstrapFromFilesIfNeeded() {
+      if (!canUsePostgres) return;
+      const pool = ensurePool();
+      const [{ rows: memoryRows }, recencyBlob] = await Promise.all([
+        pool.query('select id from hint_memory_records limit 1'),
+        readBlob(pool, 'hint_recency'),
+      ]);
+      if (memoryRows.length > 0 && recencyBlob !== null) return;
+
+      const client = await pool.connect();
+      try {
+        await client.query('begin');
+        if (memoryRows.length === 0 && state.memoryRecords.length > 0) {
+          for (const record of state.memoryRecords) {
+            await client.query(`
+              insert into hint_memory_records (id, session_id, persona_id, created_at, updated_at, payload)
+              values ($1, $2, $3, $4, now(), $5::jsonb)
+              on conflict (id) do update
+              set session_id = excluded.session_id,
+                  persona_id = excluded.persona_id,
+                  created_at = excluded.created_at,
+                  payload = excluded.payload,
+                  updated_at = now()
+            `, [record.id, record.session_id || null, record.persona_id || null, record.created_at || new Date().toISOString(), JSON.stringify(record)]);
+          }
+        }
+        if (recencyBlob === null) {
+          await writeBlob(client, 'hint_recency', { openers: state.recencyOpeners.slice(-HINT_RECENCY_MAX) });
+        }
+        await client.query('commit');
+      } catch (error) {
+        await client.query('rollback');
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+    getHintMemoryRecords() {
+      return state.memoryRecords;
+    },
+    saveHintMemoryRecords(records) {
+      state.memoryRecords = records;
+      queueFlush(async () => {
+        const pool = ensurePool();
+        const client = await pool.connect();
+        try {
+          await client.query('begin');
+          const ids = state.memoryRecords.map((record) => String(record.id)).filter(Boolean);
+          if (ids.length > 0) {
+            await client.query('delete from hint_memory_records where not (id = any($1::text[]))', [ids]);
+          } else {
+            await client.query('delete from hint_memory_records');
+          }
+          for (const record of state.memoryRecords) {
+            await client.query(`
+              insert into hint_memory_records (id, session_id, persona_id, created_at, updated_at, payload)
+              values ($1, $2, $3, $4, now(), $5::jsonb)
+              on conflict (id) do update
+              set session_id = excluded.session_id,
+                  persona_id = excluded.persona_id,
+                  created_at = excluded.created_at,
+                  payload = excluded.payload,
+                  updated_at = now()
+            `, [record.id, record.session_id || null, record.persona_id || null, record.created_at || new Date().toISOString(), JSON.stringify(record)]);
+          }
+          await client.query('commit');
+        } catch (error) {
+          await client.query('rollback');
+          throw error;
+        } finally {
+          client.release();
+        }
+      });
+    },
+    getHintRecencyOpeners() {
+      return state.recencyOpeners;
+    },
+    saveHintRecencyOpeners(openers) {
+      state.recencyOpeners = openers.slice(-HINT_RECENCY_MAX);
+      queueFlush(async () => {
+        const pool = ensurePool();
+        await writeBlob(pool, 'hint_recency', { openers: state.recencyOpeners });
+      });
+    },
+    getTuning() {
+      return readTuningFile();
+    }
+  };
+}
+
+const hintStateStore = createHintStateStore();
+await hintStateStore.init();
+await hintStateStore.bootstrapFromFilesIfNeeded();
+
 function visibleDialogueMessages(session) {
   return (session?.transcript || []).filter((entry) => entry.role !== 'system');
 }
@@ -81,48 +298,21 @@ function normalizeTuningList(value) {
 }
 
 function loadHintRecency() {
-  try {
-    if (fs.existsSync(hintRecencyFile)) {
-      const raw = JSON.parse(fs.readFileSync(hintRecencyFile, 'utf8'));
-      return Array.isArray(raw.openers) ? raw.openers : [];
-    }
-  } catch (_) {}
-  return [];
+  return hintStateStore.getHintRecencyOpeners();
 }
 
 function saveHintRecency(openers) {
+  const normalized = openers.slice(-HINT_RECENCY_MAX);
   try {
-    fs.writeFileSync(hintRecencyFile, JSON.stringify({ openers: openers.slice(-HINT_RECENCY_MAX) }, null, 2));
+    fs.writeFileSync(hintRecencyFile, JSON.stringify({ openers: normalized }, null, 2));
   } catch (_) {}
+  hintStateStore.saveHintRecencyOpeners(normalized);
 }
 
 function loadSdrHintTuning() {
-  let stat;
-  try {
-    stat = fs.statSync(sdrHintTuningFile);
-  } catch {
-    sdrHintTuningCache = { mtimeMs: -1, data: { openers: {}, concerns: {}, next_steps: {} } };
-    return sdrHintTuningCache.data;
-  }
-
-  if (stat.mtimeMs === sdrHintTuningCache.mtimeMs) {
-    return sdrHintTuningCache.data;
-  }
-
-  try {
-    const parsed = JSON.parse(fs.readFileSync(sdrHintTuningFile, 'utf8'));
-    sdrHintTuningCache = {
-      mtimeMs: stat.mtimeMs,
-      data: {
-        openers: normalizeTuningMap(parsed?.openers),
-        concerns: normalizeTuningMap(parsed?.concerns),
-        next_steps: normalizeTuningMap(parsed?.next_steps)
-      }
-    };
-  } catch {
-    sdrHintTuningCache = { mtimeMs: stat.mtimeMs, data: { openers: {}, concerns: {}, next_steps: {} } };
-  }
-  return sdrHintTuningCache.data;
+  const data = hintStateStore.getTuning();
+  sdrHintTuningCache = { mtimeMs: -1, data };
+  return data;
 }
 
 function tunedOpeners(personaId) {
@@ -1193,37 +1383,15 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
 }
 
 function loadHintMemoryStore() {
-  let stat;
-  try {
-    stat = fs.statSync(hintMemoryFile);
-  } catch {
-    return [];
-  }
-
-  if (hintMemoryCache.mtimeMs === stat.mtimeMs) {
-    return hintMemoryCache.data.records;
-  }
-
-  try {
-    const parsed = JSON.parse(fs.readFileSync(hintMemoryFile, 'utf8'));
-    const records = Array.isArray(parsed)
-      ? parsed
-      : Array.isArray(parsed?.records)
-      ? parsed.records
-      : [];
-    const normalized = records
-      .map((record, index) => normalizeHintMemoryRecord(record, index))
-      .filter(Boolean)
-      .slice(-HINT_MEMORY_MAX_RECORDS);
-    hintMemoryCache = {
-      mtimeMs: stat.mtimeMs,
-      data: { version: HINT_MEMORY_VERSION, records: normalized }
-    };
-    return normalized;
-  } catch {
-    hintMemoryCache = { mtimeMs: stat.mtimeMs, data: { version: HINT_MEMORY_VERSION, records: [] } };
-    return [];
-  }
+  const normalized = hintStateStore.getHintMemoryRecords()
+    .map((record, index) => normalizeHintMemoryRecord(record, index))
+    .filter(Boolean)
+    .slice(-HINT_MEMORY_MAX_RECORDS);
+  hintMemoryCache = {
+    mtimeMs: -1,
+    data: { version: HINT_MEMORY_VERSION, records: normalized }
+  };
+  return normalized;
 }
 
 function saveHintMemoryStore(records) {
@@ -1236,6 +1404,7 @@ function saveHintMemoryStore(records) {
     updated_at: now(),
     records: normalized
   }, null, 2));
+  hintStateStore.saveHintMemoryRecords(normalized);
   hintMemoryCache = { mtimeMs: -1, data: { version: HINT_MEMORY_VERSION, records: normalized } };
 }
 
