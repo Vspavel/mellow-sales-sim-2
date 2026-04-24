@@ -30,3 +30,5 @@ The current SQL slice covers:
 - Existing Postgres rows are not deleted during bootstrap.
 
 - `prompt_memory_runs` stores generated prompt-memory loop reports so runs no longer depend only on local files.
+
+- Telegram v2 sessions currently reuse the shared session persistence path; remaining Telegram-specific logging should be treated as the last optional tail if needed.

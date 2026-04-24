@@ -63,7 +63,7 @@ function formatSdeCard(card, persona) {
 // ── Finish run handler ───────────────────────────────────────────────────────
 
 async function handleFinishRun(ctx, session, trigger) {
-  finishSession(session, trigger);
+  await finishSession(session, trigger);
   await ctx.reply('⏳ Оцениваю прогон...');
   try {
     const { telegramMessage } = await runEvaluation(session);
@@ -87,7 +87,7 @@ function createBot(personaId, token) {
     const userId = ctx.from.id;
     const username = ctx.from.username || ctx.from.first_name || String(userId);
 
-    const existing = loadActiveSession(personaId, chatId);
+    const existing = await loadActiveSession(personaId, chatId);
     if (existing) {
       await ctx.reply(
         `У вас уже есть активный прогон с *${personaName}*.\n\nИспользуйте /end или /стоп для завершения прогона перед началом нового.`,
@@ -96,7 +96,7 @@ function createBot(personaId, token) {
       return;
     }
 
-    const session = createSession(personaId, chatId, userId, username);
+    const session = await createSession(personaId, chatId, userId, username);
     const cardMessage = formatSdeCard(session.sde_card, persona);
     await ctx.reply(cardMessage, { parse_mode: 'Markdown' });
 
@@ -104,13 +104,13 @@ function createBot(personaId, token) {
     const greeting = buildPersonaGreeting(personaId);
     session.transcript.push({ role: 'bot', text: greeting, ts: new Date().toISOString() });
     session.meta.bot_turns = 1;
-    saveSession(session);
+    await saveSession(session);
     await ctx.reply(greeting);
   });
 
   // /end and /стоп — finish run
   const endHandler = async (ctx) => {
-    const session = loadActiveSession(personaId, ctx.chat.id);
+    const session = await loadActiveSession(personaId, ctx.chat.id);
     if (!session) {
       await ctx.reply('Нет активного прогона. Используйте /start чтобы начать.');
       return;
@@ -136,7 +136,7 @@ function createBot(personaId, token) {
       return;
     }
 
-    const session = loadActiveSession(personaId, ctx.chat.id);
+    const session = await loadActiveSession(personaId, ctx.chat.id);
     if (!session) {
       await ctx.reply(`Нет активного прогона. Используйте /start чтобы начать с ${personaName}.`);
       return;
@@ -168,7 +168,7 @@ function createBot(personaId, token) {
     updateSessionClaims(session, text);
     session.meta.bot_turns = (session.meta.bot_turns || 0) + 1;
     session.transcript.push({ role: 'bot', text: reply, ts: new Date().toISOString() });
-    saveSession(session);
+    await saveSession(session);
 
     // Add typing indicator for realism
     await ctx.sendChatAction('typing');

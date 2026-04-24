@@ -1,8 +1,6 @@
-/**
- * evaluator.js — Post-run assessment formatting and email dispatch
- */
 import fs from 'fs';
 import path from 'path';
+import pg from 'pg';
 import nodemailer from 'nodemailer';
 import { assess, BUILTIN_PERSONAS } from './engine.js';
 
@@ -11,8 +9,47 @@ const logsDir = process.env.LOGS_DIR
   : path.join(process.cwd(), 'data', 'logs');
 
 const RESULT_EMAIL = process.env.RESULT_EMAIL || 'onboarding-simulations@mellow.io';
+const { Pool } = pg;
+let pool = null;
 
-// ── Assessment Telegram message ──────────────────────────────────────────────
+function resolvePostgresConnection() {
+  return process.env.DATABASE_URL
+    || process.env.POSTGRES_URL
+    || process.env.POSTGRES_PRISMA_URL
+    || process.env.POSTGRES_URL_NON_POOLING
+    || '';
+}
+
+function shouldUsePostgres() {
+  return String(process.env.STORAGE_DRIVER || '').toLowerCase() === 'postgres' && Boolean(resolvePostgresConnection());
+}
+
+function shouldUsePostgresSsl(connectionString) {
+  if (!connectionString) return false;
+  try {
+    const url = new URL(connectionString);
+    if (url.searchParams.get('sslmode') === 'disable') return false;
+    return !['localhost', '127.0.0.1'].includes(url.hostname);
+  } catch {
+    return !/localhost|127\.0\.0\.1/.test(connectionString);
+  }
+}
+
+function getPool() {
+  if (!shouldUsePostgres()) return null;
+  if (!pool) {
+    const connectionString = resolvePostgresConnection();
+    pool = new Pool({
+      connectionString,
+      ssl: shouldUsePostgresSsl(connectionString) ? { rejectUnauthorized: false } : false,
+      max: 2,
+      idleTimeoutMillis: 10000,
+      connectionTimeoutMillis: 5000,
+      allowExitOnIdle: true,
+    });
+  }
+  return pool;
+}
 
 const VERDICT_EMOJI = { PASS: '✅', PASS_WITH_NOTES: '🟡', FAIL: '❌', BLOCKER: '🚫' };
 const STATUS_EMOJI = { PASS: '✅', FAIL: '❌' };
@@ -22,7 +59,6 @@ export function formatAssessmentTelegram(session, assessment) {
   const personaName = persona?.name || session.bot_id;
   const verdictEmoji = VERDICT_EMOJI[assessment.verdict] || '❓';
   const lines = [];
-
   lines.push(`*━━ ИТОГИ ПРОГОНА ━━*`);
   lines.push(`Персона: *${personaName}* — ${persona?.role || ''}`);
   lines.push(`Карточка: ${session.sde_card_id} · ${session.sde_card?.signal_type || ''} · ${session.sde_card?.heat || ''}`);
@@ -36,7 +72,6 @@ export function formatAssessmentTelegram(session, assessment) {
     const emoji = STATUS_EMOJI[c.status] || '❓';
     lines.push(`${emoji} *${c.id}* ${c.label}: ${c.short_reason}`);
   }
-
   if (assessment.coaching_points?.length) {
     lines.push('');
     lines.push(`*Что улучшить:*`);
@@ -45,7 +80,6 @@ export function formatAssessmentTelegram(session, assessment) {
       if (cp.better_version) lines.push(`  → ${cp.better_version}`);
     }
   }
-
   lines.push('');
   lines.push(`*Следующий шаг:*`);
   lines.push(assessment.recommended_next_drill_label);
@@ -53,11 +87,8 @@ export function formatAssessmentTelegram(session, assessment) {
   lines.push(`_${assessment.summary_for_seller}_`);
   lines.push('');
   lines.push(`\`Run ID: ${session.session_id}\``);
-
   return lines.join('\n');
 }
-
-// ── Transcript formatting ────────────────────────────────────────────────────
 
 function formatTranscriptText(session) {
   const persona = BUILTIN_PERSONAS[session.bot_id];
@@ -69,12 +100,8 @@ function formatTranscriptText(session) {
   }).join('\n');
 }
 
-// ── Email dispatch ───────────────────────────────────────────────────────────
-
 function buildTransport() {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    return null;
-  }
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return null;
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT) || 465,
@@ -99,9 +126,7 @@ function buildEmailBody(session, assessment) {
   lines.push(`Verdict:   ${assessment.verdict} — ${assessment.verdict_label}`);
   lines.push('');
   lines.push(`── Criteria ──`);
-  for (const c of assessment.criteria) {
-    lines.push(`${c.id} ${c.label}: ${c.status} — ${c.short_reason}`);
-  }
+  for (const c of assessment.criteria) lines.push(`${c.id} ${c.label}: ${c.status} — ${c.short_reason}`);
   lines.push('');
   lines.push(`── Transcript (${session.transcript.length} turns) ──`);
   lines.push(formatTranscriptText(session));
@@ -138,13 +163,7 @@ export async function sendResultEmail(session, assessment) {
   }
 }
 
-// ── Run logging ──────────────────────────────────────────────────────────────
-
-export function logRun(session, assessment) {
-  const date = (session.finished_at || new Date().toISOString()).slice(0, 10);
-  const dayDir = path.join(logsDir, date);
-  fs.mkdirSync(dayDir, { recursive: true });
-  const logPath = path.join(dayDir, `${session.session_id}.json`);
+export async function logRun(session, assessment) {
   const record = {
     session_id: session.session_id,
     bot_id: session.bot_id,
@@ -162,16 +181,32 @@ export function logRun(session, assessment) {
     criteria_summary: assessment.criteria.map(c => ({ id: c.id, status: c.status })),
     transcript_length: session.transcript.length
   };
+
+  const db = getPool();
+  if (db) {
+    await db.query(`
+      insert into session_logs (log_id, session_id, log_date, payload, created_at, updated_at)
+      values ($1, $2, $3, $4::jsonb, now(), now())
+      on conflict (log_id) do update
+      set payload = excluded.payload,
+          updated_at = now()
+    `, [session.session_id, session.session_id, (session.finished_at || new Date().toISOString()).slice(0, 10), JSON.stringify(record)]);
+    console.log(`[evaluator] Run logged → postgres:${session.session_id}`);
+    return;
+  }
+
+  const date = (session.finished_at || new Date().toISOString()).slice(0, 10);
+  const dayDir = path.join(logsDir, date);
+  fs.mkdirSync(dayDir, { recursive: true });
+  const logPath = path.join(dayDir, `${session.session_id}.json`);
   fs.writeFileSync(logPath, JSON.stringify(record, null, 2));
   console.log(`[evaluator] Run logged → ${logPath}`);
 }
 
-// ── Main evaluator entry point ───────────────────────────────────────────────
-
 export async function runEvaluation(session) {
   const assessment = assess(session);
   session.assessment = assessment;
-  logRun(session, assessment);
+  await logRun(session, assessment);
   await sendResultEmail(session, assessment);
   return { assessment, telegramMessage: formatAssessmentTelegram(session, assessment) };
 }
