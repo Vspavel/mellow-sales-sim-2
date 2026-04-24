@@ -1,13 +1,47 @@
 import fs from 'fs';
 import path from 'path';
+import pg from 'pg';
 
 const BASE_URL = process.env.SALES_SIM_BASE_URL || 'http://127.0.0.1:3210';
 const ROOT = path.resolve(process.cwd());
 const DATA_DIR = path.join(ROOT, 'data');
 const RUNS_DIR = path.join(DATA_DIR, 'prompt_memory_runs');
 const HINT_MEMORY_FILE = path.join(DATA_DIR, 'hint_memory.json');
+const { Pool } = pg;
 
 fs.mkdirSync(RUNS_DIR, { recursive: true });
+
+function resolvePostgresConnection() {
+  return process.env.DATABASE_URL
+    || process.env.POSTGRES_URL
+    || process.env.POSTGRES_PRISMA_URL
+    || process.env.POSTGRES_URL_NON_POOLING
+    || '';
+}
+
+function shouldUsePostgresSsl(connectionString) {
+  if (!connectionString) return false;
+  try {
+    const url = new URL(connectionString);
+    if (url.searchParams.get('sslmode') === 'disable') return false;
+    return !['localhost', '127.0.0.1'].includes(url.hostname);
+  } catch {
+    return !/localhost|127\.0\.0\.1/.test(connectionString);
+  }
+}
+
+async function createPool() {
+  const connectionString = resolvePostgresConnection();
+  if (!connectionString) return null;
+  return new Pool({
+    connectionString,
+    ssl: shouldUsePostgresSsl(connectionString) ? { rejectUnauthorized: false } : false,
+    max: 2,
+    idleTimeoutMillis: 10000,
+    connectionTimeoutMillis: 5000,
+    allowExitOnIdle: true,
+  });
+}
 
 async function api(urlPath, options = {}) {
   const response = await fetch(`${BASE_URL}${urlPath}`, {
@@ -153,11 +187,8 @@ async function run() {
     });
   }
 
-  const rawMemory = fs.existsSync(HINT_MEMORY_FILE)
-    ? JSON.parse(fs.readFileSync(HINT_MEMORY_FILE, 'utf8'))
-    : [];
-  const memoryRecords = (Array.isArray(rawMemory) ? rawMemory : (rawMemory.records || []))
-    .filter((record) => record.persona_id === personaId);
+  const summary = await api(`/api/hint-memory/summary?personaId=${encodeURIComponent(personaId)}`);
+  const memoryRecords = Array.isArray(summary?.recent_records) ? summary.recent_records : [];
   const report = {
     runId,
     generatedAt: new Date().toISOString(),
@@ -174,10 +205,29 @@ async function run() {
 
   const reportPathJson = path.join(RUNS_DIR, `${runId}.json`);
   const reportPathMd = path.join(RUNS_DIR, `${runId}.md`);
+  const markdown = founderReport({ personaId, cycles, memoryRecords, reportPathJson });
   fs.writeFileSync(reportPathJson, JSON.stringify(report, null, 2));
-  fs.writeFileSync(reportPathMd, founderReport({ personaId, cycles, memoryRecords, reportPathJson }));
+  fs.writeFileSync(reportPathMd, markdown);
 
-  console.log(JSON.stringify({ runId, personaId, reportPathJson, reportPathMd, cycleCount: cycles.length }, null, 2));
+  const pool = await createPool();
+  if (pool) {
+    try {
+      await pool.query(`
+        insert into prompt_memory_runs (run_id, persona_id, generated_at, report_json, report_markdown, payload)
+        values ($1, $2, now(), $3::jsonb, $4, $5::jsonb)
+        on conflict (run_id) do update
+        set persona_id = excluded.persona_id,
+            generated_at = now(),
+            report_json = excluded.report_json,
+            report_markdown = excluded.report_markdown,
+            payload = excluded.payload
+      `, [runId, personaId, JSON.stringify(report), markdown, JSON.stringify({ reportPathJson, reportPathMd, cycleCount: cycles.length })]);
+    } finally {
+      await pool.end();
+    }
+  }
+
+  console.log(JSON.stringify({ runId, personaId, reportPathJson, reportPathMd, cycleCount: cycles.length, persisted: pool ? 'postgres+file' : 'file' }, null, 2));
 }
 
 run().catch((error) => {

@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "check": "node --input-type=module -e \"import('./server.js').then(() => process.exit(0))\""
+    "check": "node --input-type=module -e \"import('./server.js').then(() => process.exit(0))\"",
+    "prompt-memory:run": "node run_prompt_memory_loop.js"
   },
   "engines": {
     "node": ">=20 <23"

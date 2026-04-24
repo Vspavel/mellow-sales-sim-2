@@ -28,3 +28,5 @@ The current SQL slice covers:
 - If `sales_sessions` is empty, it imports `data/sessions/*.json`.
 - If a specific session is requested and missing in Postgres, the adapter can still import that session on demand from the local JSON file when available.
 - Existing Postgres rows are not deleted during bootstrap.
+
+- `prompt_memory_runs` stores generated prompt-memory loop reports so runs no longer depend only on local files.
