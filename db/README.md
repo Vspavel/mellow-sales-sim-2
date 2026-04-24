@@ -6,14 +6,25 @@ This app now uses a storage adapter boundary in `storage/index.js`.
 
 - Default driver: `file`
 - Switch via: `STORAGE_DRIVER=file|postgres`
-- Today, only the file driver is live.
-- The `postgres` option is intentionally scaffold-only and throws until a real SQL adapter is implemented.
+- `file` keeps local JSON compatibility.
+- `postgres` is now live for personas and sessions.
+- Current connection envs supported: `DATABASE_URL`, `POSTGRES_URL`, `POSTGRES_PRISMA_URL`, `POSTGRES_URL_NON_POOLING`
+- Optional bootstrap control: `POSTGRES_BOOTSTRAP_FROM_FILE=true|false` (default `true`)
 
 ## First relational entities
 
-The initial SQL scaffold covers:
+The current SQL slice covers:
 
 - `personas`
 - `sales_sessions`
+- `storage_migrations`
+- `storage_runtime_meta`
 
-Both tables store the full entity payload in `jsonb` so the app can migrate incrementally before normalizing columns further.
+`personas` and `sales_sessions` store the full entity payload in `jsonb` so the app can migrate incrementally before normalizing columns further.
+
+## Bootstrap behavior
+
+- On a fresh Postgres database, the adapter imports `data/personas.json` into `personas`.
+- If `sales_sessions` is empty, it imports `data/sessions/*.json`.
+- If a specific session is requested and missing in Postgres, the adapter can still import that session on demand from the local JSON file when available.
+- Existing Postgres rows are not deleted during bootstrap.

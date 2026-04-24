@@ -8,12 +8,14 @@ Related issue: MEL-341
 Confirmed from `mellow-sales-sim/server.js`, `package.json`, and `README.md`:
 - current web runtime is a plain Node.js + Express app
 - current web app uses deterministic roleplay and assessment logic
-- current web app does **not** call any external LLM or mail provider
-- the only runtime env variable currently read by the web server is `PORT`
+- current web app can optionally call Anthropic when `ANTHROPIC_API_KEY` is set, but still has deterministic fallback logic
+- current web app can optionally send result emails when SMTP env vars are configured
+- current web app supports `STORAGE_DRIVER=file|postgres`
+- Postgres connection envs supported: `DATABASE_URL`, `POSTGRES_URL`, `POSTGRES_PRISMA_URL`, `POSTGRES_URL_NON_POOLING`
 - there is no auth/session secret implemented in the current app
-- there is no result-delivery email path implemented in the current web app
+- persona/session persistence can now move off local disk into Postgres while other artifacts remain file-backed
 
-So for the **current shipped web build**, there are no mandatory API credentials beyond normal host/deploy access.
+So for the **current shipped web build**, required env depends on the storage/runtime mode you deploy.
 
 ## 2. What is explicitly **not** required for the web path
 
@@ -49,15 +51,14 @@ Minimum required secrets for email delivery:
 - destination rule such as `RESULT_EMAIL` or per-user recipient mapping
 
 Important note:
-- these mail variables exist only in the older `telegram-v2/.env.example`
-- they are **not** currently wired into the active web app
+- these mail variables are now wired into the active web app
 
 ## 4. Hosting/runtime items still missing for a real web-v2 deployment
 
 If the product stays as the current deterministic web app, hosting needs are light:
 - Node runtime
 - public URL / reverse proxy
-- writable storage for `data/sessions`
+- writable storage for file mode, or hosted Postgres for `STORAGE_DRIVER=postgres`
 - process supervision (systemd, pm2, container runtime, etc.)
 
 If the product becomes true MEL-331 web v2, add these runtime items explicitly:
@@ -73,7 +74,12 @@ Treat the dependency surface like this:
 ### Required now to keep the current web app live
 - `PORT`
 - host-level deployment config
-- writable app data directory
+- either writable app data directory for file mode or Postgres connection env for postgres mode
+
+### Required now for Vercel-style durable deployment
+- `STORAGE_DRIVER=postgres`
+- one of `DATABASE_URL` / `POSTGRES_URL` / `POSTGRES_PRISMA_URL` / `POSTGRES_URL_NON_POOLING`
+- optional `POSTGRES_BOOTSTRAP_FROM_FILE=true|false`
 
 ### Required before claiming full MEL-331 web-v2 readiness
 - one chosen LLM provider key

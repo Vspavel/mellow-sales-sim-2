@@ -31,14 +31,14 @@
 1. `server.js` now exports the Express app and only starts a local listener when run directly.
 2. Added `api/index.js` as a Vercel serverless entrypoint.
 3. Added `vercel.json` rewrites for `/api/*` and `/download/*`.
+4. Added a real `pg`-backed storage adapter behind `STORAGE_DRIVER=postgres`.
+5. Added SQL migration application on startup plus `storage_migrations` / `storage_runtime_meta`.
+6. Personas and sessions now persist in Postgres while local file mode still works unchanged.
+7. Added `/api/meta` plus response headers for runtime/version visibility in deployment.
 
 ## Recommended next implementation slice
 
-1. Introduce a storage adapter layer, so file storage and DB storage are swappable.
-2. Migrate writes first for:
-   - personas
-   - sessions
-   - session transcript/messages
-3. Then migrate reads for analytics/history/artifacts.
-4. Add DB schema + seed migration for built-in personas.
-5. Connect GitHub repo, then Vercel project, then add environment variables (`ANTHROPIC_API_KEY`, optional SMTP vars if result email stays enabled).
+1. Migrate artifact storage and hint-memory state off local disk.
+2. Decide whether transcripts should stay embedded in `sales_sessions.payload` or be normalized into `session_messages`.
+3. Move analytics/history exports to Postgres-native queries once artifacts/hints are migrated.
+4. Connect GitHub repo, then Vercel project, then add environment variables (`STORAGE_DRIVER=postgres`, `POSTGRES_URL` or `DATABASE_URL`, `ANTHROPIC_API_KEY`, optional SMTP vars).

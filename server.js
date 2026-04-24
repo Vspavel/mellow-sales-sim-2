@@ -20,9 +20,12 @@ const promptMemoryRunsDir = path.join(dataDir, 'prompt_memory_runs');
 const artifactsDir = path.join(dataDir, 'artifacts');
 const personasFile = path.join(dataDir, 'personas.json');
 const promptArtifactsFile = path.join(__dirname, '..', 'mellow-sales-sim-v1-artifacts.md');
+const packageMetadata = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+const APP_NAME = packageMetadata.name || 'mellow-sales-sim';
+const APP_VERSION = packageMetadata.version || '0.0.0';
 
 const storage = createStorage({ dataDir, sessionsDir, personasFile });
-storage.init();
+await storage.init();
 fs.mkdirSync(logsDir, { recursive: true });
 fs.mkdirSync(promptMemoryRunsDir, { recursive: true });
 fs.mkdirSync(artifactsDir, { recursive: true });
@@ -50,7 +53,7 @@ function dialogueMessageBudgetRemaining(session) {
   return Math.max(0, MAX_DIALOGUE_MESSAGES - visibleDialogueMessageCount(session));
 }
 
-function finalizeSession(session, trigger = 'final_state') {
+async function finalizeSession(session, trigger = 'final_state') {
   session.status = 'finished';
   session.finished_at = now();
   session.trigger = trigger;
@@ -58,7 +61,7 @@ function finalizeSession(session, trigger = 'final_state') {
   session.assessment_id = session.assessment.assessment_id;
   session.dialogue_summary = buildDialogueSummary(session);
   appendSessionHintMemory(session);
-  saveSession(session);
+  await saveSession(session);
   saveArtifact(session);
   logFinishedRun(session);
   return session;
@@ -883,8 +886,8 @@ function seedPersonaStore() {
   return seeded;
 }
 
-function loadPersonaStore() {
-  const parsed = storage.loadPersonas({ seedFactory: seedPersonaStore });
+async function loadPersonaStore() {
+  const parsed = await storage.loadPersonas({ seedFactory: seedPersonaStore });
   const entries = Array.isArray(parsed)
     ? parsed.map((persona) => [persona.id, persona])
     : Object.entries(parsed || {});
@@ -893,22 +896,28 @@ function loadPersonaStore() {
   );
   if (!Object.keys(normalized).length) {
     const seeded = seedPersonaStore();
-    storage.savePersonas(seeded);
+    await storage.savePersonas(seeded);
     return seeded;
   }
   if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
-    storage.savePersonas(normalized);
+    await storage.savePersonas(normalized);
   }
   return normalized;
 }
 
-function savePersonaStore() {
-  storage.savePersonas(personas);
+async function savePersonaStore() {
+  await storage.savePersonas(personas);
 }
 
-let personas = loadPersonaStore();
+let personas = await loadPersonaStore();
 
 app.use(express.json());
+app.use((req, res, next) => {
+  res.setHeader('X-Mellow-App', APP_NAME);
+  res.setHeader('X-Mellow-Version', APP_VERSION);
+  res.setHeader('X-Mellow-Storage', storage.driver);
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 function now() {
@@ -919,8 +928,8 @@ function sessionPath(sessionId) {
   return storage.sessionFilePath(sessionId);
 }
 
-function saveSession(session) {
-  storage.saveSession(session);
+async function saveSession(session) {
+  await storage.saveSession(session);
 }
 
 const POSITIVE_OUTCOME_RE = /(созвон|звонок|встреч|meeting|short call|20-minute call|15-minute|walkthrough)/i;
@@ -978,8 +987,8 @@ function sessionHasMeetingBooked(session) {
   return (session?.transcript || []).some((e) => e.role === 'bot' && detectBuyerMeetingAcceptance(e.text, lang));
 }
 
-function listStoredSessions() {
-  return storage.listSessions()
+async function listStoredSessions() {
+  return (await storage.listSessions())
     .map((session) => {
       try {
         return ensureBuyerStateSessionFields(session);
@@ -991,8 +1000,8 @@ function listStoredSessions() {
     .sort((a, b) => new Date(b.finished_at || b.started_at || 0) - new Date(a.finished_at || a.started_at || 0));
 }
 
-function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = null, outcomeFilter = null, verdictFilter = null } = {}) {
-  const sessions = listStoredSessions();
+async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = null, outcomeFilter = null, verdictFilter = null } = {}) {
+  const sessions = await listStoredSessions();
   const finished = sessions.filter((session) => session.status === 'finished');
   const positive = finished.filter(sessionHasPositiveOutcome);
   const meetingBooked = finished.filter(sessionHasMeetingBooked);
@@ -2864,8 +2873,8 @@ function saveArtifact(session) {
   }
 }
 
-function loadSession(sessionId) {
-  const session = storage.loadSession(sessionId);
+async function loadSession(sessionId) {
+  const session = await storage.loadSession(sessionId);
   if (!session) return null;
   return ensureBuyerStateSessionFields(session);
 }
@@ -7568,6 +7577,19 @@ function assess(session) {
 
 // ==================== API ROUTES ====================
 
+app.get('/api/meta', async (_req, res) => {
+  res.json({
+    app: APP_NAME,
+    version: APP_VERSION,
+    storage: await storage.getInfo(),
+    runtime: {
+      node: process.version,
+      vercel: Boolean(process.env.VERCEL),
+      commit_sha: process.env.VERCEL_GIT_COMMIT_SHA || process.env.GIT_COMMIT_SHA || null,
+    }
+  });
+});
+
 app.get('/api/personas', (_req, res) => {
   res.json(Object.values(personas));
 });
@@ -7591,7 +7613,7 @@ app.post('/api/personas/extract-from-prompt', (req, res) => {
   });
 });
 
-app.post('/api/personas', (req, res) => {
+app.post('/api/personas', async (req, res) => {
   const payload = req.body || {};
   const baseId = sanitizePersonaId(payload.id || payload.name);
   let personaId = baseId || `persona_${crypto.randomUUID().slice(0, 8)}`;
@@ -7604,11 +7626,11 @@ app.post('/api/personas', (req, res) => {
     cards: payload.cards
   }, personaId);
   personas[persona.id] = persona;
-  savePersonaStore();
+  await savePersonaStore();
   res.status(201).json(persona);
 });
 
-app.patch('/api/personas/:id', (req, res) => {
+app.patch('/api/personas/:id', async (req, res) => {
   const persona = personas[req.params.id];
   if (!persona) return res.status(404).json({ error: 'Persona not found' });
 
@@ -7621,15 +7643,15 @@ app.patch('/api/personas/:id', (req, res) => {
   }, persona.id);
 
   personas[persona.id] = nextPersona;
-  savePersonaStore();
+  await savePersonaStore();
   res.json(nextPersona);
 });
 
-app.delete('/api/personas/:id', (req, res) => {
+app.delete('/api/personas/:id', async (req, res) => {
   const persona = personas[req.params.id];
   if (!persona) return res.status(404).json({ error: 'Persona not found' });
   delete personas[req.params.id];
-  savePersonaStore();
+  await savePersonaStore();
   res.json({ ok: true, id: req.params.id });
 });
 
@@ -7647,7 +7669,7 @@ function normalizeRandomizerConfig(raw) {
   return config;
 }
 
-app.post('/api/sessions', (req, res) => {
+app.post('/api/sessions', async (req, res) => {
   const { personaId, sellerId = 'pavel', dialogueType = 'messenger', randomizerConfig: rawConfig, language, difficultyTier } = req.body || {};
   if (!personaId || !personas[personaId]) {
     return res.status(400).json({ error: 'Unknown personaId' });
@@ -7701,23 +7723,23 @@ app.post('/api/sessions', (req, res) => {
     }
   };
   syncLegacyBehaviorState(session);
-  saveSession(session);
+  await saveSession(session);
   res.json(session);
 });
 
-app.get('/api/sessions/:id', (req, res) => {
-  const session = loadSession(req.params.id);
+app.get('/api/sessions/:id', async (req, res) => {
+  const session = await loadSession(req.params.id);
   if (!session) return res.status(404).json({ error: 'Session not found' });
   res.json(session);
 });
 
-app.get('/api/analytics', (req, res) => {
+app.get('/api/analytics', async (req, res) => {
   const limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 100));
   const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
   const personaFilter = req.query.personaId ? String(req.query.personaId) : null;
   const outcomeFilter = req.query.outcome ? String(req.query.outcome) : null;
   const verdictFilter = req.query.verdict ? String(req.query.verdict) : null;
-  res.json(buildAnalyticsSummary({ limit, offset, personaFilter, outcomeFilter, verdictFilter }));
+  res.json(await buildAnalyticsSummary({ limit, offset, personaFilter, outcomeFilter, verdictFilter }));
 });
 
 app.get('/api/hint-memory/summary', (req, res) => {
@@ -7726,11 +7748,11 @@ app.get('/api/hint-memory/summary', (req, res) => {
 });
 
 app.post('/api/sessions/:id/message', async (req, res) => {
-  const session = ensureBuyerStateSessionFields(loadSession(req.params.id));
+  const session = ensureBuyerStateSessionFields(await loadSession(req.params.id));
   if (!session) return res.status(404).json({ error: 'Session not found' });
   if (session.status !== 'in_progress') return res.status(400).json({ error: 'Session already finished' });
   if (dialogueMessageBudgetRemaining(session) < 2) {
-    finalizeSession(session, 'max_dialogue_messages');
+    await finalizeSession(session, 'max_dialogue_messages');
     return res.status(400).json({ error: `Dialogue reached ${MAX_DIALOGUE_MESSAGES} visible messages and was auto-finished`, session });
   }
 
@@ -7776,32 +7798,32 @@ app.post('/api/sessions/:id/message', async (req, res) => {
   }
   updateHintMemoryAttempt(session, sellerEntry, sellerEntry.hint_memory_id || hintId || null);
   if (visibleDialogueMessageCount(session) >= MAX_DIALOGUE_MESSAGES) {
-    finalizeSession(session, 'max_dialogue_messages');
+    await finalizeSession(session, 'max_dialogue_messages');
   } else {
-    saveSession(session);
+    await saveSession(session);
   }
   res.json({ reply, session });
 });
 
-app.post('/api/sessions/:id/finish', (req, res) => {
-  const session = loadSession(req.params.id);
+app.post('/api/sessions/:id/finish', async (req, res) => {
+  const session = await loadSession(req.params.id);
   if (!session) return res.status(404).json({ error: 'Session not found' });
   if (session.status === 'finished') return res.json(session);
   if (sellerMessages(session).length === 0) {
     return res.status(400).json({ error: 'Send at least one seller message before finishing the run' });
   }
-  finalizeSession(session, 'final_state');
+  await finalizeSession(session, 'final_state');
   res.json(session);
 });
 
 // GET /api/sessions/:id/seller-suggest — return a contextual seller message suggestion
 // without committing it to the transcript. Useful for coaching or auto-play seeding.
 app.get('/api/sessions/:id/seller-suggest', async (req, res) => {
-  const session = ensureBuyerStateSessionFields(loadSession(req.params.id));
+  const session = ensureBuyerStateSessionFields(await loadSession(req.params.id));
   if (!session) return res.status(404).json({ error: 'Session not found' });
   if (session.status !== 'in_progress') return res.status(400).json({ error: 'Session already finished' });
   if (dialogueMessageBudgetRemaining(session) < 2) {
-    finalizeSession(session, 'max_dialogue_messages');
+    await finalizeSession(session, 'max_dialogue_messages');
     return res.status(400).json({ error: `Dialogue reached ${MAX_DIALOGUE_MESSAGES} visible messages and was auto-finished`, session });
   }
 
@@ -7820,11 +7842,11 @@ app.get('/api/sessions/:id/seller-suggest', async (req, res) => {
 // POST /api/sessions/:id/auto-message — generate and commit a seller message automatically,
 // then return the full session including the bot reply. Enables programmatic simulation runs.
 app.post('/api/sessions/:id/auto-message', async (req, res) => {
-  const session = ensureBuyerStateSessionFields(loadSession(req.params.id));
+  const session = ensureBuyerStateSessionFields(await loadSession(req.params.id));
   if (!session) return res.status(404).json({ error: 'Session not found' });
   if (session.status !== 'in_progress') return res.status(400).json({ error: 'Session already finished' });
   if (dialogueMessageBudgetRemaining(session) < 2) {
-    finalizeSession(session, 'max_dialogue_messages');
+    await finalizeSession(session, 'max_dialogue_messages');
     return res.status(400).json({ error: `Dialogue reached ${MAX_DIALOGUE_MESSAGES} visible messages and was auto-finished`, session });
   }
 
@@ -7861,9 +7883,9 @@ app.post('/api/sessions/:id/auto-message', async (req, res) => {
   }
   updateHintMemoryAttempt(session, sellerEntry, hintAttempt.record.id);
   if (visibleDialogueMessageCount(session) >= MAX_DIALOGUE_MESSAGES) {
-    finalizeSession(session, 'max_dialogue_messages');
+    await finalizeSession(session, 'max_dialogue_messages');
   } else {
-    saveSession(session);
+    await saveSession(session);
   }
   res.json({ seller_text: sellerText, reply, session });
 });
@@ -7872,7 +7894,7 @@ app.post('/api/sessions/:id/auto-message', async (req, res) => {
 // Requires env: SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS, SMTP_FROM, RESULT_EMAIL
 // Returns 503 with a named blocker if SMTP is not configured.
 app.post('/api/sessions/:id/send-result', async (req, res) => {
-  const session = loadSession(req.params.id);
+  const session = await loadSession(req.params.id);
   if (!session) return res.status(404).json({ error: 'Session not found' });
   if (session.status !== 'finished') return res.status(400).json({ error: 'Session must be finished before sending results' });
 
@@ -7940,8 +7962,8 @@ app.post('/api/sessions/:id/send-result', async (req, res) => {
 });
 
 // GET /api/sessions — compact list of finished sessions for История бесед
-app.get('/api/sessions', (_req, res) => {
-  const sessions = listStoredSessions()
+app.get('/api/sessions', async (_req, res) => {
+  const sessions = (await listStoredSessions())
     .filter((s) => s.status === 'finished')
     .map((s) => ({
       session_id: s.session_id,
@@ -7961,8 +7983,8 @@ app.get('/api/sessions', (_req, res) => {
 });
 
 // GET /api/sessions/:id/download — download a single finished session as Markdown
-app.get('/api/sessions/:id/download', (req, res) => {
-  const session = loadSession(req.params.id);
+app.get('/api/sessions/:id/download', async (req, res) => {
+  const session = await loadSession(req.params.id);
   if (!session) return res.status(404).json({ error: 'Session not found' });
   if (session.status !== 'finished') return res.status(400).json({ error: 'Session not finished' });
 
@@ -8025,15 +8047,15 @@ app.get('/api/sessions/:id/download', (req, res) => {
 
 // POST /api/sessions/bulk-download — download selected (or recent) finished sessions as JSON bundle.
 // Streams output to avoid V8 string-length limits on large datasets.
-app.post('/api/sessions/bulk-download', (req, res) => {
+app.post('/api/sessions/bulk-download', async (req, res) => {
   const { session_ids } = req.body || {};
   const BULK_LIMIT = 500;
   let sessions;
 
   if (Array.isArray(session_ids) && session_ids.length > 0) {
-    sessions = session_ids.map((id) => loadSession(id)).filter(Boolean).filter((s) => s.status === 'finished');
+    sessions = (await Promise.all(session_ids.map((id) => loadSession(id)))).filter(Boolean).filter((s) => s.status === 'finished');
   } else {
-    sessions = listStoredSessions().filter((s) => s.status === 'finished').slice(0, BULK_LIMIT);
+    sessions = (await listStoredSessions()).filter((s) => s.status === 'finished').slice(0, BULK_LIMIT);
   }
 
   if (sessions.length === 0) return res.status(404).json({ error: 'No sessions found' });
@@ -8172,9 +8194,9 @@ function backfillHintMemoryScores() {
   }
 }
 
-function backfillArtifacts() {
+async function backfillArtifacts() {
   try {
-    const sessions = listStoredSessions().filter((s) => s.status === 'finished');
+    const sessions = (await listStoredSessions()).filter((s) => s.status === 'finished');
     let count = 0;
     for (const session of sessions) {
       const p = path.join(artifactsDir, `artifact_${session.session_id}.json`);
@@ -8192,9 +8214,9 @@ function backfillArtifacts() {
 export default app;
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
-  app.listen(PORT, () => {
+  app.listen(PORT, async () => {
     console.log(`Mellow Sales Sim listening on http://localhost:${PORT}`);
     backfillHintMemoryScores();
-    backfillArtifacts();
+    await backfillArtifacts();
   });
 }

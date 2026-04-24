@@ -4,11 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check": "node --input-type=module -e \"import('./server.js').then(() => process.exit(0))\""
+  },
+  "engines": {
+    "node": ">=20 <23"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
     "express": "^4.21.2",
-    "nodemailer": "^8.0.5"
+    "nodemailer": "^8.0.5",
+    "pg": "^8.16.3"
   }
 }
