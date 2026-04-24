@@ -10,7 +10,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3210;
-const dataDir = path.join(__dirname, 'data');
+const runtimeDataRoot = process.env.VERCEL
+  ? path.join('/tmp', 'mellow-sales-sim')
+  : path.join(__dirname, 'data');
+const dataDir = runtimeDataRoot;
 const sessionsDir = path.join(dataDir, 'sessions');
 const logsDir = path.join(dataDir, 'logs');
 const sdrHintTuningFile = path.join(dataDir, 'sdr_hint_tuning.json');
