@@ -7,6 +7,7 @@ const state = {
   editorMode: 'create',
   dialogueType: 'messenger',
   // Randomizer & random-factor settings (persisted to localStorage)
+  phase: 'setup',
   randomizerConfig: {
     variability: 'medium',       // 'off' | 'low' | 'medium' | 'high'
     signal_types: [],            // [] = all types allowed
@@ -121,6 +122,7 @@ const historyViewClose = document.getElementById('historyViewClose');
 const backToHistoryBtn = document.getElementById('backToHistoryBtn');
 const downloadResultBtn = document.getElementById('downloadResultBtn');
 const copyShareLinkBtn = document.getElementById('copyShareLinkBtn');
+const appVersion = document.getElementById('appVersion');
 
 let historyData = [];
 let historySelectedIds = new Set();
@@ -165,12 +167,50 @@ function sellerMessages() {
   return state.session?.transcript?.filter((m) => m.role === 'seller') || [];
 }
 
-function showPhase(phase) {
+function buildUrlForState() {
+  const params = new URLSearchParams();
+  if (state.selectedPersonaId) params.set('persona', state.selectedPersonaId);
+  if (state.dialogueType) params.set('dialogueType', state.dialogueType);
+  if (state.phase === 'run' && state.session?.session_id) params.set('session', state.session.session_id);
+
+  const query = params.toString();
+  if (state.phase === 'analytics') return '/analytics';
+  if (state.phase === 'history') return '/history';
+  if (state.phase === 'review' && state.session?.session_id) return `/share/${encodeURIComponent(state.session.session_id)}`;
+  if (state.phase === 'run') return `/run${query ? `?${query}` : ''}`;
+  return `/${query ? `?${query}` : ''}`;
+}
+
+function syncRoute(replace = false) {
+  const nextUrl = buildUrlForState();
+  const currentUrl = `${window.location.pathname}${window.location.search}`;
+  if (nextUrl === currentUrl) return;
+  const method = replace ? 'replaceState' : 'pushState';
+  window.history[method]({ phase: state.phase, sessionId: state.session?.session_id || null }, '', nextUrl);
+}
+
+function showPhase(phase, options = {}) {
+  const { replace = false, skipRoute = false } = options;
+  state.phase = phase;
   setupPanel.classList.toggle('hidden', phase !== 'setup');
   runPanel.classList.toggle('hidden', phase !== 'run');
   reviewPanel.classList.toggle('hidden', phase !== 'review');
   analyticsPanel.classList.toggle('hidden', phase !== 'analytics');
   historyPanel.classList.toggle('hidden', phase !== 'history');
+  if (!skipRoute) syncRoute(replace);
+}
+
+async function loadVersionInfo() {
+  if (!appVersion) return;
+  try {
+    const response = await fetch('/version.json');
+    if (!response.ok) throw new Error('Version unavailable');
+    const payload = await response.json();
+    const label = payload.display_version || payload.version || 'unknown';
+    appVersion.textContent = `Version ${label}`;
+  } catch {
+    appVersion.textContent = 'Version unavailable';
+  }
 }
 
 function badgeClass(status) {
@@ -707,7 +747,8 @@ function renderSetupPersona() {
     : '<li><span>No field schema yet.</span></li>';
 }
 
-function setDialogueType(type) {
+function setDialogueType(type, options = {}) {
+  const { skipSessionRefresh = false, replaceRoute = false } = options;
   state.dialogueType = type === 'email' ? 'email' : 'messenger';
   dialogueTypeMessengerBtn?.classList.toggle('is-active', state.dialogueType === 'messenger');
   dialogueTypeEmailBtn?.classList.toggle('is-active', state.dialogueType === 'email');
@@ -717,8 +758,14 @@ function setDialogueType(type) {
       : 'Short, conversational turns. Think LinkedIn DM or Telegram.';
   }
   // Recreate session with new dialogue type if persona already selected
+  if (skipSessionRefresh) {
+    syncRoute(replaceRoute);
+    return;
+  }
   if (state.selectedPersonaId) {
     selectPersona(state.selectedPersonaId);
+  } else {
+    syncRoute(replaceRoute);
   }
 }
 
@@ -1045,7 +1092,7 @@ async function selectPersona(personaId) {
   resetBtn.classList.add('hidden');
   renderPersonaDropdown();
   renderSetupPersona();
-  showPhase('setup');
+  showPhase('setup', { replace: true });
   updateRunState();
 
   if (!personaId) return;
@@ -1059,6 +1106,7 @@ async function selectPersona(personaId) {
     signalBrief.classList.remove('hidden');
     setupCta.classList.remove('hidden');
     resetBtn.classList.remove('hidden');
+    syncRoute(true);
   } catch (error) {
     signalCard.innerHTML = `<p class="muted">${escapeHtml(error.message)}</p>`;
     signalBrief.classList.remove('hidden');
@@ -1266,6 +1314,7 @@ messageForm.addEventListener('submit', async (event) => {
   state.appliedHintId = null;
   state.session = result.session;
   renderTranscript();
+  syncRoute(true);
 });
 
 finishBtn.addEventListener('click', async () => {
@@ -1331,6 +1380,7 @@ function resetToSetup() {
   } else {
     showPhase('setup');
   }
+  syncRoute(true);
 }
 
 resetBtn.addEventListener('click', resetToSetup);
@@ -1567,22 +1617,17 @@ copyShareLinkBtn?.addEventListener('click', () => {
   });
 });
 
-// Handle /share/:sessionId URL — load and show that session on page load
-(async () => {
-  const match = location.pathname.match(/^\/share\/([^/]+)$/);
-  if (!match) return;
-  const sessionId = match[1];
-  try {
-    const session = await api(`api/sessions/${sessionId}`);
-    if (session && session.status === 'finished') {
-      state.session = session;
-      renderAssessment(false);
-      showPhase('review');
-    }
-  } catch {
-    // fall through to normal setup
-  }
-})();
+function readInitialRoute() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    pathname: window.location.pathname,
+    phase: window.location.pathname === '/analytics' ? 'analytics' : window.location.pathname === '/history' ? 'history' : window.location.pathname.startsWith('/run') ? 'run' : window.location.pathname.startsWith('/share/') ? 'review' : 'setup',
+    personaId: params.get('persona') || '',
+    dialogueType: params.get('dialogueType') || 'messenger',
+    sessionId: params.get('session') || '',
+    shareSessionId: (window.location.pathname.match(/^\/share\/([^/]+)$/) || [])[1] || ''
+  };
+}
 
 // ── Randomizer settings ──────────────────────────────────────────────────────
 
@@ -1659,11 +1704,77 @@ runSignalCard?.addEventListener('click', () => {
 });
 
 // Init
+const initialRoute = readInitialRoute();
 loadRandomizerConfig();
-setDialogueType('messenger');
-showPhase('setup');
+setDialogueType(initialRoute.dialogueType, { skipSessionRefresh: true, replaceRoute: true });
+showPhase('setup', { replace: true });
 updateRunState();
 syncRandomizerUI();
-loadPersonas().then(() => state.selectedPersonaId && selectPersona(state.selectedPersonaId)).catch((error) => {
+loadVersionInfo();
+loadPersonas().then(async () => {
+  if (initialRoute.personaId) state.selectedPersonaId = initialRoute.personaId;
+  if (initialRoute.shareSessionId) {
+    try {
+      const session = await api(`api/sessions/${initialRoute.shareSessionId}`);
+      if (session && session.status === 'finished') {
+        state.session = session;
+        state.selectedPersonaId = session.bot_id || state.selectedPersonaId;
+        renderPersonaDropdown();
+        renderAssessment(false);
+        showPhase('review', { replace: true });
+        return;
+      }
+    } catch {}
+  }
+  if (state.selectedPersonaId) await selectPersona(state.selectedPersonaId);
+  if (initialRoute.phase === 'analytics') {
+    showPhase('analytics', { replace: true });
+    await loadAnalytics();
+    return;
+  }
+  if (initialRoute.phase === 'history') {
+    showPhase('history', { replace: true });
+    await loadHistory();
+    return;
+  }
+  if (initialRoute.phase === 'run' && state.session) {
+    showPhase('run', { replace: true });
+    updateRunState();
+    return;
+  }
+  showPhase('setup', { replace: true });
+}).catch((error) => {
   setupPanel.innerHTML = `<p class="muted">Failed to load application: ${escapeHtml(error.message)}</p>`;
+});
+
+window.addEventListener('popstate', async () => {
+  const route = readInitialRoute();
+  if (route.dialogueType && route.dialogueType !== state.dialogueType) {
+    setDialogueType(route.dialogueType, { skipSessionRefresh: true, replaceRoute: true });
+  }
+  if (route.shareSessionId) {
+    try {
+      const session = await api(`api/sessions/${route.shareSessionId}`);
+      if (session && session.status === 'finished') {
+        state.session = session;
+        renderAssessment(false);
+        showPhase('review', { skipRoute: true });
+        return;
+      }
+    } catch {}
+  }
+  if (route.phase === 'analytics') {
+    showPhase('analytics', { skipRoute: true });
+    await loadAnalytics();
+    return;
+  }
+  if (route.phase === 'history') {
+    showPhase('history', { skipRoute: true });
+    await loadHistory();
+    return;
+  }
+  if (route.personaId && route.personaId !== state.selectedPersonaId) {
+    await selectPersona(route.personaId);
+  }
+  showPhase(route.phase === 'run' ? 'run' : 'setup', { skipRoute: true });
 });

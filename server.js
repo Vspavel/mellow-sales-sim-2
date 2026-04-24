@@ -27,6 +27,9 @@ const promptArtifactsFile = path.join(__dirname, '..', 'mellow-sales-sim-v1-arti
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
 const APP_NAME = packageMetadata.name || 'mellow-sales-sim';
 const APP_VERSION = packageMetadata.version || '0.0.0';
+const COMMIT_SHA = process.env.VERCEL_GIT_COMMIT_SHA || process.env.GIT_COMMIT_SHA || null;
+const SHORT_COMMIT_SHA = COMMIT_SHA ? COMMIT_SHA.slice(0, 7) : null;
+const DISPLAY_VERSION = SHORT_COMMIT_SHA ? `${APP_VERSION}+${SHORT_COMMIT_SHA}` : APP_VERSION;
 
 const storage = createStorage({ dataDir, sessionsDir, personasFile });
 await storage.init();
@@ -7922,10 +7925,22 @@ function assess(session) {
 
 // ==================== API ROUTES ====================
 
+app.get('/version.json', (_req, res) => {
+  res.json({
+    app: APP_NAME,
+    version: APP_VERSION,
+    display_version: DISPLAY_VERSION,
+    commit_sha: COMMIT_SHA,
+    short_commit_sha: SHORT_COMMIT_SHA,
+    vercel_env: process.env.VERCEL_ENV || null,
+  });
+});
+
 app.get('/api/meta', async (_req, res) => {
   res.json({
     app: APP_NAME,
     version: APP_VERSION,
+    display_version: DISPLAY_VERSION,
     storage: await storage.getInfo(),
     aux_storage: await hintStateStore.getInfo(),
     artifact_storage: { driver: artifactStore.canUsePostgres ? 'postgres' : 'file' },
