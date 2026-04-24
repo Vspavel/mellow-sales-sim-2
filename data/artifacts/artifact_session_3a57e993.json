@@ -1,0 +1,102 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_3a57e993",
+  "saved_at": "2026-04-24T03:33:06.830Z",
+  "started_at": "2026-04-19T04:01:17.400Z",
+  "finished_at": "2026-04-19T04:01:17.405Z",
+  "seller_username": "hermes_cycle4",
+  "persona": {
+    "id": "cfo_round",
+    "name": "София Бреннер"
+  },
+  "signal_card": {
+    "id": "cfo-round-card-1",
+    "signal_type": "FUNDRAISING_DILIGENCE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "FAIL",
+    "verdict_label": "Нужна доработка",
+    "summary_for_seller": "Прогон рабочий, но доверие и next step пока держатся не на всех ключевых местах.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Добрый день. Mellow — это лидер рынка в своём сегменте. Самое надёжное решение для contractor payments.",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Нет ясной границы ответственности и конкретики по зоне контроля Mellow.",
+        "evidence_quote": "Все наши клиенты говорят, что это меняет их жизнь кардинально. Вы точно не пожалеете.",
+        "blocking": false,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Тон и подача не адаптированы под выбранную персону.",
+        "evidence_quote": "Добрый день. Mellow — это лидер рынка в своём сегменте. Самое надёжное решение для contractor payments.",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Возражения закрыты слабо или не дожаты.",
+        "evidence_quote": "Все наши клиенты говорят, что это меняет их жизнь кардинально. Вы точно не пожалеете.",
+        "objections": [
+          {
+            "objection": "Это шаблон. Что конкретно у нас происходит, что вас привело именно сейчас?",
+            "result": "partial"
+          },
+          {
+            "objection": "Это ближе. Но следующий раунд — не завтра. Зачем мне менять схему сейчас, если текущая не взорвалась?",
+            "result": "partial"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Разговор закончился без чёткого next step.",
+        "evidence_quote": "Все наши клиенты говорят, что это меняет их жизнь кардинально. Вы точно не пожалеете.",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Добрый день. Mellow — это лидер рынка в своём сегменте. Самое надёжное решение для contractor payments.",
+      "ts": "2026-04-19T04:01:17.402Z"
+    },
+    {
+      "role": "bot",
+      "text": "Это шаблон. Что конкретно у нас происходит, что вас привело именно сейчас?",
+      "ts": "2026-04-19T04:01:17.402Z"
+    },
+    {
+      "role": "seller",
+      "text": "Все наши клиенты говорят, что это меняет их жизнь кардинально. Вы точно не пожалеете.",
+      "ts": "2026-04-19T04:01:17.404Z"
+    },
+    {
+      "role": "bot",
+      "text": "Это ближе. Но следующий раунд — не завтра. Зачем мне менять схему сейчас, если текущая не взорвалась?",
+      "ts": "2026-04-19T04:01:17.404Z"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_ff4a5c7d",
+  "saved_at": "2026-04-24T03:33:06.868Z",
+  "started_at": "2026-04-19T03:14:05.346Z",
+  "finished_at": "2026-04-19T03:14:05.356Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "cfo_round",
+    "name": "София Бреннер"
+  },
+  "signal_card": {
+    "id": "cfo-round-card-1",
+    "signal_type": "FUNDRAISING_DILIGENCE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "BLOCKER",
+    "verdict_label": "Критическая ошибка",
+    "summary_for_seller": "Есть блокирующая ошибка: ты пообещал то, что Mellow не должен обещать.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "Первое сообщение слишком общее и теряет контекст сигнала.",
+        "evidence_quote": "Здравствуйте! Mellow - это платформа для управления подрядчиками. Мы защищаем от misclassification рисков и гарантируем compliance.",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Продавец дал ложное обещание про misclassification.",
+        "evidence_quote": "Здравствуйте! Mellow - это платформа для управления подрядчиками. Мы защищаем от misclassification рисков и гарантируем compliance.",
+        "blocking": true,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Здравствуйте! Mellow - это платформа для управления подрядчиками. Мы защищаем от misclassification рисков и гарантируем compliance.",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Возражения закрыты слабо или не дожаты.",
+        "evidence_quote": "Здравствуйте! Mellow - это платформа для управления подрядчиками. Мы защищаем от misclassification рисков и гарантируем compliance.",
+        "objections": [
+          {
+            "objection": "Misclassification вы не можете снять, и если обещаете — это красный флаг. Что именно в вашей зоне, без расширенных обещаний?",
+            "result": "partial"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Разговор закончился без чёткого next step.",
+        "evidence_quote": "Здравствуйте! Mellow - это платформа для управления подрядчиками. Мы защищаем от misclassification рисков и гарантируем compliance.",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Здравствуйте! Mellow - это платформа для управления подрядчиками. Мы защищаем от misclassification рисков и гарантируем compliance.",
+      "ts": "2026-04-19T03:14:05.352Z"
+    },
+    {
+      "role": "bot",
+      "text": "Misclassification вы не можете снять, и если обещаете — это красный флаг. Что именно в вашей зоне, без расширенных обещаний?",
+      "ts": "2026-04-19T03:14:05.352Z"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_3c5bf0df",
+  "saved_at": "2026-04-24T03:33:06.868Z",
+  "started_at": "2026-04-19T03:14:47.270Z",
+  "finished_at": "2026-04-19T03:14:47.289Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "alexey",
+    "name": "Алексей Громов"
+  },
+  "signal_card": {
+    "id": "alexey-card-1",
+    "signal_type": "PAIN_SIGNAL",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS_WITH_NOTES",
+    "verdict_label": "Хорошо, но можно сильнее",
+    "summary_for_seller": "Прогон рабочий, но доверие и next step пока держатся не на всех ключевых местах.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "Первое сообщение слишком общее и теряет контекст сигнала.",
+        "evidence_quote": "Привет! Mellow это great платформа для contractor management которая убирает marketing slang и помогает с compliance.",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Привет! Mellow это great платформа для contractor management которая убирает marketing slang и помогает с compliance.",
+        "blocking": false,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Мы делаем upscaling команды быстрее и убираем compliance overhead через нашу платформу.",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Привет! Mellow это great платформа для contractor management которая убирает marketing slang и помогает с compliance.",
+        "objections": [
+          {
+            "objection": "Не надо про compliance. Что именно убирается из моей ручной работы?",
+            "result": "answered"
+          },
+          {
+            "objection": "Ок. Мне не нужна длинная история. Что следующий шаг — быстро?",
+            "result": "answered"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Разговор закончился без чёткого next step.",
+        "evidence_quote": "Мы делаем upscaling команды быстрее и убираем compliance overhead через нашу платформу.",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Привет! Mellow это great платформа для contractor management которая убирает marketing slang и помогает с compliance.",
+      "ts": "2026-04-19T03:14:47.278Z"
+    },
+    {
+      "role": "bot",
+      "text": "Не надо про compliance. Что именно убирается из моей ручной работы?",
+      "ts": "2026-04-19T03:14:47.278Z"
+    },
+    {
+      "role": "seller",
+      "text": "Мы делаем upscaling команды быстрее и убираем compliance overhead через нашу платформу.",
+      "ts": "2026-04-19T03:14:47.283Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Мне не нужна длинная история. Что следующий шаг — быстро?",
+      "ts": "2026-04-19T03:14:47.284Z"
+    }
+  ]
+}

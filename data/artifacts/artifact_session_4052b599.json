@@ -1,0 +1,230 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_4052b599",
+  "saved_at": "2026-04-24T03:33:04.995Z",
+  "started_at": "2026-04-23T08:20:01.580Z",
+  "finished_at": "2026-04-23T08:20:05.204Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "cm_winback",
+    "name": "Ирина Соколова"
+  },
+  "signal_card": {
+    "id": "cm-winback-card-3",
+    "signal_type": "DIRECT_CONTRACT_NEED",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "objections": [
+          {
+            "objection": "Ok but crypto + Wise has worked for two years. Why do I need this specifically now?",
+            "result": "answered"
+          },
+          {
+            "objection": "There's some relevance here, but the setup is still blurry. Explain it concretely: documents, payout flow, incident handling.",
+            "result": "answered"
+          },
+          {
+            "objection": "There's some relevance here, but the setup is still blurry. Explain it concretely: documents, payout flow, incident handling.",
+            "result": "answered"
+          },
+          {
+            "objection": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+      "ts": "2026-04-23T08:20:01.696Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok but crypto + Wise has worked for two years. Why do I need this specifically now?",
+      "ts": "2026-04-23T08:20:01.697Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:20:02.011Z"
+    },
+    {
+      "role": "bot",
+      "text": "There's some relevance here, but the setup is still blurry. Explain it concretely: documents, payout flow, incident handling.",
+      "ts": "2026-04-23T08:20:02.011Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-23T08:20:02.376Z"
+    },
+    {
+      "role": "bot",
+      "text": "There's some relevance here, but the setup is still blurry. Explain it concretely: documents, payout flow, incident handling.",
+      "ts": "2026-04-23T08:20:02.376Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:20:02.701Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:20:02.701Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:20:02.932Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:20:02.933Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-23T08:20:03.197Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:20:03.197Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:20:03.454Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:20:03.454Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:20:03.678Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:20:03.678Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:20:03.879Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:20:03.880Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:20:04.074Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:20:04.074Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:20:04.275Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:20:04.276Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? Which part of your process is eating the most time right now?",
+      "ts": "2026-04-23T08:20:04.499Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:20:04.499Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:20:04.780Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:20:04.780Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:20:05.025Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:20:05.025Z"
+    }
+  ]
+}

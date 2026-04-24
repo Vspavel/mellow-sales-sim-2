@@ -1,0 +1,102 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_c818e0b9",
+  "saved_at": "2026-04-24T03:33:06.909Z",
+  "started_at": "2026-04-18T23:09:08.841Z",
+  "finished_at": "2026-04-18T23:09:08.965Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "internal_legal",
+    "name": "Анна Рихтер"
+  },
+  "signal_card": {
+    "id": "internal-legal-card-1",
+    "signal_type": "LEGAL_REVIEW_TRIGGER",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "У SynthPort вижу work on contractor documentation и поиск cleaner payout/document flow. Mellow даёт audit trail, KYC и structured docs. Ответственность чётко очерчена, без overclaiming. Готов прислать короткий memo с зоной контроля."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "У SynthPort вижу work on contractor documentation и поиск cleaner payout/document flow. Mellow даёт audit trail, KYC и structured docs. Ответственность чётко очерчена, без overclaiming. Готов прислать короткий memo с зоной контроля.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "У SynthPort вижу work on contractor documentation и поиск cleaner payout/document flow. Mellow даёт audit trail, KYC и structured docs. Ответственность чётко очерчена, без overclaiming. Готов прислать короткий memo с зоной контроля."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "У SynthPort вижу work on contractor documentation и поиск cleaner payout/document flow. Mellow даёт audit trail, KYC и structured docs. Ответственность чётко очерчена, без overclaiming. Готов прислать короткий memo с зоной контроля.",
+        "objections": [
+          {
+            "objection": "Ок. Что именно Mellow даёт по documents, audit trail и process discipline, и где вы не делаете overclaim?",
+            "result": "answered"
+          },
+          {
+            "objection": "Хорошо. Но как это уменьшает серые зоны между legal, ops и finance, а не просто добавляет новый слой?",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "У SynthPort вижу work on contractor documentation и поиск cleaner payout/document flow. Mellow даёт audit trail, KYC и structured docs. Ответственность чётко очерчена, без overclaiming. Готов прислать короткий memo с зоной контроля."
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Анна Рихтер. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-18T23:09:08.841Z"
+    },
+    {
+      "role": "seller",
+      "text": "У SynthPort вижу work on contractor documentation и поиск cleaner payout/document flow. Mellow даёт audit trail, KYC и structured docs. Ответственность чётко очерчена, без overclaiming. Готов прислать короткий memo с зоной контроля.",
+      "ts": "2026-04-18T23:09:08.891Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Что именно Mellow даёт по documents, audit trail и process discipline, и где вы не делаете overclaim?",
+      "ts": "2026-04-18T23:09:08.891Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow контролирует документы, KYC, платёжную цепь и audit trail. Misclassification risk не берём на себя. SLA 2 дня, есть трекинг статусов. Предлагаю 20 минут на неделе для walkthrough.",
+      "ts": "2026-04-18T23:09:08.937Z"
+    },
+    {
+      "role": "bot",
+      "text": "Хорошо. Но как это уменьшает серые зоны между legal, ops и finance, а не просто добавляет новый слой?",
+      "ts": "2026-04-18T23:09:08.937Z"
+    }
+  ]
+}

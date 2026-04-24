@@ -1,0 +1,124 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_d4b9ea81",
+  "saved_at": "2026-04-24T03:33:05.168Z",
+  "started_at": "2026-04-20T07:18:43.479Z",
+  "finished_at": "2026-04-20T07:18:43.610Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "alexey",
+    "name": "Алексей Громов"
+  },
+  "signal_card": {
+    "id": "alexey-card-1",
+    "signal_type": "PAIN_SIGNAL",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "email",
+  "language": "en",
+  "assessment": {
+    "verdict": "FAIL",
+    "verdict_label": "Needs work",
+    "summary_for_seller": "Workable run, but trust and next step are not landing on all key points yet.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hey, I saw you are building something at your company. Mellow can help with contractors.",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K6",
+        "name": "Email format",
+        "status": "FAIL",
+        "short_reason": "Missing email greeting (Hi / Hello / Dear). Cold email without salutation reads as unprofessional.",
+        "evidence_quote": "Hey, I saw you are building something at your company. Mellow can help with contractors.",
+        "label": "Email format"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "We handle payments and KYC. Should we chat?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Tone and delivery are not adapted to the chosen persona.",
+        "evidence_quote": "Hey, I saw you are building something at your company. Mellow can help with contractors.",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Objections addressed weakly or not followed through.",
+        "evidence_quote": "We handle payments and KYC. Should we chat?",
+        "objections": [
+          {
+            "objection": "Pavel,\n\nThanks for reaching out. What exactly breaks if I don't change anything?\n\nBest,\nАлексей",
+            "result": "partial"
+          },
+          {
+            "objection": "Pavel,\n\nThanks for reaching out. I hear you. But 'upgrade ops' isn't a mechanism.\n\nBest,\nАлексей",
+            "result": "partial"
+          },
+          {
+            "objection": "Pavel,\n\nThanks for reaching out. Not convincing. Where's the specifics on what changes manually?\n\nBest,\nАлексей",
+            "result": "partial"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Conversation ended without a clear next step.",
+        "evidence_quote": "Ok let me know if you want to connect.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hey, I saw you are building something at your company. Mellow can help with contractors.",
+      "ts": "2026-04-20T07:18:43.554Z"
+    },
+    {
+      "role": "bot",
+      "text": "Pavel,\n\nThanks for reaching out. What exactly breaks if I don't change anything?\n\nBest,\nАлексей",
+      "ts": "2026-04-20T07:18:43.555Z"
+    },
+    {
+      "role": "seller",
+      "text": "We handle payments and KYC. Should we chat?",
+      "ts": "2026-04-20T07:18:43.578Z"
+    },
+    {
+      "role": "bot",
+      "text": "Pavel,\n\nThanks for reaching out. I hear you. But 'upgrade ops' isn't a mechanism.\n\nBest,\nАлексей",
+      "ts": "2026-04-20T07:18:43.579Z"
+    },
+    {
+      "role": "seller",
+      "text": "Ok let me know if you want to connect.",
+      "ts": "2026-04-20T07:18:43.595Z"
+    },
+    {
+      "role": "bot",
+      "text": "Pavel,\n\nThanks for reaching out. Not convincing. Where's the specifics on what changes manually?\n\nBest,\nАлексей",
+      "ts": "2026-04-20T07:18:43.595Z"
+    }
+  ]
+}

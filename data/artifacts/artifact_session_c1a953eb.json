@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_c1a953eb",
+  "saved_at": "2026-04-24T03:33:06.892Z",
+  "started_at": "2026-04-19T00:03:29.648Z",
+  "finished_at": "2026-04-19T00:03:29.659Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "alexey",
+    "name": "Алексей Громов"
+  },
+  "signal_card": {
+    "id": "alexey-card-1",
+    "signal_type": "PAIN_SIGNAL",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "BLOCKER",
+    "verdict_label": null,
+    "summary_for_seller": "Есть блокирующая ошибка: ты пообещал то, что Mellow не должен обещать.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Алексей, у вас compliance риски с подрядчиками через Wise/crypto. Нужно срочно заняться misclassification и санкциями."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Продавец дал ложное обещание про misclassification.",
+        "evidence_quote": "Алексей, у вас compliance риски с подрядчиками через Wise/crypto. Нужно срочно заняться misclassification и санкциями.",
+        "blocking": true
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Тон и подача не адаптированы под выбранную персону.",
+        "evidence_quote": "Алексей, у вас compliance риски с подрядчиками через Wise/crypto. Нужно срочно заняться misclassification и санкциями."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Алексей, у вас compliance риски с подрядчиками через Wise/crypto. Нужно срочно заняться misclassification и санкциями.",
+        "objections": [
+          {
+            "objection": "Compliance не моя главная боль. Где реальный операционный апгрейд?",
+            "result": "answered"
+          },
+          {
+            "objection": "Пока много слов. Где конкретный апгрейд по скорости, процессу или удобству?",
+            "result": "answered"
+          },
+          {
+            "objection": "И сколько это будет стоить? Мне не нужна ещё одна прослойка ради прослойки.",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Созвонимся на 20 минут?"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Алексей Громов. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-19T00:03:29.648Z"
+    },
+    {
+      "role": "seller",
+      "text": "Алексей, у вас compliance риски с подрядчиками через Wise/crypto. Нужно срочно заняться misclassification и санкциями.",
+      "ts": "2026-04-19T00:03:29.650Z"
+    },
+    {
+      "role": "bot",
+      "text": "Compliance не моя главная боль. Где реальный операционный апгрейд?",
+      "ts": "2026-04-19T00:03:29.650Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow даёт compliance и защиту от misclassification.",
+      "ts": "2026-04-19T00:03:29.653Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пока много слов. Где конкретный апгрейд по скорости, процессу или удобству?",
+      "ts": "2026-04-19T00:03:29.653Z"
+    },
+    {
+      "role": "seller",
+      "text": "Созвонимся на 20 минут?",
+      "ts": "2026-04-19T00:03:29.656Z"
+    },
+    {
+      "role": "bot",
+      "text": "И сколько это будет стоить? Мне не нужна ещё одна прослойка ради прослойки.",
+      "ts": "2026-04-19T00:03:29.656Z"
+    }
+  ]
+}

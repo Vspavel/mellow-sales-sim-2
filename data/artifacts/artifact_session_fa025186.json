@@ -1,0 +1,130 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_fa025186",
+  "saved_at": "2026-04-24T09:17:56.603Z",
+  "started_at": "2026-04-24T09:17:54.828Z",
+  "finished_at": "2026-04-24T09:17:56.488Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "panic_churn_ops",
+    "name": "Ольга Миронова"
+  },
+  "signal_card": {
+    "id": "panic-churn-ops-card-1",
+    "signal_type": "CHURN_SIGNAL",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS_WITH_NOTES",
+    "verdict_label": "Good, but can be stronger",
+    "summary_for_seller": "Workable run, but trust and next step are not landing on all key points yet.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "objections": [
+          {
+            "objection": "Ok but crypto + Wise has worked for two years. Why do I need this specifically now?",
+            "result": "answered"
+          },
+          {
+            "objection": "And on cost: what does this actually run, and is there a trial or pilot option?",
+            "result": "answered"
+          },
+          {
+            "objection": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+            "result": "answered"
+          },
+          {
+            "objection": "Fine. If the flow is real, I'll do a 20-minute call.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Conversation ended without a clear next step.",
+        "evidence_quote": "The point here is the mechanism, not the pitch: KYC, contractor docs, payout flow, incident trail. Which piece matters most in your case?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+      "ts": "2026-04-24T09:17:55.207Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok but crypto + Wise has worked for two years. Why do I need this specifically now?",
+      "ts": "2026-04-24T09:17:55.208Z"
+    },
+    {
+      "role": "seller",
+      "text": "What is creating the most manual work right now: statuses, escalations, or reconciliation?",
+      "ts": "2026-04-24T09:17:55.598Z"
+    },
+    {
+      "role": "bot",
+      "text": "And on cost: what does this actually run, and is there a trial or pilot option?",
+      "ts": "2026-04-24T09:17:55.599Z"
+    },
+    {
+      "role": "seller",
+      "text": "The point here is the mechanism, not the pitch: KYC, contractor docs, payout flow, incident trail. Which piece matters most in your case?",
+      "ts": "2026-04-24T09:17:55.985Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-24T09:17:55.985Z"
+    },
+    {
+      "role": "seller",
+      "text": "The point here is the mechanism, not the pitch: KYC, contractor docs, payout flow, incident trail. Which piece matters most in your case?",
+      "ts": "2026-04-24T09:17:56.361Z"
+    },
+    {
+      "role": "bot",
+      "text": "Fine. If the flow is real, I'll do a 20-minute call.",
+      "ts": "2026-04-24T09:17:56.361Z"
+    }
+  ]
+}

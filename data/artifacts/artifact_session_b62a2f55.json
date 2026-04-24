@@ -1,0 +1,148 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_b62a2f55",
+  "saved_at": "2026-04-24T03:33:05.137Z",
+  "started_at": "2026-04-20T07:49:36.690Z",
+  "finished_at": "2026-04-20T07:49:36.701Z",
+  "seller_username": "sdr_agent",
+  "persona": {
+    "id": "eng_manager",
+    "name": "Марк Левин"
+  },
+  "signal_card": {
+    "id": "eng-manager-card-1",
+    "signal_type": "TEAM_SCALING",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "email",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nConcrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K6",
+        "name": "Email format",
+        "status": "PASS",
+        "short_reason": "Messages use correct email format: greeting and sign-off present.",
+        "evidence_quote": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nConcrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+        "label": "Email format"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nConcrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Tone and delivery are not adapted to the chosen persona.",
+        "evidence_quote": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nConcrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nConcrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+        "objections": [
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. You got the problem right. But I need to bring this to finance — how do you help me make that case?\n\nBest,\nМарк",
+            "result": "answered"
+          },
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. Wait. I still don't understand how to bring this to finance.\n\nBest,\nМарк",
+            "result": "answered"
+          },
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. Fine. Send flow and specifically what escalations get handled automatically.\n\nBest,\nМарк",
+            "result": "answered"
+          },
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. Specifically: what stops being manual? Give me hours and steps, not marketing language.\n\nBest,\nМарк",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Hi Mark Levin,\n\nOps impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nConcrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.691Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. You got the problem right. But I need to bring this to finance — how do you help me make that case?\n\nBest,\nМарк",
+      "ts": "2026-04-20T07:49:36.692Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Mark Levin,\n\nOps impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.693Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. Wait. I still don't understand how to bring this to finance.\n\nBest,\nМарк",
+      "ts": "2026-04-20T07:49:36.693Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Mark Levin,\n\nOps impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions. Which part of your process is eating the most time right now?\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.695Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. Fine. Send flow and specifically what escalations get handled automatically.\n\nBest,\nМарк",
+      "ts": "2026-04-20T07:49:36.696Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Mark Levin,\n\nConcretely for ops: less manual status chasing, less reconciliation overhead, and a named owner for incidents. That is the before/after change, not a generic platform claim.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.697Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. Specifically: what stops being manual? Give me hours and steps, not marketing language.\n\nBest,\nМарк",
+      "ts": "2026-04-20T07:49:36.697Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Mark Levin,\n\nOps impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.699Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. Waiting for the materials. When will you send them?\n\nBest,\nМарк",
+      "ts": "2026-04-20T07:49:36.699Z"
+    }
+  ]
+}

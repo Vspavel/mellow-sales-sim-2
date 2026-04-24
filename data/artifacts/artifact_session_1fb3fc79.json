@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_1fb3fc79",
+  "saved_at": "2026-04-24T03:33:05.171Z",
+  "started_at": "2026-04-20T03:12:24.155Z",
+  "finished_at": "2026-04-20T03:12:24.170Z",
+  "seller_username": "longrun_cycle_30",
+  "persona": {
+    "id": "external_legal",
+    "name": "Давид Шмидт"
+  },
+  "signal_card": {
+    "id": "external-legal-card-1",
+    "signal_type": "OUTSIDE_COUNSEL_CHECK",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "David, you've already seen Westline's fragile mix of intermediaries and manual exceptions. Mellow provides a structured alternative: CoR with a documented control zone, audit trail on every payment. No promises on what's outside our scope. What would you call the critical weakness in the current scheme from a defensibility standpoint?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "David, you've already seen Westline's fragile mix of intermediaries and manual exceptions. Mellow provides a structured alternative: CoR with a documented control zone, audit trail on every payment. No promises on what's outside our scope. What would you call the critical weakness in the current scheme from a defensibility standpoint?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "David, you've already seen Westline's fragile mix of intermediaries and manual exceptions. Mellow provides a structured alternative: CoR with a documented control zone, audit trail on every payment. No promises on what's outside our scope. What would you call the critical weakness in the current scheme from a defensibility standpoint?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "David, you've already seen Westline's fragile mix of intermediaries and manual exceptions. Mellow provides a structured alternative: CoR with a documented control zone, audit trail on every payment. No promises on what's outside our scope. What would you call the critical weakness in the current scheme from a defensibility standpoint?",
+        "objections": [
+          {
+            "objection": "Ok. Three things right away: what's in Mellow's scope, what's not, and where is that evidenced in process?",
+            "result": "answered"
+          },
+          {
+            "objection": "The grey zone question: when there's an overlap between your scope and ours — who owns that? What's the documented answer?",
+            "result": "answered"
+          },
+          {
+            "objection": "Defensibility requires no grey zones. Show me exactly where your responsibility ends and ours begins.",
+            "result": "answered"
+          },
+          {
+            "objection": "Where exactly does your zone end and ours begin? Who owns the gap between Mellow, our legal, and client? Без overclaim.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "David, you've already seen Westline's fragile mix of intermediaries and manual exceptions. Mellow provides a structured alternative: CoR with a documented control zone, audit trail on every payment. No promises on what's outside our scope. What would you call the critical weakness in the current scheme from a defensibility standpoint?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "David, you've already seen Westline's fragile mix of intermediaries and manual exceptions. Mellow provides a structured alternative: CoR with a documented control zone, audit trail on every payment. No promises on what's outside our scope. What would you call the critical weakness in the current scheme from a defensibility standpoint?",
+      "ts": "2026-04-20T03:12:24.158Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok. Three things right away: what's in Mellow's scope, what's not, and where is that evidenced in process?",
+      "ts": "2026-04-20T03:12:24.158Z"
+    },
+    {
+      "role": "seller",
+      "text": "The boundary is explicit: our scope covers the payment chain, KYC and contractor documentation. Your legal and finance teams own the strategic decisions. The overlap is mapped — not assumed.",
+      "ts": "2026-04-20T03:12:24.161Z"
+    },
+    {
+      "role": "bot",
+      "text": "The grey zone question: when there's an overlap between your scope and ours — who owns that? What's the documented answer?",
+      "ts": "2026-04-20T03:12:24.161Z"
+    },
+    {
+      "role": "seller",
+      "text": "The boundary is explicit: our scope covers the payment chain, KYC and contractor documentation. Your legal and finance teams own the strategic decisions. The overlap is mapped — not assumed.",
+      "ts": "2026-04-20T03:12:24.163Z"
+    },
+    {
+      "role": "bot",
+      "text": "Defensibility requires no grey zones. Show me exactly where your responsibility ends and ours begins.",
+      "ts": "2026-04-20T03:12:24.164Z"
+    },
+    {
+      "role": "seller",
+      "text": "The boundary is explicit: our scope covers the payment chain, KYC and contractor documentation. Your legal and finance teams own the strategic decisions. The overlap is mapped — not assumed.",
+      "ts": "2026-04-20T03:12:24.166Z"
+    },
+    {
+      "role": "bot",
+      "text": "Where exactly does your zone end and ours begin? Who owns the gap between Mellow, our legal, and client? Без overclaim.",
+      "ts": "2026-04-20T03:12:24.166Z"
+    },
+    {
+      "role": "seller",
+      "text": "The boundary is explicit: our scope covers the payment chain, KYC and contractor documentation. Your legal and finance teams own the strategic decisions. The overlap is mapped — not assumed. Which of these aspects is most critical for you right now?",
+      "ts": "2026-04-20T03:12:24.168Z"
+    },
+    {
+      "role": "bot",
+      "text": "The grey zone question: when there's an overlap between your scope and ours — who owns that? What's the documented answer?",
+      "ts": "2026-04-20T03:12:24.168Z"
+    }
+  ]
+}

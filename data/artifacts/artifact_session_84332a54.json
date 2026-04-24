@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_84332a54",
+  "saved_at": "2026-04-24T03:33:05.121Z",
+  "started_at": "2026-04-22T18:29:46.660Z",
+  "finished_at": "2026-04-22T18:29:46.690Z",
+  "seller_username": "cto_test",
+  "persona": {
+    "id": "andrey",
+    "name": "Андрей Волков"
+  },
+  "signal_card": {
+    "id": "andrey-card-2",
+    "signal_type": "FUNDRAISING_DILIGENCE",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "BLOCKER",
+    "verdict_label": "Critical error",
+    "summary_for_seller": "Critical error: you promised something Mellow should not promise.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Hi Andrey, our platform helps with contractor payments and compliance automation.",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Seller made a false promise about misclassification.",
+        "evidence_quote": "Mellow controls: KYC, documents, audit trail, payment chain, SLA on escalations. We do not take on misclassification risk. That stays with you.",
+        "blocking": true,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Mellow controls: KYC, documents, audit trail, payment chain, SLA on escalations. We do not take on misclassification risk. That stays with you.",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Mellow controls: KYC, documents, audit trail, payment chain, SLA on escalations. We do not take on misclassification risk. That stays with you.",
+        "objections": [
+          {
+            "objection": "Good. Then without preamble: what Mellow controls, what it doesn't, and how that's substantiated?",
+            "result": "answered"
+          },
+          {
+            "objection": "That's closer. But why should I replace my current setup if it's worked for years, even if imperfectly?",
+            "result": "answered"
+          },
+          {
+            "objection": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Conversation ended without a clear next step.",
+        "evidence_quote": "And we guarantee to fully protect you from misclassification risk — Mellow eliminates it completely.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi Andrey, our platform helps with contractor payments and compliance automation.",
+      "ts": "2026-04-22T18:29:46.668Z"
+    },
+    {
+      "role": "bot",
+      "text": "Good. Then without preamble: what Mellow controls, what it doesn't, and how that's substantiated?",
+      "ts": "2026-04-22T18:29:46.671Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow controls: KYC, documents, audit trail, payment chain, SLA on escalations. We do not take on misclassification risk. That stays with you.",
+      "ts": "2026-04-22T18:29:46.678Z"
+    },
+    {
+      "role": "bot",
+      "text": "That's closer. But why should I replace my current setup if it's worked for years, even if imperfectly?",
+      "ts": "2026-04-22T18:29:46.679Z"
+    },
+    {
+      "role": "seller",
+      "text": "And we guarantee to fully protect you from misclassification risk — Mellow eliminates it completely.",
+      "ts": "2026-04-22T18:29:46.684Z"
+    },
+    {
+      "role": "bot",
+      "text": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+      "ts": "2026-04-22T18:29:46.685Z"
+    }
+  ]
+}

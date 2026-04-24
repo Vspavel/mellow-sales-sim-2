@@ -1,0 +1,19 @@
+{
+  "status": "done",
+  "completedCycles": 30,
+  "targetCycles": 30,
+  "personas": 9,
+  "simsPerPersonaPerCycle": 10,
+  "currentStatus": "done",
+  "keyFindings": [
+    "30 cycles executed with 10 full simulations for each of 9 personas per cycle",
+    "Prompt tuning and SDR hint tuning applied only from observed weak criteria",
+    "Final summary written with evidence window comparison (cycles 1-5 vs 26-30)"
+  ],
+  "filesChanged": [
+    "/home/vspavel/.openclaw/workspace/mellow-sales-sim/data/analysis/longrun_2026-04-20_030258/checkpoint.json",
+    "/home/vspavel/.openclaw/workspace/mellow-sales-sim/data/analysis/longrun_2026-04-20_030258/FINAL_SUMMARY.md",
+    "/home/vspavel/.openclaw/workspace/mellow-sales-sim/data/personas.json",
+    "/home/vspavel/.openclaw/workspace/mellow-sales-sim/data/sdr_hint_tuning.json"
+  ]
+}

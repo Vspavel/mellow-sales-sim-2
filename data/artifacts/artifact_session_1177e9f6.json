@@ -1,0 +1,270 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_1177e9f6",
+  "saved_at": "2026-04-24T03:33:04.975Z",
+  "started_at": "2026-04-23T08:28:55.227Z",
+  "finished_at": "2026-04-23T08:28:58.924Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "rate_floor_cfo",
+    "name": "Марина Белова"
+  },
+  "signal_card": {
+    "id": "rate-floor-cfo-card-1",
+    "signal_type": "RATE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "objections": [
+          {
+            "objection": "I see you did your homework. Immediate question: payment chain, documents, KYC — what's in your scope, what's not?",
+            "result": "answered"
+          },
+          {
+            "objection": "Send a one-page summary: scope, documents, SLA on incidents. If it's without fluff — we'll find time.",
+            "result": "answered"
+          },
+          {
+            "objection": "Waiting for the materials. When will you send them?",
+            "result": "answered"
+          },
+          {
+            "objection": "Agreed. Waiting for your email.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+      "ts": "2026-04-23T08:28:55.322Z"
+    },
+    {
+      "role": "bot",
+      "text": "I see you did your homework. Immediate question: payment chain, documents, KYC — what's in your scope, what's not?",
+      "ts": "2026-04-23T08:28:55.323Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:28:55.513Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a one-page summary: scope, documents, SLA on incidents. If it's without fluff — we'll find time.",
+      "ts": "2026-04-23T08:28:55.513Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:28:55.691Z"
+    },
+    {
+      "role": "bot",
+      "text": "Waiting for the materials. When will you send them?",
+      "ts": "2026-04-23T08:28:55.691Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What's most important to you heading into the next step?",
+      "ts": "2026-04-23T08:28:55.874Z"
+    },
+    {
+      "role": "bot",
+      "text": "Agreed. Waiting for your email.",
+      "ts": "2026-04-23T08:28:55.874Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:28:56.076Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:56.076Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-23T08:28:56.290Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:56.290Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-23T08:28:56.502Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:56.502Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-23T08:28:56.693Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:56.693Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:28:56.896Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:56.896Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-23T08:28:57.116Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:57.116Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-23T08:28:57.361Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:57.361Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-23T08:28:57.558Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:57.558Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What's most important to you heading into the next step?",
+      "ts": "2026-04-23T08:28:57.759Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:57.759Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-23T08:28:57.957Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:57.957Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-23T08:28:58.160Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:58.160Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-23T08:28:58.358Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:58.358Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:28:58.619Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:58.620Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-23T08:28:58.816Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:28:58.817Z"
+    }
+  ]
+}

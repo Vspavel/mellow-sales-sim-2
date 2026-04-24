@@ -1,0 +1,148 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_b1786f13",
+  "saved_at": "2026-04-24T03:33:05.138Z",
+  "started_at": "2026-04-20T07:49:36.618Z",
+  "finished_at": "2026-04-20T07:49:36.629Z",
+  "seller_username": "sdr_agent",
+  "persona": {
+    "id": "eng_manager",
+    "name": "Марк Левин"
+  },
+  "signal_card": {
+    "id": "eng-manager-card-1",
+    "signal_type": "TEAM_SCALING",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "email",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nI can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge.\n\nAnd if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?\n\nBest,\nPavel",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K6",
+        "name": "Email format",
+        "status": "PASS",
+        "short_reason": "Messages use correct email format: greeting and sign-off present.",
+        "evidence_quote": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nI can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge.\n\nAnd if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?\n\nBest,\nPavel",
+        "label": "Email format"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nI can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge.\n\nAnd if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?\n\nBest,\nPavel",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Tone and delivery are not adapted to the chosen persona.",
+        "evidence_quote": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nI can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge.\n\nAnd if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?\n\nBest,\nPavel",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nI can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge.\n\nAnd if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?\n\nBest,\nPavel",
+        "objections": [
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. You got the problem right. But I need to bring this to finance — how do you help me make that case?\n\nBest,\nМарк",
+            "result": "answered"
+          },
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. What exactly disappears from the daily process — payment statuses, manual coordination, what?\n\nBest,\nМарк",
+            "result": "answered"
+          },
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. Ok. Send me something I can bring to finance without a long internal pitch.\n\nBest,\nМарк",
+            "result": "answered"
+          },
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. Waiting for the materials. When will you send them?\n\nBest,\nМарк",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Hi Mark Levin,\n\nOps impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Subject: Docklane: Champion теряет время на firefighting вместо команды и delivery.\n\nHi Mark Levin,\n\nI can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge.\n\nAnd if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.619Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. You got the problem right. But I need to bring this to finance — how do you help me make that case?\n\nBest,\nМарк",
+      "ts": "2026-04-20T07:49:36.620Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Mark Levin,\n\nConcretely for ops: less manual status chasing, less reconciliation overhead, and a named owner for incidents. That is the before/after change, not a generic platform claim.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.621Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. What exactly disappears from the daily process — payment statuses, manual coordination, what?\n\nBest,\nМарк",
+      "ts": "2026-04-20T07:49:36.621Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Mark Levin,\n\nOps impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.623Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. Ok. Send me something I can bring to finance without a long internal pitch.\n\nBest,\nМарк",
+      "ts": "2026-04-20T07:49:36.623Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Mark Levin,\n\nOps impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.625Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. Waiting for the materials. When will you send them?\n\nBest,\nМарк",
+      "ts": "2026-04-20T07:49:36.625Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Mark Levin,\n\nOps impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions. Which part of your process is eating the most time right now?\n\nWould it make sense to compare this against your current flow?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.627Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. Agreed. Waiting for your email.\n\nBest,\nМарк",
+      "ts": "2026-04-20T07:49:36.627Z"
+    }
+  ]
+}

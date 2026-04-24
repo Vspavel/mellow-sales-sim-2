@@ -1,0 +1,246 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_308e6fa6",
+  "saved_at": "2026-04-24T08:46:52.153Z",
+  "started_at": "2026-04-24T08:46:45.534Z",
+  "finished_at": "2026-04-24T08:46:52.020Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "rate_floor_cfo",
+    "name": "Марина Белова"
+  },
+  "signal_card": {
+    "id": "rate-floor-cfo-card-1",
+    "signal_type": "RATE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "objections": [
+          {
+            "objection": "I see you did your homework. Immediate question: payment chain, documents, KYC — what's in your scope, what's not?",
+            "result": "answered"
+          },
+          {
+            "objection": "Too many declarations. What specifically changes in my process, and in what timeframe?",
+            "result": "answered"
+          },
+          {
+            "objection": "Ok. Send me a brief written summary: payment flow, audit story, scope boundary.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Specifically on cost, Mellow covers KYC, contractor docs, and the payment chain with audit trail on our side. Which part do you want more precision on?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+      "ts": "2026-04-24T08:46:45.965Z"
+    },
+    {
+      "role": "bot",
+      "text": "I see you did your homework. Immediate question: payment chain, documents, KYC — what's in your scope, what's not?",
+      "ts": "2026-04-24T08:46:45.965Z"
+    },
+    {
+      "role": "seller",
+      "text": "Where is the weakest point today: documents, payout flow, or status control?",
+      "ts": "2026-04-24T08:46:46.380Z"
+    },
+    {
+      "role": "bot",
+      "text": "Too many declarations. What specifically changes in my process, and in what timeframe?",
+      "ts": "2026-04-24T08:46:46.381Z"
+    },
+    {
+      "role": "seller",
+      "text": "Specifically on cost, Mellow covers KYC, contractor docs, and the payment chain with audit trail on our side. Which part do you want more precision on?",
+      "ts": "2026-04-24T08:46:46.794Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok. Send me a brief written summary: payment flow, audit story, scope boundary.",
+      "ts": "2026-04-24T08:46:46.795Z"
+    },
+    {
+      "role": "seller",
+      "text": "Low-pressure next step: I can send a short one-pager for your case, and if it is concrete enough, then we can talk. Does that work?",
+      "ts": "2026-04-24T08:46:47.202Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:47.203Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let's put a narrow 15-minute walkthrough on the calendar just for this issue, without a broad pitch. What time works?",
+      "ts": "2026-04-24T08:46:47.579Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:47.579Z"
+    },
+    {
+      "role": "seller",
+      "text": "The clean next step may be a short 15-minute walkthrough on the problem area only, without a broad pitch. Does that work?",
+      "ts": "2026-04-24T08:46:47.975Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:47.976Z"
+    },
+    {
+      "role": "seller",
+      "text": "The clean next step may be a short 15-minute walkthrough on the problem area only, without a broad pitch. Does that work?",
+      "ts": "2026-04-24T08:46:48.354Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:48.354Z"
+    },
+    {
+      "role": "seller",
+      "text": "Rather than a broad call, we can do a narrow 15-minute walkthrough just on the acute issue. Would that work?",
+      "ts": "2026-04-24T08:46:48.742Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:48.742Z"
+    },
+    {
+      "role": "seller",
+      "text": "Specifically on cost, Mellow covers KYC, contractor docs, and the payment chain with audit trail on our side. Which part do you want more precision on?",
+      "ts": "2026-04-24T08:46:49.131Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:49.132Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send a short memo for your case today, and if the logic holds, let's put a short review call on the calendar. What time works?",
+      "ts": "2026-04-24T08:46:49.529Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:49.530Z"
+    },
+    {
+      "role": "seller",
+      "text": "Rather than a broad call, we can do a narrow 15-minute walkthrough just on the acute issue. Would that work?",
+      "ts": "2026-04-24T08:46:49.909Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:49.909Z"
+    },
+    {
+      "role": "seller",
+      "text": "Rather than a broad call, we can do a narrow 15-minute walkthrough just on the acute issue. Would that work?",
+      "ts": "2026-04-24T08:46:50.304Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:50.304Z"
+    },
+    {
+      "role": "seller",
+      "text": "The clean next step may be a short 15-minute walkthrough on the problem area only, without a broad pitch. Does that work?",
+      "ts": "2026-04-24T08:46:50.698Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:50.698Z"
+    },
+    {
+      "role": "seller",
+      "text": "Rather than a broad call, we can do a narrow 15-minute walkthrough just on the acute issue. Would that work?",
+      "ts": "2026-04-24T08:46:51.101Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:51.102Z"
+    },
+    {
+      "role": "seller",
+      "text": "Specifically on cost, Mellow covers KYC, contractor docs, and the payment chain with audit trail on our side. Which part do you want more precision on?",
+      "ts": "2026-04-24T08:46:51.512Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:51.512Z"
+    },
+    {
+      "role": "seller",
+      "text": "Rather than stretch this further, let's put a short 20-minute call on the calendar for your scenario. What slot works?",
+      "ts": "2026-04-24T08:46:51.875Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:46:51.875Z"
+    }
+  ]
+}

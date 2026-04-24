@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_9038a26f",
+  "saved_at": "2026-04-24T03:33:06.883Z",
+  "started_at": "2026-04-19T00:03:30.616Z",
+  "finished_at": "2026-04-19T00:03:30.629Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "internal_legal",
+    "name": "Анна Рихтер"
+  },
+  "signal_card": {
+    "id": "internal-legal-card-1",
+    "signal_type": "LEGAL_REVIEW_TRIGGER",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Добрый день, Анна. Mellow помогает с юридической документацией."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Добрый день, Анна. Mellow помогает с юридической документацией.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Добрый день, Анна. Mellow помогает с юридической документацией."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Возражения закрыты слабо или не дожаты.",
+        "evidence_quote": "Мы лучшее решение для legal.",
+        "objections": [
+          {
+            "objection": "Ок. Что именно Mellow даёт по documents, audit trail и process discipline, и где вы не делаете overclaim?",
+            "result": "partial"
+          },
+          {
+            "objection": "Пока недостаточно точности. Мне нужны формулировки про границы, документы и process safeguards, а не общие обещания.",
+            "result": "partial"
+          },
+          {
+            "objection": "Ок. Пришлите короткий memo: documents, audit trail, ограничения, процесс инцидента. Если это аккуратно, можно сделать короткий walkthrough.",
+            "result": "partial"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Созвон?"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Анна Рихтер. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-19T00:03:30.616Z"
+    },
+    {
+      "role": "seller",
+      "text": "Добрый день, Анна. Mellow помогает с юридической документацией.",
+      "ts": "2026-04-19T00:03:30.619Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Что именно Mellow даёт по documents, audit trail и process discipline, и где вы не делаете overclaim?",
+      "ts": "2026-04-19T00:03:30.619Z"
+    },
+    {
+      "role": "seller",
+      "text": "Мы лучшее решение для legal.",
+      "ts": "2026-04-19T00:03:30.622Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пока недостаточно точности. Мне нужны формулировки про границы, документы и process safeguards, а не общие обещания.",
+      "ts": "2026-04-19T00:03:30.622Z"
+    },
+    {
+      "role": "seller",
+      "text": "Созвон?",
+      "ts": "2026-04-19T00:03:30.625Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Пришлите короткий memo: documents, audit trail, ограничения, процесс инцидента. Если это аккуратно, можно сделать короткий walkthrough.",
+      "ts": "2026-04-19T00:03:30.626Z"
+    }
+  ]
+}

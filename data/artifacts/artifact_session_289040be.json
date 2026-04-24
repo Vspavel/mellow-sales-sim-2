@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_289040be",
+  "saved_at": "2026-04-24T03:33:06.884Z",
+  "started_at": "2026-04-19T00:03:30.531Z",
+  "finished_at": "2026-04-19T00:03:30.542Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "head_finance",
+    "name": "Елена Мартин"
+  },
+  "signal_card": {
+    "id": "head-finance-card-1",
+    "signal_type": "FINANCE_CONTROL_GAP",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Елена, 5 дней в месяц на ручную сверку — это время 2 finance сотрудников. Mellow закрывает этот разрыв."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Стоимость Mellow окупается через сокращение ручной работы и меньше вопросов от leadership. SLA и incident process — прозрачно.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Елена, 5 дней в месяц на ручную сверку — это время 2 finance сотрудников. Mellow закрывает этот разрыв."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Елена, 5 дней в месяц на ручную сверку — это время 2 finance сотрудников. Mellow закрывает этот разрыв.",
+        "objections": [
+          {
+            "objection": "Хорошо, контекст finance operations вы увидели. Что именно вы контролируете в цепочке, а что остаётся на стороне клиента?",
+            "result": "answered"
+          },
+          {
+            "objection": "Ок. А что я получаю кроме ещё одной прослойки? Мне нужны контроль и меньше ручной сверки, а не новый vendor ради vendor.",
+            "result": "answered"
+          },
+          {
+            "objection": "Ок. Скиньте коротко flow, SLA и как сокращается ручная сверка. Если это приземлённо, выделю слот на неделе.",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Скину расчёт. 20 минут?"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Елена Мартин. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-19T00:03:30.531Z"
+    },
+    {
+      "role": "seller",
+      "text": "Елена, 5 дней в месяц на ручную сверку — это время 2 finance сотрудников. Mellow закрывает этот разрыв.",
+      "ts": "2026-04-19T00:03:30.533Z"
+    },
+    {
+      "role": "bot",
+      "text": "Хорошо, контекст finance operations вы увидели. Что именно вы контролируете в цепочке, а что остаётся на стороне клиента?",
+      "ts": "2026-04-19T00:03:30.534Z"
+    },
+    {
+      "role": "seller",
+      "text": "Стоимость Mellow окупается через сокращение ручной работы и меньше вопросов от leadership. SLA и incident process — прозрачно.",
+      "ts": "2026-04-19T00:03:30.536Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. А что я получаю кроме ещё одной прослойки? Мне нужны контроль и меньше ручной сверки, а не новый vendor ради vendor.",
+      "ts": "2026-04-19T00:03:30.536Z"
+    },
+    {
+      "role": "seller",
+      "text": "Скину расчёт. 20 минут?",
+      "ts": "2026-04-19T00:03:30.539Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Скиньте коротко flow, SLA и как сокращается ручная сверка. Если это приземлённо, выделю слот на неделе.",
+      "ts": "2026-04-19T00:03:30.539Z"
+    }
+  ]
+}

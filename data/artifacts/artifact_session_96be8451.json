@@ -1,0 +1,102 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_96be8451",
+  "saved_at": "2026-04-24T03:33:06.879Z",
+  "started_at": "2026-04-19T01:24:52.363Z",
+  "finished_at": "2026-04-19T01:24:52.421Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "alexey",
+    "name": "Алексей Громов"
+  },
+  "signal_card": {
+    "id": "alexey-card-1",
+    "signal_type": "PAIN_SIGNAL",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "FAIL",
+    "verdict_label": "Нужна доработка",
+    "summary_for_seller": "Прогон рабочий, но доверие и next step пока держатся не на всех ключевых местах.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "Первое сообщение слишком общее и теряет контекст сигнала.",
+        "evidence_quote": "Привет, я из Mellow, мы помогаем компаниям с подрядчиками. Хотел бы рассказать подробнее.",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Нет ясной границы ответственности и конкретики по зоне контроля Mellow.",
+        "evidence_quote": "Mellow — лидер рынка в contractor management. Масштабируйтесь без проблем.",
+        "blocking": false,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Тон и подача не адаптированы под выбранную персону.",
+        "evidence_quote": "Привет, я из Mellow, мы помогаем компаниям с подрядчиками. Хотел бы рассказать подробнее.",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Возражения закрыты слабо или не дожаты.",
+        "evidence_quote": "Mellow — лидер рынка в contractor management. Масштабируйтесь без проблем.",
+        "objections": [
+          {
+            "objection": "Звучит как template. Что у нас конкретно зацепило?",
+            "result": "partial"
+          },
+          {
+            "objection": "Пока нет конкретики. Что именно быстрее, дешевле или проще?",
+            "result": "partial"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Разговор закончился без чёткого next step.",
+        "evidence_quote": "Mellow — лидер рынка в contractor management. Масштабируйтесь без проблем.",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Привет, я из Mellow, мы помогаем компаниям с подрядчиками. Хотел бы рассказать подробнее.",
+      "ts": "2026-04-19T01:24:52.400Z"
+    },
+    {
+      "role": "bot",
+      "text": "Звучит как template. Что у нас конкретно зацепило?",
+      "ts": "2026-04-19T01:24:52.400Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow — лидер рынка в contractor management. Масштабируйтесь без проблем.",
+      "ts": "2026-04-19T01:24:52.411Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пока нет конкретики. Что именно быстрее, дешевле или проще?",
+      "ts": "2026-04-19T01:24:52.411Z"
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_66da4237",
+  "saved_at": "2026-04-24T03:33:06.800Z",
+  "started_at": "2026-04-19T22:19:12.540Z",
+  "finished_at": "2026-04-19T22:19:12.599Z",
+  "seller_username": "auto-cycle",
+  "persona": {
+    "id": "eng_manager",
+    "name": "Марк Левин"
+  },
+  "signal_card": {
+    "id": "eng-manager-card-1",
+    "signal_type": "TEAM_SCALING",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Mark, I can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge. And if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Mark, I can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge. And if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Mark, I can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge. And if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Mark, I can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge. And if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?",
+        "objections": [
+          {
+            "objection": "Tired of being the middleman between finance and contractors. If this really removes manual escalations — what specifically gets removed and how much?",
+            "result": "answered"
+          },
+          {
+            "objection": "Too early. You haven't convinced me yet this isn't just another vendor.",
+            "result": "answered"
+          },
+          {
+            "objection": "Ok. Send me something I can bring to finance without a long internal pitch.",
+            "result": "answered"
+          },
+          {
+            "objection": "Waiting for the materials. When will you send them?",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Specifically what stops being manual: payment status follow-ups, exception handling, reconciliation. Auto-payments with real-time statuses replace the chat threads and spreadsheet updates.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Mark, I can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge. And if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?",
+      "ts": "2026-04-19T22:19:12.556Z"
+    },
+    {
+      "role": "bot",
+      "text": "Tired of being the middleman between finance and contractors. If this really removes manual escalations — what specifically gets removed and how much?",
+      "ts": "2026-04-19T22:19:12.556Z"
+    },
+    {
+      "role": "seller",
+      "text": "Specifically what stops being manual: payment status follow-ups, exception handling, reconciliation. Auto-payments with real-time statuses replace the chat threads and spreadsheet updates.",
+      "ts": "2026-04-19T22:19:12.564Z"
+    },
+    {
+      "role": "bot",
+      "text": "Too early. You haven't convinced me yet this isn't just another vendor.",
+      "ts": "2026-04-19T22:19:12.564Z"
+    },
+    {
+      "role": "seller",
+      "text": "Specifically what stops being manual: payment status follow-ups, exception handling, reconciliation. Auto-payments with real-time statuses replace the chat threads and spreadsheet updates.",
+      "ts": "2026-04-19T22:19:12.569Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok. Send me something I can bring to finance without a long internal pitch.",
+      "ts": "2026-04-19T22:19:12.569Z"
+    },
+    {
+      "role": "seller",
+      "text": "Specifically what stops being manual: payment status follow-ups, exception handling, reconciliation. Auto-payments with real-time statuses replace the chat threads and spreadsheet updates.",
+      "ts": "2026-04-19T22:19:12.578Z"
+    },
+    {
+      "role": "bot",
+      "text": "Waiting for the materials. When will you send them?",
+      "ts": "2026-04-19T22:19:12.578Z"
+    },
+    {
+      "role": "seller",
+      "text": "Specifically what stops being manual: payment status follow-ups, exception handling, reconciliation. Auto-payments with real-time statuses replace the chat threads and spreadsheet updates.",
+      "ts": "2026-04-19T22:19:12.586Z"
+    },
+    {
+      "role": "bot",
+      "text": "Agreed. Waiting for your email.",
+      "ts": "2026-04-19T22:19:12.588Z"
+    },
+    {
+      "role": "seller",
+      "text": "Specifically what stops being manual: payment status follow-ups, exception handling, reconciliation. Auto-payments with real-time statuses replace the chat threads and spreadsheet updates. What would take the most pain off your team specifically?",
+      "ts": "2026-04-19T22:19:12.593Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send it. If it's concrete — I'll respond.",
+      "ts": "2026-04-19T22:19:12.595Z"
+    }
+  ]
+}

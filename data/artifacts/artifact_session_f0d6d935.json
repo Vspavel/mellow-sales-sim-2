@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_f0d6d935",
+  "saved_at": "2026-04-24T03:33:06.869Z",
+  "started_at": "2026-04-19T03:03:21.816Z",
+  "finished_at": "2026-04-19T03:03:21.937Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "andrey",
+    "name": "Андрей Волков"
+  },
+  "signal_card": {
+    "id": "andrey-card-1",
+    "signal_type": "COMPLIANCE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Готово к следующему шагу",
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Видел ваш недавний legal review — Mellow может помочь с документацией и платёжной цепью.",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Видел ваш недавний legal review — Mellow может помочь с документацией и платёжной цепью.",
+        "blocking": false,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Мы контролируем KYC, документы и audit trail. Не берём на себя misclassification.",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Возражения закрыты слабо или не дожаты.",
+        "evidence_quote": "Мы контролируем KYC, документы и audit trail. Не берём на себя misclassification.",
+        "objections": [
+          {
+            "objection": "Ок. Чем быстрее объясните границу ответственности, тем быстрее станет понятно, есть ли разговор.",
+            "result": "partial"
+          },
+          {
+            "objection": "Допустим. Но у нас уже работает схема — не идеальная, но предсказуемая. Зачем менять?",
+            "result": "partial"
+          },
+          {
+            "objection": "Нормально. Скиньте flow, SLA и один конкретный кейс. Если без воды — найдём время.",
+            "result": "partial"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Видел ваш недавний legal review — Mellow может помочь с документацией и платёжной цепью.",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Видел ваш недавний legal review — Mellow может помочь с документацией и платёжной цепью.",
+      "ts": "2026-04-19T03:03:21.874Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Чем быстрее объясните границу ответственности, тем быстрее станет понятно, есть ли разговор.",
+      "ts": "2026-04-19T03:03:21.874Z"
+    },
+    {
+      "role": "seller",
+      "text": "Мы контролируем KYC, документы и audit trail. Не берём на себя misclassification.",
+      "ts": "2026-04-19T03:03:21.900Z"
+    },
+    {
+      "role": "bot",
+      "text": "Допустим. Но у нас уже работает схема — не идеальная, но предсказуемая. Зачем менять?",
+      "ts": "2026-04-19T03:03:21.901Z"
+    },
+    {
+      "role": "seller",
+      "text": "Предлагаю 20 минут созвона на неделе, пришлю расчёт заранее.",
+      "ts": "2026-04-19T03:03:21.923Z"
+    },
+    {
+      "role": "bot",
+      "text": "Нормально. Скиньте flow, SLA и один конкретный кейс. Если без воды — найдём время.",
+      "ts": "2026-04-19T03:03:21.923Z"
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_09b5d917",
+  "saved_at": "2026-04-24T03:33:05.976Z",
+  "started_at": "2026-04-20T03:10:00.156Z",
+  "finished_at": "2026-04-20T03:10:00.164Z",
+  "seller_username": "longrun_cycle_16",
+  "persona": {
+    "id": "eng_manager",
+    "name": "Марк Левин"
+  },
+  "signal_card": {
+    "id": "eng-manager-card-1",
+    "signal_type": "TEAM_SCALING",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Mark, Docklane has 15+ engineers in AM/GE/KZ and payment delays have already cost you time twice. Mellow takes the manual escalations off your plate: auto-payments, statuses without chat threads, a named owner when things break. Plus I can give you material for finance if you need to move it internally. What takes the most time in payment coordination right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Mellow's scope specifically: KYC, contractor documentation, payment chain, and audit trail on every transaction — on our side. What we don't take on: misclassification risk and strategic legal decisions — those stay with you. That's the line, without blurring it.",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Mark, Docklane has 15+ engineers in AM/GE/KZ and payment delays have already cost you time twice. Mellow takes the manual escalations off your plate: auto-payments, statuses without chat threads, a named owner when things break. Plus I can give you material for finance if you need to move it internally. What takes the most time in payment coordination right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Mark, Docklane has 15+ engineers in AM/GE/KZ and payment delays have already cost you time twice. Mellow takes the manual escalations off your plate: auto-payments, statuses without chat threads, a named owner when things break. Plus I can give you material for finance if you need to move it internally. What takes the most time in payment coordination right now?",
+        "objections": [
+          {
+            "objection": "You got the problem right. But I need to bring this to finance — how do you help me make that case?",
+            "result": "answered"
+          },
+          {
+            "objection": "This sounds like every other vendor pitch. What's concretely different — not in words, but in the mechanism?",
+            "result": "answered"
+          },
+          {
+            "objection": "I've tried similar vendors before. One promised the same and delivered nothing.",
+            "result": "answered"
+          },
+          {
+            "objection": "Fine. Send flow and specifically what escalations get handled automatically.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Mark, Docklane has 15+ engineers in AM/GE/KZ and payment delays have already cost you time twice. Mellow takes the manual escalations off your plate: auto-payments, statuses without chat threads, a named owner when things break. Plus I can give you material for finance if you need to move it internally. What takes the most time in payment coordination right now?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Mark, Docklane has 15+ engineers in AM/GE/KZ and payment delays have already cost you time twice. Mellow takes the manual escalations off your plate: auto-payments, statuses without chat threads, a named owner when things break. Plus I can give you material for finance if you need to move it internally. What takes the most time in payment coordination right now?",
+      "ts": "2026-04-20T03:10:00.157Z"
+    },
+    {
+      "role": "bot",
+      "text": "You got the problem right. But I need to bring this to finance — how do you help me make that case?",
+      "ts": "2026-04-20T03:10:00.157Z"
+    },
+    {
+      "role": "seller",
+      "text": "From your current setup, what is creating the most manual work right now?",
+      "ts": "2026-04-20T03:10:00.158Z"
+    },
+    {
+      "role": "bot",
+      "text": "This sounds like every other vendor pitch. What's concretely different — not in words, but in the mechanism?",
+      "ts": "2026-04-20T03:10:00.158Z"
+    },
+    {
+      "role": "seller",
+      "text": "undefined Which part of your process is eating the most time right now?",
+      "ts": "2026-04-20T03:10:00.159Z"
+    },
+    {
+      "role": "bot",
+      "text": "I've tried similar vendors before. One promised the same and delivered nothing.",
+      "ts": "2026-04-20T03:10:00.159Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow's scope specifically: KYC, contractor documentation, payment chain, and audit trail on every transaction — on our side. What we don't take on: misclassification risk and strategic legal decisions — those stay with you. That's the line, without blurring it.",
+      "ts": "2026-04-20T03:10:00.161Z"
+    },
+    {
+      "role": "bot",
+      "text": "Fine. Send flow and specifically what escalations get handled automatically.",
+      "ts": "2026-04-20T03:10:00.161Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow's scope specifically: KYC, contractor documentation, payment chain, and audit trail on every transaction — on our side. What we don't take on: misclassification risk and strategic legal decisions — those stay with you. That's the line, without blurring it.",
+      "ts": "2026-04-20T03:10:00.163Z"
+    },
+    {
+      "role": "bot",
+      "text": "Waiting for the materials. When will you send them?",
+      "ts": "2026-04-20T03:10:00.163Z"
+    }
+  ]
+}

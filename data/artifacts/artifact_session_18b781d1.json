@@ -1,0 +1,148 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_18b781d1",
+  "saved_at": "2026-04-24T03:33:05.134Z",
+  "started_at": "2026-04-20T07:49:36.849Z",
+  "finished_at": "2026-04-20T07:49:36.863Z",
+  "seller_username": "sdr_agent",
+  "persona": {
+    "id": "ops_manager",
+    "name": "Ирина Коваль"
+  },
+  "signal_card": {
+    "id": "ops-manager-card-1",
+    "signal_type": "OPERATIONS_OVERLOAD",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "email",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Subject: BlueMesa: Процесс больше не масштабируется руками.\n\nHi Ирина Коваль,\n\nIrina, I can see BlueMesa's contractor hiring is growing and ops is already falling behind on manual coordination. Mellow removes the manual layer: predictable payout flow, statuses without chats, less reconciliation.\n\nWhat breaks in the process most often?\n\nBest,\nPavel",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K6",
+        "name": "Email format",
+        "status": "PASS",
+        "short_reason": "Messages use correct email format: greeting and sign-off present.",
+        "evidence_quote": "Subject: BlueMesa: Процесс больше не масштабируется руками.\n\nHi Ирина Коваль,\n\nIrina, I can see BlueMesa's contractor hiring is growing and ops is already falling behind on manual coordination. Mellow removes the manual layer: predictable payout flow, statuses without chats, less reconciliation.\n\nWhat breaks in the process most often?\n\nBest,\nPavel",
+        "label": "Email format"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "No clear boundary of responsibility or specifics on Mellow's scope.",
+        "evidence_quote": "Hi Ирина Коваль,\n\nPricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing.\n\nWant me to send a rough calculation?\n\nBest,\nPavel",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Subject: BlueMesa: Процесс больше не масштабируется руками.\n\nHi Ирина Коваль,\n\nIrina, I can see BlueMesa's contractor hiring is growing and ops is already falling behind on manual coordination. Mellow removes the manual layer: predictable payout flow, statuses without chats, less reconciliation.\n\nWhat breaks in the process most often?\n\nBest,\nPavel",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Subject: BlueMesa: Процесс больше не масштабируется руками.\n\nHi Ирина Коваль,\n\nIrina, I can see BlueMesa's contractor hiring is growing and ops is already falling behind on manual coordination. Mellow removes the manual layer: predictable payout flow, statuses without chats, less reconciliation.\n\nWhat breaks in the process most often?\n\nBest,\nPavel",
+        "objections": [
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. The current setup is slow but I own it. Switching has a cost too.\n\nBest,\nИрина",
+            "result": "answered"
+          },
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. Wait. I still don't understand how to bring this to finance.\n\nBest,\nИрина",
+            "result": "answered"
+          },
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. Send me one screen with the flow and what specifically stops being manual. If it's real, we can talk.\n\nBest,\nИрина",
+            "result": "answered"
+          },
+          {
+            "objection": "Sdr_agent,\n\nThanks for reaching out. Agreed. Waiting for your email.\n\nBest,\nИрина",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Hi Ирина Коваль,\n\nPricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing.\n\nWant me to send a rough calculation? Which part of your process is eating the most time right now?\n\nBest,\nPavel",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Subject: BlueMesa: Процесс больше не масштабируется руками.\n\nHi Ирина Коваль,\n\nIrina, I can see BlueMesa's contractor hiring is growing and ops is already falling behind on manual coordination. Mellow removes the manual layer: predictable payout flow, statuses without chats, less reconciliation.\n\nWhat breaks in the process most often?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.851Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. The current setup is slow but I own it. Switching has a cost too.\n\nBest,\nИрина",
+      "ts": "2026-04-20T07:49:36.851Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Ирина Коваль,\n\nPricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing.\n\nWant me to send a rough calculation?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.853Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. Wait. I still don't understand how to bring this to finance.\n\nBest,\nИрина",
+      "ts": "2026-04-20T07:49:36.853Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Ирина Коваль,\n\nPricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing.\n\nWant me to send a rough calculation?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.855Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. Send me one screen with the flow and what specifically stops being manual. If it's real, we can talk.\n\nBest,\nИрина",
+      "ts": "2026-04-20T07:49:36.855Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Ирина Коваль,\n\nPricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing.\n\nWant me to send a rough calculation?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.857Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. Agreed. Waiting for your email.\n\nBest,\nИрина",
+      "ts": "2026-04-20T07:49:36.857Z"
+    },
+    {
+      "role": "seller",
+      "text": "Hi Ирина Коваль,\n\nPricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing.\n\nWant me to send a rough calculation? Which part of your process is eating the most time right now?\n\nBest,\nPavel",
+      "ts": "2026-04-20T07:49:36.860Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sdr_agent,\n\nThanks for reaching out. Send it. If it's concrete — I'll respond.\n\nBest,\nИрина",
+      "ts": "2026-04-20T07:49:36.860Z"
+    }
+  ]
+}

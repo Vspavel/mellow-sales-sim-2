@@ -1,0 +1,88 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_1acfd86f",
+  "saved_at": "2026-04-24T03:33:06.912Z",
+  "started_at": "2026-04-18T18:57:50.504Z",
+  "finished_at": "2026-04-18T18:57:50.538Z",
+  "seller_username": "verify",
+  "persona": {
+    "id": "andrey",
+    "name": "Андрей Волков"
+  },
+  "signal_card": {
+    "id": "andrey-card-1",
+    "signal_type": "COMPLIANCE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "FAIL",
+    "verdict_label": null,
+    "summary_for_seller": "Прогон рабочий, но доверие и next step пока держатся не на всех ключевых местах.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Андрей, увидел у вас зависший на 23 дня платёж и upcoming legal review. Обычно в такой точке CFO хочет быстро понять, где заканчивается ручная сверка и начинается управляемый поток."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Нет ясной границы ответственности и конкретики по зоне контроля Mellow.",
+        "evidence_quote": "Андрей, увидел у вас зависший на 23 дня платёж и upcoming legal review. Обычно в такой точке CFO хочет быстро понять, где заканчивается ручная сверка и начинается управляемый поток.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Тон и подача не адаптированы под выбранную персону.",
+        "evidence_quote": "Андрей, увидел у вас зависший на 23 дня платёж и upcoming legal review. Обычно в такой точке CFO хочет быстро понять, где заканчивается ручная сверка и начинается управляемый поток."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Возражения закрыты слабо или не дожаты.",
+        "evidence_quote": "Андрей, увидел у вас зависший на 23 дня платёж и upcoming legal review. Обычно в такой точке CFO хочет быстро понять, где заканчивается ручная сверка и начинается управляемый поток.",
+        "objections": [
+          {
+            "objection": "Ок, контекст вы хотя бы увидели. Тогда сразу: что именно Mellow контролирует, а где ваша ответственность заканчивается?",
+            "result": "partial"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Разговор закончился без чёткого next step.",
+        "evidence_quote": "Андрей, увидел у вас зависший на 23 дня платёж и upcoming legal review. Обычно в такой точке CFO хочет быстро понять, где заканчивается ручная сверка и начинается управляемый поток."
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Андрей Волков. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-18T18:57:50.504Z"
+    },
+    {
+      "role": "seller",
+      "text": "Андрей, увидел у вас зависший на 23 дня платёж и upcoming legal review. Обычно в такой точке CFO хочет быстро понять, где заканчивается ручная сверка и начинается управляемый поток.",
+      "ts": "2026-04-18T18:57:50.523Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок, контекст вы хотя бы увидели. Тогда сразу: что именно Mellow контролирует, а где ваша ответственность заканчивается?",
+      "ts": "2026-04-18T18:57:50.523Z"
+    }
+  ]
+}

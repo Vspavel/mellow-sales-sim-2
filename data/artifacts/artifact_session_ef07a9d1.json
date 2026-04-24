@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_ef07a9d1",
+  "saved_at": "2026-04-24T03:33:05.210Z",
+  "started_at": "2026-04-20T03:12:21.393Z",
+  "finished_at": "2026-04-20T03:12:21.406Z",
+  "seller_username": "longrun_cycle_28",
+  "persona": {
+    "id": "internal_legal",
+    "name": "Анна Рихтер"
+  },
+  "signal_card": {
+    "id": "internal-legal-card-2",
+    "signal_type": "OUTSIDE_COUNSEL_CHECK",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Anna, I see SynthPort is rebuilding contractor documentation and wants to reduce grey zones between ops, finance, and intermediaries. Mellow takes a concrete zone: KYC, documents, payment chain — with an audit trail and a clear boundary on what's ours and what's the client's. No overclaiming. Does this speak to what you're working on?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Anna, I see SynthPort is rebuilding contractor documentation and wants to reduce grey zones between ops, finance, and intermediaries. Mellow takes a concrete zone: KYC, documents, payment chain — with an audit trail and a clear boundary on what's ours and what's the client's. No overclaiming. Does this speak to what you're working on?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Anna, I see SynthPort is rebuilding contractor documentation and wants to reduce grey zones between ops, finance, and intermediaries. Mellow takes a concrete zone: KYC, documents, payment chain — with an audit trail and a clear boundary on what's ours and what's the client's. No overclaiming. Does this speak to what you're working on?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Anna, I see SynthPort is rebuilding contractor documentation and wants to reduce grey zones between ops, finance, and intermediaries. Mellow takes a concrete zone: KYC, documents, payment chain — with an audit trail and a clear boundary on what's ours and what's the client's. No overclaiming. Does this speak to what you're working on?",
+        "objections": [
+          {
+            "objection": "Context is visible. Then directly: documents, audit trail, responsibility boundaries — what's exactly in your scope?",
+            "result": "answered"
+          },
+          {
+            "objection": "That's the right framing. But I need to understand how it works in practice — documents, trail, incident path. Без overclaim.",
+            "result": "answered"
+          },
+          {
+            "objection": "Good. But 'clean scope' and 'audit trail' need to be demonstrated, not described.",
+            "result": "answered"
+          },
+          {
+            "objection": "The words sound right. But I need to see the process, not just hear the formulations. Без overclaim.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else needs to be clarified before the next step?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Anna, I see SynthPort is rebuilding contractor documentation and wants to reduce grey zones between ops, finance, and intermediaries. Mellow takes a concrete zone: KYC, documents, payment chain — with an audit trail and a clear boundary on what's ours and what's the client's. No overclaiming. Does this speak to what you're working on?",
+      "ts": "2026-04-20T03:12:21.395Z"
+    },
+    {
+      "role": "bot",
+      "text": "Context is visible. Then directly: documents, audit trail, responsibility boundaries — what's exactly in your scope?",
+      "ts": "2026-04-20T03:12:21.395Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-20T03:12:21.396Z"
+    },
+    {
+      "role": "bot",
+      "text": "That's the right framing. But I need to understand how it works in practice — documents, trail, incident path. Без overclaim.",
+      "ts": "2026-04-20T03:12:21.396Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-20T03:12:21.398Z"
+    },
+    {
+      "role": "bot",
+      "text": "Good. But 'clean scope' and 'audit trail' need to be demonstrated, not described.",
+      "ts": "2026-04-20T03:12:21.398Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else needs to be clarified before the next step?",
+      "ts": "2026-04-20T03:12:21.400Z"
+    },
+    {
+      "role": "bot",
+      "text": "The words sound right. But I need to see the process, not just hear the formulations. Без overclaim.",
+      "ts": "2026-04-20T03:12:21.400Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else needs to be clarified before the next step?",
+      "ts": "2026-04-20T03:12:21.401Z"
+    },
+    {
+      "role": "bot",
+      "text": "That's the right framing. But I need to understand how it works in practice — documents, trail, incident path. Без overclaim.",
+      "ts": "2026-04-20T03:12:21.401Z"
+    }
+  ]
+}

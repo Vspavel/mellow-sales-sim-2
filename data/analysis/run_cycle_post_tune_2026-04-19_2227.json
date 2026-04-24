@@ -1,0 +1,1352 @@
+[
+  {
+    "persona_id": "andrey",
+    "session_id": "session_cf1ed902",
+    "card": "andrey-card-1",
+    "seed": "analytical",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "andrey",
+    "session_id": "session_674345af",
+    "card": "andrey-card-2",
+    "seed": "risk-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "andrey",
+    "session_id": "session_1b1e13ee",
+    "card": "andrey-card-2",
+    "seed": "deal-weary",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "andrey",
+    "session_id": "session_8a190a9c",
+    "card": "andrey-card-2",
+    "seed": "risk-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "andrey",
+    "session_id": "session_d67d0b79",
+    "card": "andrey-card-2",
+    "seed": "risk-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "andrey",
+    "session_id": "session_dcf73a47",
+    "card": "andrey-card-2",
+    "seed": "deal-weary",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "andrey",
+    "session_id": "session_8e948ec9",
+    "card": "andrey-card-1",
+    "seed": "deal-weary",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "andrey",
+    "session_id": "session_791f735a",
+    "card": "andrey-card-1",
+    "seed": "analytical",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "andrey",
+    "session_id": "session_fabed2be",
+    "card": "andrey-card-2",
+    "seed": "deal-weary",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "andrey",
+    "session_id": "session_4f24af77",
+    "card": "andrey-card-1",
+    "seed": "deal-weary",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "alexey",
+    "session_id": "session_21b5b8b0",
+    "card": "alexey-card-2",
+    "seed": "exec-compressed",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "alexey",
+    "session_id": "session_f66e887c",
+    "card": "alexey-card-2",
+    "seed": "semi-open",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "alexey",
+    "session_id": "session_87122017",
+    "card": "alexey-card-2",
+    "seed": "semi-open",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "alexey",
+    "session_id": "session_9a078f56",
+    "card": "alexey-card-1",
+    "seed": "pragmatist",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "alexey",
+    "session_id": "session_32524125",
+    "card": "alexey-card-1",
+    "seed": "pragmatist",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "alexey",
+    "session_id": "session_a0216ab2",
+    "card": "alexey-card-2",
+    "seed": "pragmatist",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "alexey",
+    "session_id": "session_b3219904",
+    "card": "alexey-card-2",
+    "seed": "pragmatist",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "alexey",
+    "session_id": "session_5373559a",
+    "card": "alexey-card-2",
+    "seed": "exec-compressed",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "alexey",
+    "session_id": "session_777245ad",
+    "card": "alexey-card-1",
+    "seed": "speed-freak",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "alexey",
+    "session_id": "session_eef67c23",
+    "card": "alexey-card-1",
+    "seed": "semi-open",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "cfo_round",
+    "session_id": "session_3475c1ff",
+    "card": "cfo-round-card-1",
+    "seed": "process-risk",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "cfo_round",
+    "session_id": "session_5a2f4036",
+    "card": "cfo-round-card-2",
+    "seed": "diligence-focused",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "cfo_round",
+    "session_id": "session_446a1d84",
+    "card": "cfo-round-card-1",
+    "seed": "cautious-timing",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "cfo_round",
+    "session_id": "session_a31d891a",
+    "card": "cfo-round-card-2",
+    "seed": "process-risk",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "cfo_round",
+    "session_id": "session_0c9b0d16",
+    "card": "cfo-round-card-1",
+    "seed": "investor-aware",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "cfo_round",
+    "session_id": "session_270272e1",
+    "card": "cfo-round-card-2",
+    "seed": "diligence-focused",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "cfo_round",
+    "session_id": "session_47b1ad38",
+    "card": "cfo-round-card-2",
+    "seed": "cautious-timing",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "cfo_round",
+    "session_id": "session_6e0a83c9",
+    "card": "cfo-round-card-1",
+    "seed": "cautious-timing",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "cfo_round",
+    "session_id": "session_525b1c07",
+    "card": "cfo-round-card-1",
+    "seed": "cautious-timing",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "cfo_round",
+    "session_id": "session_74cdba43",
+    "card": "cfo-round-card-2",
+    "seed": "cautious-timing",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "eng_manager",
+    "session_id": "session_f2d33eed",
+    "card": "eng-manager-card-1",
+    "seed": "champion-potential",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "eng_manager",
+    "session_id": "session_8247203e",
+    "card": "eng-manager-card-1",
+    "seed": "champion-potential",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "eng_manager",
+    "session_id": "session_f400018e",
+    "card": "eng-manager-card-1",
+    "seed": "skeptical-vendor",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "eng_manager",
+    "session_id": "session_a052a453",
+    "card": "eng-manager-card-1",
+    "seed": "bridge-seeker",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "eng_manager",
+    "session_id": "session_188fa304",
+    "card": "eng-manager-card-1",
+    "seed": "champion-potential",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "eng_manager",
+    "session_id": "session_5fb24cb3",
+    "card": "eng-manager-card-1",
+    "seed": "tired-escalator",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "eng_manager",
+    "session_id": "session_5d0b43ef",
+    "card": "eng-manager-card-1",
+    "seed": "champion-potential",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "eng_manager",
+    "session_id": "session_8a602fe7",
+    "card": "eng-manager-card-1",
+    "seed": "tired-escalator",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "eng_manager",
+    "session_id": "session_f25b559c",
+    "card": "eng-manager-card-1",
+    "seed": "bridge-seeker",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "eng_manager",
+    "session_id": "session_1b55ca81",
+    "card": "eng-manager-card-1",
+    "seed": "bridge-seeker",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "ops_manager",
+    "session_id": "session_bb7fa101",
+    "card": "ops-manager-card-2",
+    "seed": "process-fatigued",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "ops_manager",
+    "session_id": "session_706b6931",
+    "card": "ops-manager-card-1",
+    "seed": "process-fatigued",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "ops_manager",
+    "session_id": "session_f9a83e7c",
+    "card": "ops-manager-card-2",
+    "seed": "chaos-averse",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "ops_manager",
+    "session_id": "session_dae49d6c",
+    "card": "ops-manager-card-2",
+    "seed": "chaos-averse",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "ops_manager",
+    "session_id": "session_0795156e",
+    "card": "ops-manager-card-2",
+    "seed": "process-fatigued",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "ops_manager",
+    "session_id": "session_533276d6",
+    "card": "ops-manager-card-1",
+    "seed": "chaos-averse",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "ops_manager",
+    "session_id": "session_fe3bab81",
+    "card": "ops-manager-card-1",
+    "seed": "chaos-averse",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "ops_manager",
+    "session_id": "session_7adf2ac4",
+    "card": "ops-manager-card-1",
+    "seed": "process-fatigued",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "ops_manager",
+    "session_id": "session_b2fe19a0",
+    "card": "ops-manager-card-2",
+    "seed": "chaos-averse",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "ops_manager",
+    "session_id": "session_2a0bff3b",
+    "card": "ops-manager-card-1",
+    "seed": "process-fatigued",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "FAIL",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "head_finance",
+    "session_id": "session_cef13637",
+    "card": "head-finance-card-1",
+    "seed": "control-seeker",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "head_finance",
+    "session_id": "session_56b10b4c",
+    "card": "head-finance-card-2",
+    "seed": "control-seeker",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "head_finance",
+    "session_id": "session_1c9fa5ff",
+    "card": "head-finance-card-2",
+    "seed": "explainability-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "head_finance",
+    "session_id": "session_f55b91d8",
+    "card": "head-finance-card-2",
+    "seed": "audit-focused",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "head_finance",
+    "session_id": "session_d784e43d",
+    "card": "head-finance-card-1",
+    "seed": "control-seeker",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "head_finance",
+    "session_id": "session_593224e2",
+    "card": "head-finance-card-2",
+    "seed": "reporting-pressure",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "head_finance",
+    "session_id": "session_0b660302",
+    "card": "head-finance-card-2",
+    "seed": "audit-focused",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "head_finance",
+    "session_id": "session_452a85a4",
+    "card": "head-finance-card-2",
+    "seed": "reporting-pressure",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "head_finance",
+    "session_id": "session_54a3004d",
+    "card": "head-finance-card-1",
+    "seed": "audit-focused",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "head_finance",
+    "session_id": "session_a3ad7b4b",
+    "card": "head-finance-card-2",
+    "seed": "explainability-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "internal_legal",
+    "session_id": "session_c5691489",
+    "card": "internal-legal-card-1",
+    "seed": "overclaim-allergic",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "internal_legal",
+    "session_id": "session_e9132fea",
+    "card": "internal-legal-card-2",
+    "seed": "methodical",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "internal_legal",
+    "session_id": "session_6bf8490d",
+    "card": "internal-legal-card-2",
+    "seed": "methodical",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "internal_legal",
+    "session_id": "session_4f76cffb",
+    "card": "internal-legal-card-2",
+    "seed": "precision-seeker",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "internal_legal",
+    "session_id": "session_b2eab35d",
+    "card": "internal-legal-card-1",
+    "seed": "precision-seeker",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "internal_legal",
+    "session_id": "session_cad037ef",
+    "card": "internal-legal-card-2",
+    "seed": "overclaim-allergic",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "internal_legal",
+    "session_id": "session_ee05fed9",
+    "card": "internal-legal-card-1",
+    "seed": "methodical",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "internal_legal",
+    "session_id": "session_51665908",
+    "card": "internal-legal-card-2",
+    "seed": "grey-zone-fatigued",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "internal_legal",
+    "session_id": "session_c98e940b",
+    "card": "internal-legal-card-1",
+    "seed": "overclaim-allergic",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "internal_legal",
+    "session_id": "session_d647e4ea",
+    "card": "internal-legal-card-2",
+    "seed": "precision-seeker",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "external_legal",
+    "session_id": "session_819a38db",
+    "card": "external-legal-card-1",
+    "seed": "defensibility-focused",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "external_legal",
+    "session_id": "session_cbf06745",
+    "card": "external-legal-card-1",
+    "seed": "evidence-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "external_legal",
+    "session_id": "session_c29d18d1",
+    "card": "external-legal-card-1",
+    "seed": "deeply-skeptical",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "external_legal",
+    "session_id": "session_8cb87097",
+    "card": "external-legal-card-1",
+    "seed": "defensibility-focused",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "external_legal",
+    "session_id": "session_4cc82c19",
+    "card": "external-legal-card-1",
+    "seed": "evidence-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "external_legal",
+    "session_id": "session_cee3f2c9",
+    "card": "external-legal-card-1",
+    "seed": "rapid-assessor",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "external_legal",
+    "session_id": "session_06ba6eb8",
+    "card": "external-legal-card-1",
+    "seed": "deeply-skeptical",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "external_legal",
+    "session_id": "session_0182ccf5",
+    "card": "external-legal-card-1",
+    "seed": "evidence-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "external_legal",
+    "session_id": "session_f7489ec6",
+    "card": "external-legal-card-1",
+    "seed": "deeply-skeptical",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "external_legal",
+    "session_id": "session_33d33824",
+    "card": "external-legal-card-1",
+    "seed": "evidence-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "PASS",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "olga",
+    "session_id": "session_2223d749",
+    "card": "olga-card-1",
+    "seed": "tight-wording",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "FAIL",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "olga",
+    "session_id": "session_0c92a373",
+    "card": "olga-card-1",
+    "seed": "evidence-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "FAIL",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "olga",
+    "session_id": "session_2f983fb0",
+    "card": "olga-card-1",
+    "seed": "tight-wording",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "FAIL",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "olga",
+    "session_id": "session_bb7287a2",
+    "card": "olga-card-1",
+    "seed": "outside-counsel",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "FAIL",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "olga",
+    "session_id": "session_34580380",
+    "card": "olga-card-1",
+    "seed": "evidence-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "FAIL",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "olga",
+    "session_id": "session_0d7622b5",
+    "card": "olga-card-1",
+    "seed": "evidence-first",
+    "verdict": "PASS_WITH_NOTES",
+    "criteria": {
+      "K1": "FAIL",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "FAIL"
+    },
+    "summary": "Workable run, but trust and next step are not landing on all key points yet."
+  },
+  {
+    "persona_id": "olga",
+    "session_id": "session_eae3c9dc",
+    "card": "olga-card-1",
+    "seed": "outside-counsel",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "FAIL",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "olga",
+    "session_id": "session_5526aaa9",
+    "card": "olga-card-1",
+    "seed": "evidence-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "FAIL",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "olga",
+    "session_id": "session_72faca21",
+    "card": "olga-card-1",
+    "seed": "evidence-first",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "FAIL",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  },
+  {
+    "persona_id": "olga",
+    "session_id": "session_856bf12e",
+    "card": "olga-card-1",
+    "seed": "outside-counsel",
+    "verdict": "PASS",
+    "criteria": {
+      "K1": "FAIL",
+      "K2": "PASS",
+      "K3": "PASS",
+      "K4": "PASS",
+      "K5": "PASS"
+    },
+    "summary": "Good run: you held context, answered on-point, and brought the conversation to a next step."
+  }
+]

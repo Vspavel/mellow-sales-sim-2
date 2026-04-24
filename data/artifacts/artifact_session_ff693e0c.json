@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_ff693e0c",
+  "saved_at": "2026-04-24T03:33:06.893Z",
+  "started_at": "2026-04-19T00:03:29.506Z",
+  "finished_at": "2026-04-19T00:03:29.528Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "andrey",
+    "name": "Андрей Волков"
+  },
+  "signal_card": {
+    "id": "andrey-card-1",
+    "signal_type": "COMPLIANCE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Андрей, перед legal review — contractor payments через Wise/Payoneer и посредника создают серые зоны в audit trail. Mellow даёт единую документальную цепь и KYC без ручных исключений. Зону ответственности не расширяем."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Андрей, перед legal review — contractor payments через Wise/Payoneer и посредника создают серые зоны в audit trail. Mellow даёт единую документальную цепь и KYC без ручных исключений. Зону ответственности не расширяем.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Андрей, перед legal review — contractor payments через Wise/Payoneer и посредника создают серые зоны в audit trail. Mellow даёт единую документальную цепь и KYC без ручных исключений. Зону ответственности не расширяем."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Андрей, перед legal review — contractor payments через Wise/Payoneer и посредника создают серые зоны в audit trail. Mellow даёт единую документальную цепь и KYC без ручных исключений. Зону ответственности не расширяем.",
+        "objections": [
+          {
+            "objection": "Ок, контекст вы хотя бы увидели. Тогда сразу: что именно Mellow контролирует, а где ваша ответственность заканчивается?",
+            "result": "answered"
+          },
+          {
+            "objection": "Это уже ближе к делу. Но зачем мне менять текущего посредника, если схема пусть криво, но работает годами?",
+            "result": "answered"
+          },
+          {
+            "objection": "И отдельно, как вы работаете с НДФЛ и выплатами по людям с российским паспортом? Мне нужна граница, а не витрина.",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Андрей, перед legal review — contractor payments через Wise/Payoneer и посредника создают серые зоны в audit trail. Mellow даёт единую документальную цепь и KYC без ручных исключений. Зону ответственности не расширяем."
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Андрей Волков. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-19T00:03:29.506Z"
+    },
+    {
+      "role": "seller",
+      "text": "Андрей, перед legal review — contractor payments через Wise/Payoneer и посредника создают серые зоны в audit trail. Mellow даёт единую документальную цепь и KYC без ручных исключений. Зону ответственности не расширяем.",
+      "ts": "2026-04-19T00:03:29.511Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок, контекст вы хотя бы увидели. Тогда сразу: что именно Mellow контролирует, а где ваша ответственность заканчивается?",
+      "ts": "2026-04-19T00:03:29.511Z"
+    },
+    {
+      "role": "seller",
+      "text": "Документы: NDA, SoW, invoice matching — всё под одним flow. KYC на стороне Mellow. Налоги — клиент. НДФЛ по РФ паспортам — я готов объяснить структуру детально. Есть вопросы по цепи?",
+      "ts": "2026-04-19T00:03:29.514Z"
+    },
+    {
+      "role": "bot",
+      "text": "Это уже ближе к делу. Но зачем мне менять текущего посредника, если схема пусть криво, но работает годами?",
+      "ts": "2026-04-19T00:03:29.514Z"
+    },
+    {
+      "role": "seller",
+      "text": "SLA 3 дня, инцидентная эскалация прописана. Могу скинуть memo с примером потока и зонами ответственности. Выделите 20 минут на неделе?",
+      "ts": "2026-04-19T00:03:29.522Z"
+    },
+    {
+      "role": "bot",
+      "text": "И отдельно, как вы работаете с НДФЛ и выплатами по людям с российским паспортом? Мне нужна граница, а не витрина.",
+      "ts": "2026-04-19T00:03:29.522Z"
+    }
+  ]
+}

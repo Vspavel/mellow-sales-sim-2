@@ -1,0 +1,88 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_0b1311ac",
+  "saved_at": "2026-04-24T03:33:06.912Z",
+  "started_at": "2026-04-18T18:53:10.591Z",
+  "finished_at": "2026-04-18T18:53:10.773Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "andrey",
+    "name": "Андрей Волков"
+  },
+  "signal_card": {
+    "id": "andrey-card-1",
+    "signal_type": "COMPLIANCE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Андрей, увидел у вас перед external legal review всплыла ручная сверка выплат подрядчикам и был зависший платёж. Мы в Mellow обычно помогаем собрать contractor docs, payout flow и audit trail в одну управляемую схему, без обещаний magic compliance. Есть смысл созвониться на 15 минут и посмотреть, где у вас сейчас самый хрупкий участок?"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Андрей, увидел у вас перед external legal review всплыла ручная сверка выплат подрядчикам и был зависший платёж. Мы в Mellow обычно помогаем собрать contractor docs, payout flow и audit trail в одну управляемую схему, без обещаний magic compliance. Есть смысл созвониться на 15 минут и посмотреть, где у вас сейчас самый хрупкий участок?",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Тон и подача не адаптированы под выбранную персону.",
+        "evidence_quote": "Андрей, увидел у вас перед external legal review всплыла ручная сверка выплат подрядчикам и был зависший платёж. Мы в Mellow обычно помогаем собрать contractor docs, payout flow и audit trail в одну управляемую схему, без обещаний magic compliance. Есть смысл созвониться на 15 минут и посмотреть, где у вас сейчас самый хрупкий участок?"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Андрей, увидел у вас перед external legal review всплыла ручная сверка выплат подрядчикам и был зависший платёж. Мы в Mellow обычно помогаем собрать contractor docs, payout flow и audit trail в одну управляемую схему, без обещаний magic compliance. Есть смысл созвониться на 15 минут и посмотреть, где у вас сейчас самый хрупкий участок?",
+        "objections": [
+          {
+            "objection": "Ок, контекст вы хотя бы увидели. Тогда сразу: что именно Mellow контролирует, а где ваша ответственность заканчивается?",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Андрей, увидел у вас перед external legal review всплыла ручная сверка выплат подрядчикам и был зависший платёж. Мы в Mellow обычно помогаем собрать contractor docs, payout flow и audit trail в одну управляемую схему, без обещаний magic compliance. Есть смысл созвониться на 15 минут и посмотреть, где у вас сейчас самый хрупкий участок?"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Андрей Волков. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-18T18:53:10.591Z"
+    },
+    {
+      "role": "seller",
+      "text": "Андрей, увидел у вас перед external legal review всплыла ручная сверка выплат подрядчикам и был зависший платёж. Мы в Mellow обычно помогаем собрать contractor docs, payout flow и audit trail в одну управляемую схему, без обещаний magic compliance. Есть смысл созвониться на 15 минут и посмотреть, где у вас сейчас самый хрупкий участок?",
+      "ts": "2026-04-18T18:53:10.715Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок, контекст вы хотя бы увидели. Тогда сразу: что именно Mellow контролирует, а где ваша ответственность заканчивается?",
+      "ts": "2026-04-18T18:53:10.715Z"
+    }
+  ]
+}

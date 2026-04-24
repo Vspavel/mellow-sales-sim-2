@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_d4966df0",
+  "saved_at": "2026-04-24T03:33:06.880Z",
+  "started_at": "2026-04-19T00:03:31.001Z",
+  "finished_at": "2026-04-19T00:03:31.023Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "external_legal",
+    "name": "Давид Шмидт"
+  },
+  "signal_card": {
+    "id": "external-legal-card-1",
+    "signal_type": "OUTSIDE_COUNSEL_CHECK",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "FAIL",
+    "verdict_label": null,
+    "summary_for_seller": "Прогон рабочий, но доверие и next step пока держатся не на всех ключевых местах.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Давид, очень рад познакомиться! У нас отличные отзывы от external counsel по всей Европе."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Нет ясной границы ответственности и конкретики по зоне контроля Mellow.",
+        "evidence_quote": "Наши клиенты очень довольны надёжностью.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Тон и подача не адаптированы под выбранную персону.",
+        "evidence_quote": "Давид, очень рад познакомиться! У нас отличные отзывы от external counsel по всей Европе."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Возражения закрыты слабо или не дожаты.",
+        "evidence_quote": "Наши клиенты очень довольны надёжностью.",
+        "objections": [
+          {
+            "objection": "Пока звучит как vendor pitch. Что именно вы увидели в legal context и как формулируете свою зону контроля?",
+            "result": "partial"
+          },
+          {
+            "objection": "Пока недостаточно точности. Мне нужны формулировки про границы, документы и process safeguards, а не общие обещания.",
+            "result": "partial"
+          },
+          {
+            "objection": "Пока недостаточно точности. Мне нужны формулировки про границы, документы и process safeguards, а не общие обещания.",
+            "result": "partial"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Разговор закончился без чёткого next step.",
+        "evidence_quote": "Хотите демо?"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Давид Шмидт. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-19T00:03:31.001Z"
+    },
+    {
+      "role": "seller",
+      "text": "Давид, очень рад познакомиться! У нас отличные отзывы от external counsel по всей Европе.",
+      "ts": "2026-04-19T00:03:31.011Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пока звучит как vendor pitch. Что именно вы увидели в legal context и как формулируете свою зону контроля?",
+      "ts": "2026-04-19T00:03:31.011Z"
+    },
+    {
+      "role": "seller",
+      "text": "Наши клиенты очень довольны надёжностью.",
+      "ts": "2026-04-19T00:03:31.015Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пока недостаточно точности. Мне нужны формулировки про границы, документы и process safeguards, а не общие обещания.",
+      "ts": "2026-04-19T00:03:31.015Z"
+    },
+    {
+      "role": "seller",
+      "text": "Хотите демо?",
+      "ts": "2026-04-19T00:03:31.020Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пока недостаточно точности. Мне нужны формулировки про границы, документы и process safeguards, а не общие обещания.",
+      "ts": "2026-04-19T00:03:31.020Z"
+    }
+  ]
+}

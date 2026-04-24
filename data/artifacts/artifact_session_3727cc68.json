@@ -1,0 +1,226 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_3727cc68",
+  "saved_at": "2026-04-24T03:33:04.980Z",
+  "started_at": "2026-04-23T08:23:14.997Z",
+  "finished_at": "2026-04-23T08:23:18.405Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "direct_contract_transition",
+    "name": "Екатерина Левина"
+  },
+  "signal_card": {
+    "id": "direct-contract-transition-card-1",
+    "signal_type": "WORKFORCE_MIX_CHANGE",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "objections": [
+          {
+            "objection": "Ok but crypto + Wise has worked for two years. Why do I need this specifically now?",
+            "result": "answered"
+          },
+          {
+            "objection": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+            "result": "answered"
+          },
+          {
+            "objection": "Fine. Send a brief: what disappears from manual, case study, rough numbers. If it's concrete — we'll schedule 20 minutes.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+      "ts": "2026-04-23T08:23:15.106Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok but crypto + Wise has worked for two years. Why do I need this specifically now?",
+      "ts": "2026-04-23T08:23:15.107Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:23:15.319Z"
+    },
+    {
+      "role": "bot",
+      "text": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+      "ts": "2026-04-23T08:23:15.319Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? Which part of your process is eating the most time right now?",
+      "ts": "2026-04-23T08:23:15.542Z"
+    },
+    {
+      "role": "bot",
+      "text": "Fine. Send a brief: what disappears from manual, case study, rough numbers. If it's concrete — we'll schedule 20 minutes.",
+      "ts": "2026-04-23T08:23:15.542Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-23T08:23:15.783Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:23:15.784Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+      "ts": "2026-04-23T08:23:16.058Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:23:16.058Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+      "ts": "2026-04-23T08:23:16.268Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:23:16.268Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+      "ts": "2026-04-23T08:23:16.491Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:23:16.492Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-23T08:23:16.727Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:23:16.727Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:23:16.956Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:23:16.956Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-23T08:23:17.209Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:23:17.209Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:23:17.477Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:23:17.477Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+      "ts": "2026-04-23T08:23:17.721Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:23:17.722Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:23:17.985Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:23:17.986Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:23:18.263Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:23:18.263Z"
+    }
+  ]
+}

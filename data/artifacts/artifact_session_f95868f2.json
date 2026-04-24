@@ -1,0 +1,150 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_f95868f2",
+  "saved_at": "2026-04-24T03:33:06.809Z",
+  "started_at": "2026-04-19T08:27:55.398Z",
+  "finished_at": "2026-04-19T08:27:55.418Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "internal_legal",
+    "name": "Анна Рихтер"
+  },
+  "signal_card": {
+    "id": "internal-legal-card-1",
+    "signal_type": "LEGAL_REVIEW_TRIGGER",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Готово к следующему шагу",
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Анна, вижу, что SynthPort пересобирает contractor documentation и хочет сократить серые зоны между ops, finance и посредниками. Mellow берёт конкретную зону: KYC, документы, платёжная цепочка — с audit trail и чёткой границей, что в нашей зоне, что на стороне клиента. Без overclaiming. Попадаем в вашу задачу?",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Анна, вижу, что SynthPort пересобирает contractor documentation и хочет сократить серые зоны между ops, finance и посредниками. Mellow берёт конкретную зону: KYC, документы, платёжная цепочка — с audit trail и чёткой границей, что в нашей зоне, что на стороне клиента. Без overclaiming. Попадаем в вашу задачу?",
+        "blocking": false,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Анна, вижу, что SynthPort пересобирает contractor documentation и хочет сократить серые зоны между ops, finance и посредниками. Mellow берёт конкретную зону: KYC, документы, платёжная цепочка — с audit trail и чёткой границей, что в нашей зоне, что на стороне клиента. Без overclaiming. Попадаем в вашу задачу?",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Анна, вижу, что SynthPort пересобирает contractor documentation и хочет сократить серые зоны между ops, finance и посредниками. Mellow берёт конкретную зону: KYC, документы, платёжная цепочка — с audit trail и чёткой границей, что в нашей зоне, что на стороне клиента. Без overclaiming. Попадаем в вашу задачу?",
+        "objections": [
+          {
+            "objection": "Ок. Что именно Mellow даёт по documents, audit trail и process discipline, и где вы не делаете overclaim?",
+            "result": "answered"
+          },
+          {
+            "objection": "Ок. Три слоя: Mellow, наш legal, наш finance. Где именно границы — и кто несёт trail, если что-то проваливается между ними?",
+            "result": "answered"
+          },
+          {
+            "objection": "Хорошо. А как это выглядит при внутреннем compliance review — что я показываю внутри про роль Mellow без создания новых вопросов?",
+            "result": "answered"
+          },
+          {
+            "objection": "Звучит правильно. Но у нас contractor templates уже существуют. Как именно Mellow вписывается без создания conflicting ownership?",
+            "result": "answered"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Предлагаю следующий шаг: пришлю written summary — зона контроля, документы, process safeguards, пример инцидента — один экран без деклараций. Если аккуратно, короткий review call. Подходит?",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Анна, вижу, что SynthPort пересобирает contractor documentation и хочет сократить серые зоны между ops, finance и посредниками. Mellow берёт конкретную зону: KYC, документы, платёжная цепочка — с audit trail и чёткой границей, что в нашей зоне, что на стороне клиента. Без overclaiming. Попадаем в вашу задачу?",
+      "ts": "2026-04-19T08:27:55.400Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Что именно Mellow даёт по documents, audit trail и process discipline, и где вы не делаете overclaim?",
+      "ts": "2026-04-19T08:27:55.400Z"
+    },
+    {
+      "role": "seller",
+      "text": "Инцидент-path конкретный: кейс открывается в системе, named owner назначается автоматически, SLA — 24 часа resolution или эскалация с explanation. Trail по каждому шагу. Что в нашей зоне — мы resolveим. Что за пределами — объясняем почему и что дальше.",
+      "ts": "2026-04-19T08:27:55.403Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Три слоя: Mellow, наш legal, наш finance. Где именно границы — и кто несёт trail, если что-то проваливается между ними?",
+      "ts": "2026-04-19T08:27:55.403Z"
+    },
+    {
+      "role": "seller",
+      "text": "Серые зоны убираются за счёт задокументированной границы: что в зоне Mellow — описано в договоре, с trail. Что у клиента — тоже описано явно. Overlap убирается тем, что у каждого участка есть owner.",
+      "ts": "2026-04-19T08:27:55.405Z"
+    },
+    {
+      "role": "bot",
+      "text": "Хорошо. А как это выглядит при внутреннем compliance review — что я показываю внутри про роль Mellow без создания новых вопросов?",
+      "ts": "2026-04-19T08:27:55.405Z"
+    },
+    {
+      "role": "seller",
+      "text": "Следующий шаг: документ с чёткими формулировками — что в зоне Mellow, что нет, как подтверждается. Можно изучить до следующего разговора. Когда удобно?",
+      "ts": "2026-04-19T08:27:55.408Z"
+    },
+    {
+      "role": "bot",
+      "text": "Звучит правильно. Но у нас contractor templates уже существуют. Как именно Mellow вписывается без создания conflicting ownership?",
+      "ts": "2026-04-19T08:27:55.408Z"
+    },
+    {
+      "role": "seller",
+      "text": "Предлагаю следующий шаг: пришлю written summary — зона контроля, документы, process safeguards, пример инцидента — один экран без деклараций. Если аккуратно, короткий review call. Подходит?",
+      "ts": "2026-04-19T08:27:55.411Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пришлите одностраничное summary: зона контроля, документы, SLA инцидента. Если без воды — найдём время.",
+      "ts": "2026-04-19T08:27:55.411Z"
+    },
+    {
+      "role": "seller",
+      "text": "Предлагаю следующий шаг: пришлю written summary — зона контроля, документы, process safeguards, пример инцидента — один экран без деклараций. Если аккуратно, короткий review call. Подходит?",
+      "ts": "2026-04-19T08:27:55.414Z"
+    },
+    {
+      "role": "bot",
+      "text": "Жду материалы. Когда скинете?",
+      "ts": "2026-04-19T08:27:55.415Z"
+    }
+  ]
+}

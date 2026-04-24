@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_0285d6f4",
+  "saved_at": "2026-04-24T03:33:05.741Z",
+  "started_at": "2026-04-20T03:10:18.771Z",
+  "finished_at": "2026-04-20T03:10:18.778Z",
+  "seller_username": "longrun_cycle_29",
+  "persona": {
+    "id": "cfo_round",
+    "name": "София Бреннер"
+  },
+  "signal_card": {
+    "id": "cfo-round-card-2",
+    "signal_type": "COMPLIANCE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Sofia, I see Series A closed three weeks ago and the investor has already asked for cleaner contractor controls before the next diligence. Mellow acts as Contractor of Record with a clean audit trail on every payment — documents and KYC that can be shown to investors. We don't promise to remove your legal risk — we remove the unstructured layer before the next round. Does this fit your context?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Sofia, I see Series A closed three weeks ago and the investor has already asked for cleaner contractor controls before the next diligence. Mellow acts as Contractor of Record with a clean audit trail on every payment — documents and KYC that can be shown to investors. We don't promise to remove your legal risk — we remove the unstructured layer before the next round. Does this fit your context?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Sofia, I see Series A closed three weeks ago and the investor has already asked for cleaner contractor controls before the next diligence. Mellow acts as Contractor of Record with a clean audit trail on every payment — documents and KYC that can be shown to investors. We don't promise to remove your legal risk — we remove the unstructured layer before the next round. Does this fit your context?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Sofia, I see Series A closed three weeks ago and the investor has already asked for cleaner contractor controls before the next diligence. Mellow acts as Contractor of Record with a clean audit trail on every payment — documents and KYC that can be shown to investors. We don't promise to remove your legal risk — we remove the unstructured layer before the next round. Does this fit your context?",
+        "objections": [
+          {
+            "objection": "Ok, you noticed the round context. Right away then: what exactly does Mellow make more structured before diligence, and where does your scope end?",
+            "result": "answered"
+          },
+          {
+            "objection": "The investor will ask. What exactly can you show as structured — docs, KYC, payout trail?",
+            "result": "answered"
+          },
+          {
+            "objection": "How does the audit story look on contractor docs and tax for the future investor?",
+            "result": "answered"
+          },
+          {
+            "objection": "Send a written summary: what's in Mellow's scope, what's not, how it looks before the investor round. If it's clean — we'll find time.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Sofia, I see Series A closed three weeks ago and the investor has already asked for cleaner contractor controls before the next diligence. Mellow acts as Contractor of Record with a clean audit trail on every payment — documents and KYC that can be shown to investors. We don't promise to remove your legal risk — we remove the unstructured layer before the next round. Does this fit your context?",
+      "ts": "2026-04-20T03:10:18.772Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok, you noticed the round context. Right away then: what exactly does Mellow make more structured before diligence, and where does your scope end?",
+      "ts": "2026-04-20T03:10:18.772Z"
+    },
+    {
+      "role": "seller",
+      "text": "On SLA: a named escalation owner, defined response time in the contract, incident trail documented. Not general support — a process with accountability.",
+      "ts": "2026-04-20T03:10:18.773Z"
+    },
+    {
+      "role": "bot",
+      "text": "The investor will ask. What exactly can you show as structured — docs, KYC, payout trail?",
+      "ts": "2026-04-20T03:10:18.773Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow's scope is specific: KYC, contractor documentation, payment chain, and audit trail on each transaction — that's on our side. What we don't take on: misclassification risk and your strategic legal decisions. That's the boundary, in the contract, in writing.",
+      "ts": "2026-04-20T03:10:18.774Z"
+    },
+    {
+      "role": "bot",
+      "text": "How does the audit story look on contractor docs and tax for the future investor?",
+      "ts": "2026-04-20T03:10:18.774Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-20T03:10:18.775Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a written summary: what's in Mellow's scope, what's not, how it looks before the investor round. If it's clean — we'll find time.",
+      "ts": "2026-04-20T03:10:18.775Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-20T03:10:18.776Z"
+    },
+    {
+      "role": "bot",
+      "text": "Waiting for the materials. When will you send them?",
+      "ts": "2026-04-20T03:10:18.777Z"
+    }
+  ]
+}

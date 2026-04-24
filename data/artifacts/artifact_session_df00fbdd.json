@@ -1,0 +1,102 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_df00fbdd",
+  "saved_at": "2026-04-24T03:33:06.895Z",
+  "started_at": "2026-04-18T23:58:55.290Z",
+  "finished_at": "2026-04-18T23:58:55.301Z",
+  "seller_username": "hermes",
+  "persona": {
+    "id": "external_legal",
+    "name": "Давид Шмидт"
+  },
+  "signal_card": {
+    "id": "external-legal-card-1",
+    "signal_type": "OUTSIDE_COUNSEL_CHECK",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "David, при external counsel review обычно важны defensible границы, audit trail и explainable contractor flow. Mellow закрывает документы, платежную цепочку и warning points, но не обещает юридическую определённость вне своей ответственности."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "David, при external counsel review обычно важны defensible границы, audit trail и explainable contractor flow. Mellow закрывает документы, платежную цепочку и warning points, но не обещает юридическую определённость вне своей ответственности.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "David, при external counsel review обычно важны defensible границы, audit trail и explainable contractor flow. Mellow закрывает документы, платежную цепочку и warning points, но не обещает юридическую определённость вне своей ответственности."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "David, при external counsel review обычно важны defensible границы, audit trail и explainable contractor flow. Mellow закрывает документы, платежную цепочку и warning points, но не обещает юридическую определённость вне своей ответственности.",
+        "objections": [
+          {
+            "objection": "Хорошо. Тогда сразу: что именно контролирует Mellow, что не контролирует, и где это подтверждается процессно?",
+            "result": "answered"
+          },
+          {
+            "objection": "Звучит аккуратно. Тогда почему эта схема более defensible, чем текущая смесь посредников и ручных исключений?",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "David, при external counsel review обычно важны defensible границы, audit trail и explainable contractor flow. Mellow закрывает документы, платежную цепочку и warning points, но не обещает юридическую определённость вне своей ответственности."
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Давид Шмидт. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-18T23:58:55.290Z"
+    },
+    {
+      "role": "seller",
+      "text": "David, при external counsel review обычно важны defensible границы, audit trail и explainable contractor flow. Mellow закрывает документы, платежную цепочку и warning points, но не обещает юридическую определённость вне своей ответственности.",
+      "ts": "2026-04-18T23:58:55.292Z"
+    },
+    {
+      "role": "bot",
+      "text": "Хорошо. Тогда сразу: что именно контролирует Mellow, что не контролирует, и где это подтверждается процессно?",
+      "ts": "2026-04-18T23:58:55.292Z"
+    },
+    {
+      "role": "seller",
+      "text": "Если удобно, давайте 20 минут walkthrough или short review memo, чтобы пройтись по ограничениям, process safeguards и серым зонам до вашего counsel review.",
+      "ts": "2026-04-18T23:58:55.294Z"
+    },
+    {
+      "role": "bot",
+      "text": "Звучит аккуратно. Тогда почему эта схема более defensible, чем текущая смесь посредников и ручных исключений?",
+      "ts": "2026-04-18T23:58:55.295Z"
+    }
+  ]
+}

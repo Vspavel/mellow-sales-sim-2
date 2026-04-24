@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_a3642f42",
+  "saved_at": "2026-04-24T03:33:06.891Z",
+  "started_at": "2026-04-19T00:03:29.705Z",
+  "finished_at": "2026-04-19T00:03:29.720Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "alexey",
+    "name": "Алексей Громов"
+  },
+  "signal_card": {
+    "id": "alexey-card-1",
+    "signal_type": "PAIN_SIGNAL",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "FAIL",
+    "verdict_label": null,
+    "summary_for_seller": "Прогон рабочий, но доверие и next step пока держатся не на всех ключевых местах.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "Первое сообщение слишком общее и теряет контекст сигнала.",
+        "evidence_quote": "Добрый день, Алексей! Хочу рассказать про Mellow."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Нет ясной границы ответственности и конкретики по зоне контроля Mellow.",
+        "evidence_quote": "Мы помогаем с подрядчиками.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Тон и подача не адаптированы под выбранную персону.",
+        "evidence_quote": "Добрый день, Алексей! Хочу рассказать про Mellow."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Возражения закрыты слабо или не дожаты.",
+        "evidence_quote": "Мы помогаем с подрядчиками.",
+        "objections": [
+          {
+            "objection": "Пока похоже на обычный pitch. Что вы увидели у нас конкретно?",
+            "result": "partial"
+          },
+          {
+            "objection": "Пока много слов. Где конкретный апгрейд по скорости, процессу или удобству?",
+            "result": "partial"
+          },
+          {
+            "objection": "Пока много слов. Где конкретный апгрейд по скорости, процессу или удобству?",
+            "result": "partial"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Разговор закончился без чёткого next step.",
+        "evidence_quote": "Встретимся онлайн?"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Алексей Громов. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-19T00:03:29.705Z"
+    },
+    {
+      "role": "seller",
+      "text": "Добрый день, Алексей! Хочу рассказать про Mellow.",
+      "ts": "2026-04-19T00:03:29.710Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пока похоже на обычный pitch. Что вы увидели у нас конкретно?",
+      "ts": "2026-04-19T00:03:29.710Z"
+    },
+    {
+      "role": "seller",
+      "text": "Мы помогаем с подрядчиками.",
+      "ts": "2026-04-19T00:03:29.714Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пока много слов. Где конкретный апгрейд по скорости, процессу или удобству?",
+      "ts": "2026-04-19T00:03:29.715Z"
+    },
+    {
+      "role": "seller",
+      "text": "Встретимся онлайн?",
+      "ts": "2026-04-19T00:03:29.718Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пока много слов. Где конкретный апгрейд по скорости, процессу или удобству?",
+      "ts": "2026-04-19T00:03:29.718Z"
+    }
+  ]
+}

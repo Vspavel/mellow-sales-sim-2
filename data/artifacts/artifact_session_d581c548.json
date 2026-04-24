@@ -1,0 +1,150 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_d581c548",
+  "saved_at": "2026-04-24T03:33:06.818Z",
+  "started_at": "2026-04-19T08:27:54.439Z",
+  "finished_at": "2026-04-19T08:27:54.452Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "cfo_round",
+    "name": "София Бреннер"
+  },
+  "signal_card": {
+    "id": "cfo-round-card-1",
+    "signal_type": "FUNDRAISING_DILIGENCE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Готово к следующему шагу",
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Sofia, Series A за вами, и investor уже попросил cleaner contractor structure. Mellow даёт CoR с audit story, которую можно положить на стол при diligence — документы, KYC, пейаут trail. Где именно сейчас самая слабая точка в вашей contractor схеме?",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Sofia, Series A за вами, и investor уже попросил cleaner contractor structure. Mellow даёт CoR с audit story, которую можно положить на стол при diligence — документы, KYC, пейаут trail. Где именно сейчас самая слабая точка в вашей contractor схеме?",
+        "blocking": false,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Sofia, Series A за вами, и investor уже попросил cleaner contractor structure. Mellow даёт CoR с audit story, которую можно положить на стол при diligence — документы, KYC, пейаут trail. Где именно сейчас самая слабая точка в вашей contractor схеме?",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Sofia, Series A за вами, и investor уже попросил cleaner contractor structure. Mellow даёт CoR с audit story, которую можно положить на стол при diligence — документы, KYC, пейаут trail. Где именно сейчас самая слабая точка в вашей contractor схеме?",
+        "objections": [
+          {
+            "objection": "Раунд заметили. Тогда напрямую: какую часть проблемы с contractor documentation вы закрываете, а что остаётся у меня?",
+            "result": "answered"
+          },
+          {
+            "objection": "Всё ещё не слышу чёткой зоны. Что конкретно в зоне Mellow перед diligence — docs, платёжная цепочка, что ещё?",
+            "result": "answered"
+          },
+          {
+            "objection": "Ещё: как выглядит audit story по contractor docs и НДФЛ для будущего инвестора?",
+            "result": "answered"
+          },
+          {
+            "objection": "Ок. Скиньте flow и audit story — кратко, без лирики. Если это приземлено, можем поговорить 20 минут.",
+            "result": "answered"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Предлагаю: пришлю короткое flow — audit trail, SLA, зона контроля — один экран. Если это приземлённо под ваш контекст, найдём 20 минут на созвон. Когда удобно на этой неделе?",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Sofia, Series A за вами, и investor уже попросил cleaner contractor structure. Mellow даёт CoR с audit story, которую можно положить на стол при diligence — документы, KYC, пейаут trail. Где именно сейчас самая слабая точка в вашей contractor схеме?",
+      "ts": "2026-04-19T08:27:54.441Z"
+    },
+    {
+      "role": "bot",
+      "text": "Раунд заметили. Тогда напрямую: какую часть проблемы с contractor documentation вы закрываете, а что остаётся у меня?",
+      "ts": "2026-04-19T08:27:54.441Z"
+    },
+    {
+      "role": "seller",
+      "text": "По инциденту конкретно: платёж завис — открываете кейс, named owner назначается, ответ в течение 2 часов, resolution или эскалация с объяснением через 24 часа. Всё в письменном виде, всё с trail. Это процесс, а не \"разберёмся\".",
+      "ts": "2026-04-19T08:27:54.442Z"
+    },
+    {
+      "role": "bot",
+      "text": "Всё ещё не слышу чёткой зоны. Что конкретно в зоне Mellow перед diligence — docs, платёжная цепочка, что ещё?",
+      "ts": "2026-04-19T08:27:54.442Z"
+    },
+    {
+      "role": "seller",
+      "text": "Зона Mellow конкретная: KYC, contractor documentation, платёжная цепочка и audit trail по каждой транзакции — на нашей стороне. Что не берём: misclassification risk и стратегические legal-решения на вашей стороне. Это граница, без размытия. Какая часть этого попадает в вашу конкретную ситуацию?",
+      "ts": "2026-04-19T08:27:54.444Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ещё: как выглядит audit story по contractor docs и НДФЛ для будущего инвестора?",
+      "ts": "2026-04-19T08:27:54.444Z"
+    },
+    {
+      "role": "seller",
+      "text": "Предлагаю: пришлю короткое flow — audit trail, SLA, зона контроля — один экран. Если это приземлённо под ваш контекст, найдём 20 минут на созвон. Когда удобно на этой неделе?",
+      "ts": "2026-04-19T08:27:54.446Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Скиньте flow и audit story — кратко, без лирики. Если это приземлено, можем поговорить 20 минут.",
+      "ts": "2026-04-19T08:27:54.447Z"
+    },
+    {
+      "role": "seller",
+      "text": "Предлагаю: пришлю короткое flow — audit trail, SLA, зона контроля — один экран. Если это приземлённо под ваш контекст, найдём 20 минут на созвон. Когда удобно на этой неделе?",
+      "ts": "2026-04-19T08:27:54.448Z"
+    },
+    {
+      "role": "bot",
+      "text": "Договорились. Жду письмо.",
+      "ts": "2026-04-19T08:27:54.448Z"
+    },
+    {
+      "role": "seller",
+      "text": "Предлагаю: пришлю короткое flow — audit trail, SLA, зона контроля — один экран. Если это приземлённо под ваш контекст, найдём 20 минут на созвон. Когда удобно на этой неделе?",
+      "ts": "2026-04-19T08:27:54.450Z"
+    },
+    {
+      "role": "bot",
+      "text": "Жду материалы. Когда скинете?",
+      "ts": "2026-04-19T08:27:54.450Z"
+    }
+  ]
+}

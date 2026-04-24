@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_c088dfdb",
+  "saved_at": "2026-04-24T03:33:05.810Z",
+  "started_at": "2026-04-20T03:10:13.417Z",
+  "finished_at": "2026-04-20T03:10:13.434Z",
+  "seller_username": "longrun_cycle_25",
+  "persona": {
+    "id": "eng_manager",
+    "name": "Марк Левин"
+  },
+  "signal_card": {
+    "id": "eng-manager-card-1",
+    "signal_type": "TEAM_SCALING",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.",
+        "objections": [
+          {
+            "objection": "Ok, you spotted the pain. But I already had one vendor who promised the same.",
+            "result": "answered"
+          },
+          {
+            "objection": "Too early. You haven't convinced me yet this isn't just another vendor.",
+            "result": "answered"
+          },
+          {
+            "objection": "Ok. Send me something I can bring to finance without a long internal pitch.",
+            "result": "answered"
+          },
+          {
+            "objection": "The current setup is slow but I understand it. What specifically becomes more predictable?",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Ops impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.",
+      "ts": "2026-04-20T03:10:13.418Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok, you spotted the pain. But I already had one vendor who promised the same.",
+      "ts": "2026-04-20T03:10:13.418Z"
+    },
+    {
+      "role": "seller",
+      "text": "Ops impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.",
+      "ts": "2026-04-20T03:10:13.419Z"
+    },
+    {
+      "role": "bot",
+      "text": "Too early. You haven't convinced me yet this isn't just another vendor.",
+      "ts": "2026-04-20T03:10:13.419Z"
+    },
+    {
+      "role": "seller",
+      "text": "Ops impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.",
+      "ts": "2026-04-20T03:10:13.426Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok. Send me something I can bring to finance without a long internal pitch.",
+      "ts": "2026-04-20T03:10:13.426Z"
+    },
+    {
+      "role": "seller",
+      "text": "Concretely for ops: less manual status chasing, less reconciliation overhead, and a named owner for incidents. That is the before/after change, not a generic platform claim. What else do you need for the next step?",
+      "ts": "2026-04-20T03:10:13.430Z"
+    },
+    {
+      "role": "bot",
+      "text": "The current setup is slow but I understand it. What specifically becomes more predictable?",
+      "ts": "2026-04-20T03:10:13.430Z"
+    },
+    {
+      "role": "seller",
+      "text": "Ops impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions. What else do you need for the next step?",
+      "ts": "2026-04-20T03:10:13.432Z"
+    },
+    {
+      "role": "bot",
+      "text": "Waiting for the materials. When will you send them?",
+      "ts": "2026-04-20T03:10:13.432Z"
+    }
+  ]
+}

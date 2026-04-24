@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_f597e8ea",
+  "saved_at": "2026-04-24T03:33:06.826Z",
+  "started_at": "2026-04-19T04:10:42.660Z",
+  "finished_at": "2026-04-19T04:10:42.954Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "andrey",
+    "name": "Андрей Волков"
+  },
+  "signal_card": {
+    "id": "andrey-card-1",
+    "signal_type": "COMPLIANCE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Готово к следующему шагу",
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Андрей, вижу у вас external legal review и платёж завис на 23 дня через Wise. Mellow берёт документы, KYC, audit trail.",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Андрей, вижу у вас external legal review и платёж завис на 23 дня через Wise. Mellow берёт документы, KYC, audit trail.",
+        "blocking": false,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Андрей, вижу у вас external legal review и платёж завис на 23 дня через Wise. Mellow берёт документы, KYC, audit trail.",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Андрей, вижу у вас external legal review и платёж завис на 23 дня через Wise. Mellow берёт документы, KYC, audit trail.",
+        "objections": [
+          {
+            "objection": "Ок. Чем быстрее объясните границу ответственности, тем быстрее станет понятно, есть ли разговор.",
+            "result": "answered"
+          },
+          {
+            "objection": "Мне важно понять не ideal path, а failure path. Что происходит при инциденте — кто, что, за сколько?",
+            "result": "answered"
+          },
+          {
+            "objection": "Половина команды с РФ-паспортами. Это не абстракция. Что именно Mellow делает с НДФЛ в такой конфигурации?",
+            "result": "answered"
+          },
+          {
+            "objection": "Слышу слова про надёжность. Где механизм — что именно становится лучше и как это проверяется?",
+            "result": "answered"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Андрей, вижу у вас external legal review и платёж завис на 23 дня через Wise. Mellow берёт документы, KYC, audit trail.",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Андрей, вижу у вас external legal review и платёж завис на 23 дня через Wise. Mellow берёт документы, KYC, audit trail.",
+      "ts": "2026-04-19T04:10:42.702Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Чем быстрее объясните границу ответственности, тем быстрее станет понятно, есть ли разговор.",
+      "ts": "2026-04-19T04:10:42.702Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow контролирует платёжную цепочку, KYC, документы, audit trail. Misclassification — не наша зона. SLA 48 часов на эскалацию платежа.",
+      "ts": "2026-04-19T04:10:42.753Z"
+    },
+    {
+      "role": "bot",
+      "text": "Мне важно понять не ideal path, а failure path. Что происходит при инциденте — кто, что, за сколько?",
+      "ts": "2026-04-19T04:10:42.753Z"
+    },
+    {
+      "role": "seller",
+      "text": "Если платёж застрянет: автостатус, эскалация с SLA 48 часов, кейс закрывается с trail. Не просто обещание — операционный процесс.",
+      "ts": "2026-04-19T04:10:42.798Z"
+    },
+    {
+      "role": "bot",
+      "text": "Половина команды с РФ-паспортами. Это не абстракция. Что именно Mellow делает с НДФЛ в такой конфигурации?",
+      "ts": "2026-04-19T04:10:42.798Z"
+    },
+    {
+      "role": "seller",
+      "text": "По НДФЛ и РФ-паспортам: Mellow работает через CoR. Налоговая ответственность на стороне клиента, документальная — у нас. Под diligence подходит.",
+      "ts": "2026-04-19T04:10:42.843Z"
+    },
+    {
+      "role": "bot",
+      "text": "Слышу слова про надёжность. Где механизм — что именно становится лучше и как это проверяется?",
+      "ts": "2026-04-19T04:10:42.843Z"
+    },
+    {
+      "role": "seller",
+      "text": "Предлагаю 20-минутный созвон на неделе — пройдём конкретный flow и SLA под вашу схему.",
+      "ts": "2026-04-19T04:10:42.902Z"
+    },
+    {
+      "role": "bot",
+      "text": "Хорошо. Пришлите коротко структуру потока, SLA и пример расчёта. Если это выглядит приземлённо, выделю 20 минут на неделе.",
+      "ts": "2026-04-19T04:10:42.903Z"
+    }
+  ]
+}

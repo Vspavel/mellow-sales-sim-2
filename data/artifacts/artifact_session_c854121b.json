@@ -1,0 +1,88 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_c854121b",
+  "saved_at": "2026-04-24T03:33:06.911Z",
+  "started_at": "2026-04-18T23:07:20.080Z",
+  "finished_at": "2026-04-18T23:07:20.087Z",
+  "seller_username": "qa",
+  "persona": {
+    "id": "alexey",
+    "name": "Алексей Громов"
+  },
+  "signal_card": {
+    "id": "alexey-card-1",
+    "signal_type": "PAIN_SIGNAL",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Вижу у вас ручную координацию подрядчиков и хочу коротко понять, где Mellow может дать более управляемый flow, audit trail и конкретный следующий шаг на 20 минут."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Вижу у вас ручную координацию подрядчиков и хочу коротко понять, где Mellow может дать более управляемый flow, audit trail и конкретный следующий шаг на 20 минут.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Вижу у вас ручную координацию подрядчиков и хочу коротко понять, где Mellow может дать более управляемый flow, audit trail и конкретный следующий шаг на 20 минут."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Вижу у вас ручную координацию подрядчиков и хочу коротко понять, где Mellow может дать более управляемый flow, audit trail и конкретный следующий шаг на 20 минут.",
+        "objections": [
+          {
+            "objection": "Ок, уже лучше. Если коротко, зачем мне менять то, что и так как-то работает?",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Вижу у вас ручную координацию подрядчиков и хочу коротко понять, где Mellow может дать более управляемый flow, audit trail и конкретный следующий шаг на 20 минут."
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Алексей Громов. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-18T23:07:20.080Z"
+    },
+    {
+      "role": "seller",
+      "text": "Вижу у вас ручную координацию подрядчиков и хочу коротко понять, где Mellow может дать более управляемый flow, audit trail и конкретный следующий шаг на 20 минут.",
+      "ts": "2026-04-18T23:07:20.083Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок, уже лучше. Если коротко, зачем мне менять то, что и так как-то работает?",
+      "ts": "2026-04-18T23:07:20.084Z"
+    }
+  ]
+}

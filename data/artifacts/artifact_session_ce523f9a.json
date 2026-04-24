@@ -1,0 +1,102 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_ce523f9a",
+  "saved_at": "2026-04-24T03:33:06.903Z",
+  "started_at": "2026-04-18T23:58:54.357Z",
+  "finished_at": "2026-04-18T23:58:54.364Z",
+  "seller_username": "hermes",
+  "persona": {
+    "id": "cfo_round",
+    "name": "София Бреннер"
+  },
+  "signal_card": {
+    "id": "cfo-round-card-1",
+    "signal_type": "FUNDRAISING_DILIGENCE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Sofia, после раунда и перед future diligence обычно всплывают contractor docs, audit trail и контроль платежной цепочки. Mellow помогает собрать документы, KYC и процесс так, чтобы CFO лучше держал риск и explainability перед инвесторами."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Sofia, после раунда и перед future diligence обычно всплывают contractor docs, audit trail и контроль платежной цепочки. Mellow помогает собрать документы, KYC и процесс так, чтобы CFO лучше держал риск и explainability перед инвесторами.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Sofia, после раунда и перед future diligence обычно всплывают contractor docs, audit trail и контроль платежной цепочки. Mellow помогает собрать документы, KYC и процесс так, чтобы CFO лучше держал риск и explainability перед инвесторами."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Sofia, после раунда и перед future diligence обычно всплывают contractor docs, audit trail и контроль платежной цепочки. Mellow помогает собрать документы, KYC и процесс так, чтобы CFO лучше держал риск и explainability перед инвесторами.",
+        "objections": [
+          {
+            "objection": "Ок, контекст раунда вы заметили. Тогда сразу: что именно Mellow делает управляемее перед diligence, а где ваша зона заканчивается?",
+            "result": "answered"
+          },
+          {
+            "objection": "Это уже ближе к делу. Но почему мне тащить это в компанию до следующего раунда, если схема пока не взорвалась?",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Не обещаем снять misclassification риск, но можем показать control, SLA, налоговые и процессные границы ответственности. Если полезно, предложу 20-минутный review на неделе."
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для София Бреннер. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-18T23:58:54.357Z"
+    },
+    {
+      "role": "seller",
+      "text": "Sofia, после раунда и перед future diligence обычно всплывают contractor docs, audit trail и контроль платежной цепочки. Mellow помогает собрать документы, KYC и процесс так, чтобы CFO лучше держал риск и explainability перед инвесторами.",
+      "ts": "2026-04-18T23:58:54.360Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок, контекст раунда вы заметили. Тогда сразу: что именно Mellow делает управляемее перед diligence, а где ваша зона заканчивается?",
+      "ts": "2026-04-18T23:58:54.360Z"
+    },
+    {
+      "role": "seller",
+      "text": "Не обещаем снять misclassification риск, но можем показать control, SLA, налоговые и процессные границы ответственности. Если полезно, предложу 20-минутный review на неделе.",
+      "ts": "2026-04-18T23:58:54.362Z"
+    },
+    {
+      "role": "bot",
+      "text": "Это уже ближе к делу. Но почему мне тащить это в компанию до следующего раунда, если схема пока не взорвалась?",
+      "ts": "2026-04-18T23:58:54.362Z"
+    }
+  ]
+}

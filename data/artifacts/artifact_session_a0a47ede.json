@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_a0a47ede",
+  "saved_at": "2026-04-24T03:33:06.869Z",
+  "started_at": "2026-04-19T03:03:22.030Z",
+  "finished_at": "2026-04-19T03:03:22.115Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "alexey",
+    "name": "Алексей Громов"
+  },
+  "signal_card": {
+    "id": "alexey-card-1",
+    "signal_type": "PAIN_SIGNAL",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "FAIL",
+    "verdict_label": "Нужна доработка",
+    "summary_for_seller": "Прогон рабочий, но доверие и next step пока держатся не на всех ключевых местах.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "Первое сообщение слишком общее и теряет контекст сигнала.",
+        "evidence_quote": "Видел ваш недавний legal review — Mellow может помочь с документацией и платёжной цепью.",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Видел ваш недавний legal review — Mellow может помочь с документацией и платёжной цепью.",
+        "blocking": false,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Тон и подача не адаптированы под выбранную персону.",
+        "evidence_quote": "Мы контролируем KYC, документы и audit trail. Не берём на себя misclassification.",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Возражения закрыты слабо или не дожаты.",
+        "evidence_quote": "Мы контролируем KYC, документы и audit trail. Не берём на себя misclassification.",
+        "objections": [
+          {
+            "objection": "Слишком общо. Что конкретно у нас болит?",
+            "result": "partial"
+          },
+          {
+            "objection": "Слышу. Мне важна скорость проверки — как быстро можно убедиться, что это работает?",
+            "result": "partial"
+          },
+          {
+            "objection": "Ок. Скинь короткий follow-up: как выглядит поток, что убирается из ручной возни и что нужно от моей ops. Если там без воды, можно созвониться.",
+            "result": "partial"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Видел ваш недавний legal review — Mellow может помочь с документацией и платёжной цепью.",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Видел ваш недавний legal review — Mellow может помочь с документацией и платёжной цепью.",
+      "ts": "2026-04-19T03:03:22.070Z"
+    },
+    {
+      "role": "bot",
+      "text": "Слишком общо. Что конкретно у нас болит?",
+      "ts": "2026-04-19T03:03:22.070Z"
+    },
+    {
+      "role": "seller",
+      "text": "Мы контролируем KYC, документы и audit trail. Не берём на себя misclassification.",
+      "ts": "2026-04-19T03:03:22.082Z"
+    },
+    {
+      "role": "bot",
+      "text": "Слышу. Мне важна скорость проверки — как быстро можно убедиться, что это работает?",
+      "ts": "2026-04-19T03:03:22.082Z"
+    },
+    {
+      "role": "seller",
+      "text": "Предлагаю 20 минут созвона на неделе, пришлю расчёт заранее.",
+      "ts": "2026-04-19T03:03:22.095Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Скинь короткий follow-up: как выглядит поток, что убирается из ручной возни и что нужно от моей ops. Если там без воды, можно созвониться.",
+      "ts": "2026-04-19T03:03:22.095Z"
+    }
+  ]
+}

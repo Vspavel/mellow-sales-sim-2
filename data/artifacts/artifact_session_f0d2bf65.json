@@ -1,0 +1,266 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_f0d2bf65",
+  "saved_at": "2026-04-24T03:33:04.923Z",
+  "started_at": "2026-04-23T08:35:57.661Z",
+  "finished_at": "2026-04-23T08:36:02.291Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "direct_contract_transition",
+    "name": "Екатерина Левина"
+  },
+  "signal_card": {
+    "id": "direct-contract-transition-card-1",
+    "signal_type": "WORKFORCE_MIX_CHANGE",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "objections": [
+          {
+            "objection": "What exactly breaks if I don't change anything?",
+            "result": "answered"
+          },
+          {
+            "objection": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+            "result": "answered"
+          },
+          {
+            "objection": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+      "ts": "2026-04-23T08:35:57.765Z"
+    },
+    {
+      "role": "bot",
+      "text": "What exactly breaks if I don't change anything?",
+      "ts": "2026-04-23T08:35:57.766Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:35:57.972Z"
+    },
+    {
+      "role": "bot",
+      "text": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+      "ts": "2026-04-23T08:35:57.972Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:35:58.173Z"
+    },
+    {
+      "role": "bot",
+      "text": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+      "ts": "2026-04-23T08:35:58.173Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+      "ts": "2026-04-23T08:35:58.389Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:35:58.389Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:35:58.631Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:35:58.631Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:35:58.840Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:35:58.840Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:35:59.067Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:35:59.068Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-23T08:35:59.266Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:35:59.266Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:35:59.509Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:35:59.509Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:35:59.763Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:35:59.763Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:36:00.034Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:36:00.034Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:36:00.348Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:36:00.350Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:36:00.604Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:36:00.604Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:36:00.852Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:36:00.852Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:36:01.230Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:36:01.231Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? Which part of your process is eating the most time right now?",
+      "ts": "2026-04-23T08:36:01.533Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:36:01.533Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:36:01.843Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:36:01.843Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:36:02.115Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T08:36:02.116Z"
+    }
+  ]
+}

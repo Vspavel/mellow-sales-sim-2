@@ -1,0 +1,150 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_80bc0a57",
+  "saved_at": "2026-04-24T03:33:06.783Z",
+  "started_at": "2026-04-19T22:24:01.167Z",
+  "finished_at": "2026-04-19T22:24:01.189Z",
+  "seller_username": "auto-cycle",
+  "persona": {
+    "id": "olga",
+    "name": "Olga"
+  },
+  "signal_card": {
+    "id": "olga-card-1",
+    "signal_type": "OUTSIDE_COUNSEL_CHECK",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS_WITH_NOTES",
+    "verdict_label": "Good, but can be stronger",
+    "summary_for_seller": "Workable run, but trust and next step are not landing on all key points yet.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "objections": [
+          {
+            "objection": "Context is visible. Then directly: documents, audit trail, responsibility boundaries — what's exactly in your scope?",
+            "result": "answered"
+          },
+          {
+            "objection": "Three layers: Mellow, our legal, our finance — where do the lines run? Who owns the overlap? Без overclaim.",
+            "result": "answered"
+          },
+          {
+            "objection": "Let's be specific: where's the overlap between your zones and our legal side? Who owns the gap? Без overclaim.",
+            "result": "answered"
+          },
+          {
+            "objection": "Three layers: Mellow, our legal, our finance — where do the lines run? Who owns the overlap? Без overclaim.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Conversation ended without a clear next step.",
+        "evidence_quote": "The boundary is explicit: our scope covers the payment chain, KYC and contractor documentation. Your legal and finance teams own the strategic decisions. The overlap is mapped — not assumed.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+      "ts": "2026-04-19T22:24:01.170Z"
+    },
+    {
+      "role": "bot",
+      "text": "Context is visible. Then directly: documents, audit trail, responsibility boundaries — what's exactly in your scope?",
+      "ts": "2026-04-19T22:24:01.170Z"
+    },
+    {
+      "role": "seller",
+      "text": "The boundary is explicit: our scope covers the payment chain, KYC and contractor documentation. Your legal and finance teams own the strategic decisions. The overlap is mapped — not assumed.",
+      "ts": "2026-04-19T22:24:01.172Z"
+    },
+    {
+      "role": "bot",
+      "text": "Three layers: Mellow, our legal, our finance — where do the lines run? Who owns the overlap? Без overclaim.",
+      "ts": "2026-04-19T22:24:01.172Z"
+    },
+    {
+      "role": "seller",
+      "text": "The boundary is explicit: our scope covers the payment chain, KYC and contractor documentation. Your legal and finance teams own the strategic decisions. The overlap is mapped — not assumed.",
+      "ts": "2026-04-19T22:24:01.175Z"
+    },
+    {
+      "role": "bot",
+      "text": "Let's be specific: where's the overlap between your zones and our legal side? Who owns the gap? Без overclaim.",
+      "ts": "2026-04-19T22:24:01.175Z"
+    },
+    {
+      "role": "seller",
+      "text": "The boundary is explicit: our scope covers the payment chain, KYC and contractor documentation. Your legal and finance teams own the strategic decisions. The overlap is mapped — not assumed.",
+      "ts": "2026-04-19T22:24:01.177Z"
+    },
+    {
+      "role": "bot",
+      "text": "Three layers: Mellow, our legal, our finance — where do the lines run? Who owns the overlap? Без overclaim.",
+      "ts": "2026-04-19T22:24:01.178Z"
+    },
+    {
+      "role": "seller",
+      "text": "The boundary is explicit: our scope covers the payment chain, KYC and contractor documentation. Your legal and finance teams own the strategic decisions. The overlap is mapped — not assumed.",
+      "ts": "2026-04-19T22:24:01.180Z"
+    },
+    {
+      "role": "bot",
+      "text": "I need to understand the grey zones — where your scope ends and ours begins. Is that documented anywhere?",
+      "ts": "2026-04-19T22:24:01.180Z"
+    },
+    {
+      "role": "seller",
+      "text": "The boundary is explicit: our scope covers the payment chain, KYC and contractor documentation. Your legal and finance teams own the strategic decisions. The overlap is mapped — not assumed.",
+      "ts": "2026-04-19T22:24:01.184Z"
+    },
+    {
+      "role": "bot",
+      "text": "Three layers: Mellow, our legal, our finance — where do the lines run? Who owns the overlap? Без overclaim.",
+      "ts": "2026-04-19T22:24:01.184Z"
+    }
+  ]
+}

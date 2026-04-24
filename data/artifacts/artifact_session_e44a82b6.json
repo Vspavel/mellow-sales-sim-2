@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_e44a82b6",
+  "saved_at": "2026-04-24T03:33:06.179Z",
+  "started_at": "2026-04-20T03:09:45.901Z",
+  "finished_at": "2026-04-20T03:09:45.911Z",
+  "seller_username": "longrun_cycle_4",
+  "persona": {
+    "id": "eng_manager",
+    "name": "Марк Левин"
+  },
+  "signal_card": {
+    "id": "eng-manager-card-1",
+    "signal_type": "TEAM_SCALING",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Mark, I can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge. And if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Mark, I can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge. And if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Mark, I can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge. And if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Mark, I can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge. And if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?",
+        "objections": [
+          {
+            "objection": "Ok, you spotted the pain. But I already had one vendor who promised the same.",
+            "result": "answered"
+          },
+          {
+            "objection": "Wait. I still don't understand how to bring this to finance.",
+            "result": "answered"
+          },
+          {
+            "objection": "Ok. Send me something I can bring to finance without a long internal pitch.",
+            "result": "answered"
+          },
+          {
+            "objection": "Agreed. Waiting for your email.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Ops impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Mark, I can see Docklane's engineering team has been putting out payment fires more than once. Mellow removes the manual escalations: structured payout flow, real-time statuses, SLA when things break — without you acting as the operational bridge. And if you need to bring this to finance, I have a short brief for that conversation. What's the most acute pain point right now?",
+      "ts": "2026-04-20T03:09:45.902Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok, you spotted the pain. But I already had one vendor who promised the same.",
+      "ts": "2026-04-20T03:09:45.903Z"
+    },
+    {
+      "role": "seller",
+      "text": "Ops impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.",
+      "ts": "2026-04-20T03:09:45.904Z"
+    },
+    {
+      "role": "bot",
+      "text": "Wait. I still don't understand how to bring this to finance.",
+      "ts": "2026-04-20T03:09:45.904Z"
+    },
+    {
+      "role": "seller",
+      "text": "Ops impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.",
+      "ts": "2026-04-20T03:09:45.905Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok. Send me something I can bring to finance without a long internal pitch.",
+      "ts": "2026-04-20T03:09:45.906Z"
+    },
+    {
+      "role": "seller",
+      "text": "Ops impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.",
+      "ts": "2026-04-20T03:09:45.908Z"
+    },
+    {
+      "role": "bot",
+      "text": "Agreed. Waiting for your email.",
+      "ts": "2026-04-20T03:09:45.908Z"
+    },
+    {
+      "role": "seller",
+      "text": "Ops impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.",
+      "ts": "2026-04-20T03:09:45.909Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send it. If it's concrete — I'll respond.",
+      "ts": "2026-04-20T03:09:45.909Z"
+    }
+  ]
+}

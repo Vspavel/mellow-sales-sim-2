@@ -1,0 +1,146 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_ee54b45d",
+  "saved_at": "2026-04-24T03:33:05.107Z",
+  "started_at": "2026-04-22T19:26:54.261Z",
+  "finished_at": "2026-04-22T19:27:12.415Z",
+  "seller_username": "masa_qa_capacity_test",
+  "persona": {
+    "id": "andrey",
+    "name": "Андрей Волков"
+  },
+  "signal_card": {
+    "id": "andrey-card-1",
+    "signal_type": "COMPLIANCE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "FAIL",
+    "verdict_label": "Needs work",
+    "summary_for_seller": "Workable run, but trust and next step are not landing on all key points yet.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Mellow is a leading innovative platform solution that provides seamless best-in-class services for your business needs at market-leading quality and scale without disruption to your operations.",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "No clear boundary of responsibility or specifics on Mellow's scope.",
+        "evidence_quote": "Mellow is a leading innovative platform solution that provides seamless best-in-class services for your business needs at market-leading quality and scale without disruption to your operations.",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Tone and delivery are not adapted to the chosen persona.",
+        "evidence_quote": "Mellow is a leading innovative platform solution that provides seamless best-in-class services for your business needs at market-leading quality and scale without disruption to your operations.",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Objections addressed weakly or not followed through.",
+        "evidence_quote": "Mellow is a leading innovative platform solution that provides seamless best-in-class services for your business needs at market-leading quality and scale without disruption to your operations.",
+        "objections": [
+          {
+            "objection": "Too generic. What specifically in our situation made you reach out right now?",
+            "result": "partial"
+          },
+          {
+            "objection": "Still not hearing where your scope ends.",
+            "result": "partial"
+          },
+          {
+            "objection": "Again: what exactly does Mellow control? No declarations. What makes you confident?",
+            "result": "partial"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Conversation ended without a clear next step.",
+        "evidence_quote": "Let me know if you want to learn more about our platform solution.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Mellow is a leading innovative platform solution that provides seamless best-in-class services for your business needs at market-leading quality and scale without disruption to your operations.",
+      "ts": "2026-04-22T19:26:54.392Z"
+    },
+    {
+      "role": "bot",
+      "text": "Too generic. What specifically in our situation made you reach out right now?",
+      "ts": "2026-04-22T19:26:54.392Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow is a leading innovative platform solution that provides seamless best-in-class services for your business needs at market-leading quality and scale without disruption to your operations.",
+      "ts": "2026-04-22T19:26:54.460Z"
+    },
+    {
+      "role": "bot",
+      "text": "Still not hearing where your scope ends.",
+      "ts": "2026-04-22T19:26:54.462Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow is a leading innovative platform solution that provides seamless best-in-class services for your business needs at market-leading quality and scale without disruption to your operations.",
+      "ts": "2026-04-22T19:26:54.532Z"
+    },
+    {
+      "role": "bot",
+      "text": "Again: what exactly does Mellow control? No declarations. What makes you confident?",
+      "ts": "2026-04-22T19:26:54.533Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow is a leading innovative platform solution that provides seamless best-in-class services for your business needs at market-leading quality and scale without disruption to your operations.",
+      "ts": "2026-04-22T19:26:54.615Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-22T19:26:54.616Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow is a leading innovative platform solution that provides seamless best-in-class services for your business needs at market-leading quality and scale without disruption to your operations.",
+      "ts": "2026-04-22T19:26:54.685Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-22T19:26:54.685Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me know if you want to learn more about our platform solution.",
+      "ts": "2026-04-22T19:27:03.871Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-22T19:27:03.872Z"
+    }
+  ]
+}

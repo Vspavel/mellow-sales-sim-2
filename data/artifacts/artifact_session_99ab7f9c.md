@@ -1,0 +1,49 @@
+# Sales Simulator — Андрей Волков
+
+Session: session_99ab7f9c
+Saved at: 2026-04-24T03:33:05.221Z
+Started: 2026-04-20T03:12:20.329Z
+Finished: 2026-04-20T03:12:20.338Z
+Seller: longrun_cycle_28
+Persona: Андрей Волков (andrey)
+Signal card: andrey-card-1 | COMPLIANCE_PRESSURE | Heat: hot
+
+Dialogue type: messenger
+Language: en
+
+## Verdict: PASS
+*Ready for next step*
+
+## Summary
+
+Good run: you held context, answered on-point, and brought the conversation to a next step.
+
+## Criteria
+
+- K1. Contextual opening: PASS — First message anchors to a specific signal from the card.
+- K2. Scope & responsibility boundary: PASS — Seller stated Mellow's control scope without overclaiming.
+- K3. Persona language fit: PASS — Language is adapted to the chosen persona.
+- K4. Core objection handling: PASS — At least two key objections addressed substantively.
+- K5. Clear next step: PASS — Next step stated concretely.
+
+## Transcript
+
+[Seller] Andrey, I saw that Northstar has 45 contractors across complex geographies and a legal review coming up — and that payment sat stuck for 23 days. Mellow's scope: KYC, documents, payment chain, audit trail. We're clear on what we don't take on — misclassification risk stays on your side. Does this speak to what you're dealing with before the review?
+
+[Андрей Волков] Good. Then without preamble: what Mellow controls, what it doesn't, and how that's substantiated?
+
+[Seller] The current setup stops being defensible in two scenarios: a payment gets stuck with no SLA path — or diligence comes and there's no audit trail. Your current setup has both risks. Mellow removes them specifically.
+
+[Андрей Волков] Ok. Send me a brief written summary: payment flow, audit story, scope boundary. If it's concrete, I'll do a 20-minute call.
+
+[Seller] On SLA: a named escalation owner, defined response time in the contract, incident trail documented. Not general support — a process with accountability. What's most important to you heading into the next step?
+
+[Андрей Волков] Sounds right. But the right words aren't an argument. What specifically will be different?
+
+[Seller] Let me send you a brief written summary: payment flow, audit story, and scope boundary. If it's concrete and grounded, can we find 20 minutes this week?
+
+[Андрей Волков] Agreed. Waiting for your email.
+
+[Seller] Let me send you a brief written summary: payment flow, audit story, and scope boundary. If it's concrete and grounded, can we find 20 minutes this week?
+
+[Андрей Волков] Waiting for the materials. When will you send them?

@@ -1,0 +1,96 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_8b3a9649",
+  "saved_at": "2026-04-24T03:33:05.122Z",
+  "started_at": "2026-04-20T08:41:01.182Z",
+  "finished_at": "2026-04-20T08:41:01.216Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "andrey",
+    "name": "Андрей Волков"
+  },
+  "signal_card": {
+    "id": "andrey-card-2",
+    "signal_type": "FUNDRAISING_DILIGENCE",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "email",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS_WITH_NOTES",
+    "verdict_label": "Good, but can be stronger",
+    "summary_for_seller": "Workable run, but trust and next step are not landing on all key points yet.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Hi, saw you are tightening contractor controls before diligence. We help centralize payout flow, audit trail, and documentation without pretending to remove your legal risk. Worth a short comparison?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K6",
+        "name": "Email format",
+        "status": "FAIL",
+        "short_reason": "Missing sign-off (Best / Regards / Thanks). Email without a closing feels abrupt.",
+        "evidence_quote": "Hi, saw you are tightening contractor controls before diligence. We help centralize payout flow, audit trail, and documentation without pretending to remove your legal risk. Worth a short comparison?",
+        "label": "Email format"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi, saw you are tightening contractor controls before diligence. We help centralize payout flow, audit trail, and documentation without pretending to remove your legal risk. Worth a short comparison?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi, saw you are tightening contractor controls before diligence. We help centralize payout flow, audit trail, and documentation without pretending to remove your legal risk. Worth a short comparison?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi, saw you are tightening contractor controls before diligence. We help centralize payout flow, audit trail, and documentation without pretending to remove your legal risk. Worth a short comparison?",
+        "objections": [
+          {
+            "objection": "Pavel,\n\nThanks for reaching out. Good. Then without preamble: what Mellow controls, what it doesn't, and how that's substantiated?\n\nBest,\nАндрей",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Conversation ended without a clear next step.",
+        "evidence_quote": "Hi, saw you are tightening contractor controls before diligence. We help centralize payout flow, audit trail, and documentation without pretending to remove your legal risk. Worth a short comparison?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi, saw you are tightening contractor controls before diligence. We help centralize payout flow, audit trail, and documentation without pretending to remove your legal risk. Worth a short comparison?",
+      "ts": "2026-04-20T08:41:01.201Z"
+    },
+    {
+      "role": "bot",
+      "text": "Pavel,\n\nThanks for reaching out. Good. Then without preamble: what Mellow controls, what it doesn't, and how that's substantiated?\n\nBest,\nАндрей",
+      "ts": "2026-04-20T08:41:01.201Z"
+    }
+  ]
+}

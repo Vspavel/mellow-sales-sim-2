@@ -1,0 +1,112 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_0e227a54",
+  "saved_at": "2026-04-24T07:47:43.390Z",
+  "started_at": "2026-04-24T07:47:40.752Z",
+  "finished_at": "2026-04-24T07:47:43.256Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "cm_winback",
+    "name": "Ирина Соколова"
+  },
+  "signal_card": {
+    "id": "cm-winback-card-3",
+    "signal_type": "DIRECT_CONTRACT_NEED",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Готово к следующему шагу",
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Ирина, вижу, что старый CoR-контур с Mellow у вас доверие не удержал. Я не про возврат в ту же историю. Хочу понять только одно: появился ли сейчас другой use case, где CM может быть уже fit?",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Нет ясной границы ответственности и конкретики по зоне контроля Mellow.",
+        "evidence_quote": "Где процесс ломается чаще всего: payout status, follow-ups или incidents?",
+        "blocking": false,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Ирина, вижу, что старый CoR-контур с Mellow у вас доверие не удержал. Я не про возврат в ту же историю. Хочу понять только одно: появился ли сейчас другой use case, где CM может быть уже fit?",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Где процесс ломается чаще всего: payout status, follow-ups или incidents?",
+        "objections": [
+          {
+            "objection": "Пока не понимаю механику. Что именно делает Mellow по шагам, а что остаётся на нашей стороне?",
+            "result": "answered"
+          },
+          {
+            "objection": "Хорошо. Но мне не нужен broad comeback story.",
+            "result": "answered"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Где процесс ломается чаще всего: payout status, follow-ups или incidents?",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Ирина, вижу, что старый CoR-контур с Mellow у вас доверие не удержал. Я не про возврат в ту же историю. Хочу понять только одно: появился ли сейчас другой use case, где CM может быть уже fit?",
+      "ts": "2026-04-24T07:47:41.037Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пока не понимаю механику. Что именно делает Mellow по шагам, а что остаётся на нашей стороне?",
+      "ts": "2026-04-24T07:47:41.037Z"
+    },
+    {
+      "role": "seller",
+      "text": "Где процесс ломается чаще всего: payout status, follow-ups или incidents?",
+      "ts": "2026-04-24T07:47:41.839Z"
+    },
+    {
+      "role": "bot",
+      "text": "Хорошо. Но мне не нужен broad comeback story.",
+      "ts": "2026-04-24T07:47:41.840Z"
+    },
+    {
+      "role": "seller",
+      "text": "Предлагаю узкий следующий шаг: 15 минут только по проблемному участку, без общего pitch. Подходит?",
+      "ts": "2026-04-24T07:47:42.652Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T07:47:42.653Z"
+    }
+  ]
+}

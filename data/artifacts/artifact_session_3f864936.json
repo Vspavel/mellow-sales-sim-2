@@ -1,0 +1,102 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_3f864936",
+  "saved_at": "2026-04-24T03:33:06.909Z",
+  "started_at": "2026-04-18T23:33:29.481Z",
+  "finished_at": "2026-04-18T23:33:29.520Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "andrey",
+    "name": "Андрей Волков"
+  },
+  "signal_card": {
+    "id": "andrey-card-1",
+    "signal_type": "COMPLIANCE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Увидел, что у вас перед внешним legal review уже был зависший платёж на 23 дня и finance продолжает руками сводить подрядчиков через Wise и Payoneer. Mellow помогает собрать более управляемый payment flow, документы и audit trail без обещаний снять misclassification риск."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Увидел, что у вас перед внешним legal review уже был зависший платёж на 23 дня и finance продолжает руками сводить подрядчиков через Wise и Payoneer. Mellow помогает собрать более управляемый payment flow, документы и audit trail без обещаний снять misclassification риск.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Увидел, что у вас перед внешним legal review уже был зависший платёж на 23 дня и finance продолжает руками сводить подрядчиков через Wise и Payoneer. Mellow помогает собрать более управляемый payment flow, документы и audit trail без обещаний снять misclassification риск."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Увидел, что у вас перед внешним legal review уже был зависший платёж на 23 дня и finance продолжает руками сводить подрядчиков через Wise и Payoneer. Mellow помогает собрать более управляемый payment flow, документы и audit trail без обещаний снять misclassification риск.",
+        "objections": [
+          {
+            "objection": "Ок, контекст вы хотя бы увидели. Тогда сразу: что именно Mellow контролирует, а где ваша ответственность заканчивается?",
+            "result": "answered"
+          },
+          {
+            "objection": "Это уже ближе к делу. Но зачем мне менять текущего посредника, если схема пусть криво, но работает годами?",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Увидел, что у вас перед внешним legal review уже был зависший платёж на 23 дня и finance продолжает руками сводить подрядчиков через Wise и Payoneer. Mellow помогает собрать более управляемый payment flow, документы и audit trail без обещаний снять misclassification риск."
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Андрей Волков. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-18T23:33:29.481Z"
+    },
+    {
+      "role": "seller",
+      "text": "Увидел, что у вас перед внешним legal review уже был зависший платёж на 23 дня и finance продолжает руками сводить подрядчиков через Wise и Payoneer. Mellow помогает собрать более управляемый payment flow, документы и audit trail без обещаний снять misclassification риск.",
+      "ts": "2026-04-18T23:33:29.509Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок, контекст вы хотя бы увидели. Тогда сразу: что именно Mellow контролирует, а где ваша ответственность заканчивается?",
+      "ts": "2026-04-18T23:33:29.509Z"
+    },
+    {
+      "role": "seller",
+      "text": "Мы не берём на себя чужой налоговый риск, но даём более понятную цепочку выплат, SLA по инцидентам и меньше ручной сверки для finance.",
+      "ts": "2026-04-18T23:33:29.515Z"
+    },
+    {
+      "role": "bot",
+      "text": "Это уже ближе к делу. Но зачем мне менять текущего посредника, если схема пусть криво, но работает годами?",
+      "ts": "2026-04-18T23:33:29.515Z"
+    }
+  ]
+}

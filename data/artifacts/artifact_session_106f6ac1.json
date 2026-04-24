@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_106f6ac1",
+  "saved_at": "2026-04-24T08:51:01.686Z",
+  "started_at": "2026-04-24T08:51:00.288Z",
+  "finished_at": "2026-04-24T08:51:01.566Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "fx_trust_shock_finance",
+    "name": "Дмитрий Карпов"
+  },
+  "signal_card": {
+    "id": "fx-trust-shock-finance-card-1",
+    "signal_type": "POST_ONBOARDING_RISK",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "objections": [
+          {
+            "objection": "I see you did your homework. Immediate question: payment chain, documents, KYC — what's in your scope, what's not?",
+            "result": "answered"
+          },
+          {
+            "objection": "Too many declarations. What specifically changes in my process, and in what timeframe?",
+            "result": "answered"
+          },
+          {
+            "objection": "Ok. Send me a brief written summary: payment flow, audit story, scope boundary. If it's concrete, I'll do a 20-minute call.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Specifically on cost, Mellow covers KYC, contractor docs, and the payment chain with audit trail on our side. Which part do you want more precision on?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+      "ts": "2026-04-24T08:51:00.656Z"
+    },
+    {
+      "role": "bot",
+      "text": "I see you did your homework. Immediate question: payment chain, documents, KYC — what's in your scope, what's not?",
+      "ts": "2026-04-24T08:51:00.656Z"
+    },
+    {
+      "role": "seller",
+      "text": "What is most critical for you right now in the contractor setup: scope boundary, audit trail, or manual reconciliation?",
+      "ts": "2026-04-24T08:51:01.027Z"
+    },
+    {
+      "role": "bot",
+      "text": "Too many declarations. What specifically changes in my process, and in what timeframe?",
+      "ts": "2026-04-24T08:51:01.028Z"
+    },
+    {
+      "role": "seller",
+      "text": "Specifically on cost, Mellow covers KYC, contractor docs, and the payment chain with audit trail on our side. Which part do you want more precision on?",
+      "ts": "2026-04-24T08:51:01.427Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok. Send me a brief written summary: payment flow, audit story, scope boundary. If it's concrete, I'll do a 20-minute call.",
+      "ts": "2026-04-24T08:51:01.428Z"
+    }
+  ]
+}

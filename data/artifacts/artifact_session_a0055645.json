@@ -1,0 +1,102 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_a0055645",
+  "saved_at": "2026-04-24T03:33:06.899Z",
+  "started_at": "2026-04-18T23:58:54.818Z",
+  "finished_at": "2026-04-18T23:58:54.831Z",
+  "seller_username": "hermes",
+  "persona": {
+    "id": "head_finance",
+    "name": "Елена Мартин"
+  },
+  "signal_card": {
+    "id": "head-finance-card-1",
+    "signal_type": "FINANCE_CONTROL_GAP",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Elena, перед audit finance обычно упирается в ручную сверку, слабый control и разбросанные документы. Mellow даёт audit trail, документы, платёжную цепь и процесс, чтобы лучше держать риск и ответственность."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Elena, перед audit finance обычно упирается в ручную сверку, слабый control и разбросанные документы. Mellow даёт audit trail, документы, платёжную цепь и процесс, чтобы лучше держать риск и ответственность.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Elena, перед audit finance обычно упирается в ручную сверку, слабый control и разбросанные документы. Mellow даёт audit trail, документы, платёжную цепь и процесс, чтобы лучше держать риск и ответственность."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Elena, перед audit finance обычно упирается в ручную сверку, слабый control и разбросанные документы. Mellow даёт audit trail, документы, платёжную цепь и процесс, чтобы лучше держать риск и ответственность.",
+        "objections": [
+          {
+            "objection": "Хорошо, контекст finance operations вы увидели. Что именно вы контролируете в цепочке, а что остаётся на стороне клиента?",
+            "result": "answered"
+          },
+          {
+            "objection": "Ок. А что я получаю кроме ещё одной прослойки? Мне нужны контроль и меньше ручной сверки, а не новый vendor ради vendor.",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Не обещаем магический shield, но можем показать SLA, статусы, налоговые границы и меньше ручной нагрузки. Если полезно, предложу 20-минутный review текущего процесса."
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Елена Мартин. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-18T23:58:54.818Z"
+    },
+    {
+      "role": "seller",
+      "text": "Elena, перед audit finance обычно упирается в ручную сверку, слабый control и разбросанные документы. Mellow даёт audit trail, документы, платёжную цепь и процесс, чтобы лучше держать риск и ответственность.",
+      "ts": "2026-04-18T23:58:54.822Z"
+    },
+    {
+      "role": "bot",
+      "text": "Хорошо, контекст finance operations вы увидели. Что именно вы контролируете в цепочке, а что остаётся на стороне клиента?",
+      "ts": "2026-04-18T23:58:54.822Z"
+    },
+    {
+      "role": "seller",
+      "text": "Не обещаем магический shield, но можем показать SLA, статусы, налоговые границы и меньше ручной нагрузки. Если полезно, предложу 20-минутный review текущего процесса.",
+      "ts": "2026-04-18T23:58:54.826Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. А что я получаю кроме ещё одной прослойки? Мне нужны контроль и меньше ручной сверки, а не новый vendor ради vendor.",
+      "ts": "2026-04-18T23:58:54.826Z"
+    }
+  ]
+}

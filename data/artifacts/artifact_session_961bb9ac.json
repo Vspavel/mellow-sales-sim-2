@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_961bb9ac",
+  "saved_at": "2026-04-24T03:33:06.881Z",
+  "started_at": "2026-04-19T00:03:30.868Z",
+  "finished_at": "2026-04-19T00:03:30.889Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "external_legal",
+    "name": "Давид Шмидт"
+  },
+  "signal_card": {
+    "id": "external-legal-card-1",
+    "signal_type": "OUTSIDE_COUNSEL_CHECK",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "David, external review выявил слабую defensibility в contractor/payment setup. Mellow даёт: document flow с audit trail, KYC, boundaries — в написанном виде."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "David, external review выявил слабую defensibility в contractor/payment setup. Mellow даёт: document flow с audit trail, KYC, boundaries — в написанном виде.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "David, external review выявил слабую defensibility в contractor/payment setup. Mellow даёт: document flow с audit trail, KYC, boundaries — в написанном виде."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "David, external review выявил слабую defensibility в contractor/payment setup. Mellow даёт: document flow с audit trail, KYC, boundaries — в написанном виде.",
+        "objections": [
+          {
+            "objection": "Хорошо. Тогда сразу: что именно контролирует Mellow, что не контролирует, и где это подтверждается процессно?",
+            "result": "answered"
+          },
+          {
+            "objection": "Звучит аккуратно. Тогда почему эта схема более defensible, чем текущая смесь посредников и ручных исключений?",
+            "result": "answered"
+          },
+          {
+            "objection": "А как вы описываете инциденты, исключения и границы ответственности клиенту без ложных обещаний?",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "David, external review выявил слабую defensibility в contractor/payment setup. Mellow даёт: document flow с audit trail, KYC, boundaries — в написанном виде."
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Давид Шмидт. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-19T00:03:30.868Z"
+    },
+    {
+      "role": "seller",
+      "text": "David, external review выявил слабую defensibility в contractor/payment setup. Mellow даёт: document flow с audit trail, KYC, boundaries — в написанном виде.",
+      "ts": "2026-04-19T00:03:30.873Z"
+    },
+    {
+      "role": "bot",
+      "text": "Хорошо. Тогда сразу: что именно контролирует Mellow, что не контролирует, и где это подтверждается процессно?",
+      "ts": "2026-04-19T00:03:30.873Z"
+    },
+    {
+      "role": "seller",
+      "text": "Что контролируем: документы, KYC, платёжный flow, audit trail. Что не берём: налоговую ответственность, misclassification. Явно в договоре. Как описываются инциденты и исключения сейчас?",
+      "ts": "2026-04-19T00:03:30.880Z"
+    },
+    {
+      "role": "bot",
+      "text": "Звучит аккуратно. Тогда почему эта схема более defensible, чем текущая смесь посредников и ручных исключений?",
+      "ts": "2026-04-19T00:03:30.880Z"
+    },
+    {
+      "role": "seller",
+      "text": "Written follow-up с зонами контроля, process safeguards и примером flow. Review call?",
+      "ts": "2026-04-19T00:03:30.884Z"
+    },
+    {
+      "role": "bot",
+      "text": "А как вы описываете инциденты, исключения и границы ответственности клиенту без ложных обещаний?",
+      "ts": "2026-04-19T00:03:30.884Z"
+    }
+  ]
+}

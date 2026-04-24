@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_9bbfde30",
+  "saved_at": "2026-04-24T03:33:06.631Z",
+  "started_at": "2026-04-20T03:07:46.773Z",
+  "finished_at": "2026-04-20T03:07:46.791Z",
+  "seller_username": "longrun_cycle_8",
+  "persona": {
+    "id": "alexey",
+    "name": "Алексей Громов"
+  },
+  "signal_card": {
+    "id": "alexey-card-1",
+    "signal_type": "PAIN_SIGNAL",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Alexey, I can see the distributed team is growing and Wise + crypto is no longer scaling without manual overhead. Mellow gives you a structured payout flow: automatic payments, statuses without follow-ups, escalations handled by us — not by you. What breaks most often in the current setup?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "The current setup stops being defensible in two scenarios: a payment gets stuck with no SLA path — or diligence comes and there's no audit trail. Your current setup has both risks. Mellow removes them specifically.",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Alexey, I can see the distributed team is growing and Wise + crypto is no longer scaling without manual overhead. Mellow gives you a structured payout flow: automatic payments, statuses without follow-ups, escalations handled by us — not by you. What breaks most often in the current setup?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Alexey, I can see the distributed team is growing and Wise + crypto is no longer scaling without manual overhead. Mellow gives you a structured payout flow: automatic payments, statuses without follow-ups, escalations handled by us — not by you. What breaks most often in the current setup?",
+        "objections": [
+          {
+            "objection": "Ok but crypto + Wise has worked for two years. Why do I need this specifically now?",
+            "result": "answered"
+          },
+          {
+            "objection": "Send me the flow on one screen. What specifically stops being manual, how much time that saves.",
+            "result": "answered"
+          },
+          {
+            "objection": "I've heard 'upgrade your ops' before. What concretely stops happening manually?",
+            "result": "answered"
+          },
+          {
+            "objection": "The current setup is slow but I understand it. What specifically becomes more predictable?",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Alexey, I can see the distributed team is growing and Wise + crypto is no longer scaling without manual overhead. Mellow gives you a structured payout flow: automatic payments, statuses without follow-ups, escalations handled by us — not by you. What breaks most often in the current setup?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Alexey, I can see the distributed team is growing and Wise + crypto is no longer scaling without manual overhead. Mellow gives you a structured payout flow: automatic payments, statuses without follow-ups, escalations handled by us — not by you. What breaks most often in the current setup?",
+      "ts": "2026-04-20T03:07:46.776Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok but crypto + Wise has worked for two years. Why do I need this specifically now?",
+      "ts": "2026-04-20T03:07:46.777Z"
+    },
+    {
+      "role": "seller",
+      "text": "The current setup stops being defensible in two scenarios: a payment gets stuck with no SLA path — or diligence comes and there's no audit trail. Your current setup has both risks. Mellow removes them specifically.",
+      "ts": "2026-04-20T03:07:46.779Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send me the flow on one screen. What specifically stops being manual, how much time that saves.",
+      "ts": "2026-04-20T03:07:46.780Z"
+    },
+    {
+      "role": "seller",
+      "text": "Concretely for ops: less manual status chasing, less reconciliation overhead, and a named owner for incidents. That is the before/after change, not a generic platform claim. What else do you need for the next step?",
+      "ts": "2026-04-20T03:07:46.783Z"
+    },
+    {
+      "role": "bot",
+      "text": "I've heard 'upgrade your ops' before. What concretely stops happening manually?",
+      "ts": "2026-04-20T03:07:46.783Z"
+    },
+    {
+      "role": "seller",
+      "text": "Concretely for ops: less manual status chasing, less reconciliation overhead, and a named owner for incidents. That is the before/after change, not a generic platform claim. Which part of your process is eating the most time right now?",
+      "ts": "2026-04-20T03:07:46.786Z"
+    },
+    {
+      "role": "bot",
+      "text": "The current setup is slow but I understand it. What specifically becomes more predictable?",
+      "ts": "2026-04-20T03:07:46.786Z"
+    },
+    {
+      "role": "seller",
+      "text": "Concretely for ops: less manual status chasing, less reconciliation overhead, and a named owner for incidents. That is the before/after change, not a generic platform claim. What would take the most pain off your team specifically?",
+      "ts": "2026-04-20T03:07:46.789Z"
+    },
+    {
+      "role": "bot",
+      "text": "Agreed. Waiting for your email.",
+      "ts": "2026-04-20T03:07:46.789Z"
+    }
+  ]
+}

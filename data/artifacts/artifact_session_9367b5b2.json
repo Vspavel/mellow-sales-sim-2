@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_9367b5b2",
+  "saved_at": "2026-04-24T03:33:06.886Z",
+  "started_at": "2026-04-19T00:03:30.281Z",
+  "finished_at": "2026-04-19T00:03:30.295Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "ops_manager",
+    "name": "Ирина Коваль"
+  },
+  "signal_card": {
+    "id": "ops-manager-card-1",
+    "signal_type": "OPERATIONS_OVERLOAD",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS_WITH_NOTES",
+    "verdict_label": null,
+    "summary_for_seller": "Прогон рабочий, но доверие и next step пока держатся не на всех ключевых местах.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "Первое сообщение слишком общее и теряет контекст сигнала.",
+        "evidence_quote": "Ирина, 30+ подрядчиков через Wise/Payoneer/таблицы — month-end занимает 4-5 дней. Mellow убирает 4 источника данных."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Нет ясной границы ответственности и конкретики по зоне контроля Mellow.",
+        "evidence_quote": "Конкретно: один flow для всех выплат, статусы в реале, не в чатах. Что именно у вас в процессе берёт больше всего времени?",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Ирина, 30+ подрядчиков через Wise/Payoneer/таблицы — month-end занимает 4-5 дней. Mellow убирает 4 источника данных."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Конкретно: один flow для всех выплат, статусы в реале, не в чатах. Что именно у вас в процессе берёт больше всего времени?",
+        "objections": [
+          {
+            "objection": "Нормально. Тогда коротко: что именно упростится у меня в ежедневной координации?",
+            "result": "answered"
+          },
+          {
+            "objection": "Нормально. Только не веди меня в долгий sales process. Что следующий шаг, чтобы быстро понять fit?",
+            "result": "answered"
+          },
+          {
+            "objection": "И сколько это стоит в деньгах или времени команды? Мне не нужна ещё одна ручная система поверх старой.",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Скину follow-up: как выглядит поток, что упрощается. 20 минут?"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Ирина Коваль. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-19T00:03:30.281Z"
+    },
+    {
+      "role": "seller",
+      "text": "Ирина, 30+ подрядчиков через Wise/Payoneer/таблицы — month-end занимает 4-5 дней. Mellow убирает 4 источника данных.",
+      "ts": "2026-04-19T00:03:30.285Z"
+    },
+    {
+      "role": "bot",
+      "text": "Нормально. Тогда коротко: что именно упростится у меня в ежедневной координации?",
+      "ts": "2026-04-19T00:03:30.285Z"
+    },
+    {
+      "role": "seller",
+      "text": "Конкретно: один flow для всех выплат, статусы в реале, не в чатах. Что именно у вас в процессе берёт больше всего времени?",
+      "ts": "2026-04-19T00:03:30.289Z"
+    },
+    {
+      "role": "bot",
+      "text": "Нормально. Только не веди меня в долгий sales process. Что следующий шаг, чтобы быстро понять fit?",
+      "ts": "2026-04-19T00:03:30.289Z"
+    },
+    {
+      "role": "seller",
+      "text": "Скину follow-up: как выглядит поток, что упрощается. 20 минут?",
+      "ts": "2026-04-19T00:03:30.292Z"
+    },
+    {
+      "role": "bot",
+      "text": "И сколько это стоит в деньгах или времени команды? Мне не нужна ещё одна ручная система поверх старой.",
+      "ts": "2026-04-19T00:03:30.292Z"
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_8304e24e",
+  "saved_at": "2026-04-24T03:33:05.180Z",
+  "started_at": "2026-04-20T03:12:23.895Z",
+  "finished_at": "2026-04-20T03:12:23.902Z",
+  "seller_username": "longrun_cycle_30",
+  "persona": {
+    "id": "head_finance",
+    "name": "Елена Мартин"
+  },
+  "signal_card": {
+    "id": "head-finance-card-1",
+    "signal_type": "FINANCE_CONTROL_GAP",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Elena, audit season always brings pressure on documentation. Mellow is a CoR with a full trail on each contractor: documents, KYC, payouts — all structured. We remove manual reconciliation and give you a scheme that's easier to explain to leadership and auditors. What's the weakest spot?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Elena, audit season always brings pressure on documentation. Mellow is a CoR with a full trail on each contractor: documents, KYC, payouts — all structured. We remove manual reconciliation and give you a scheme that's easier to explain to leadership and auditors. What's the weakest spot?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Elena, audit season always brings pressure on documentation. Mellow is a CoR with a full trail on each contractor: documents, KYC, payouts — all structured. We remove manual reconciliation and give you a scheme that's easier to explain to leadership and auditors. What's the weakest spot?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Elena, audit season always brings pressure on documentation. Mellow is a CoR with a full trail on each contractor: documents, KYC, payouts — all structured. We remove manual reconciliation and give you a scheme that's easier to explain to leadership and auditors. What's the weakest spot?",
+        "objections": [
+          {
+            "objection": "Context noted. I need the boundary: what's exactly in your scope, what's mine — clearly, without declarations.",
+            "result": "answered"
+          },
+          {
+            "objection": "Send a summary: flow, SLA and what gets removed from manual reconciliation. If the numbers are real — we'll talk.",
+            "result": "answered"
+          },
+          {
+            "objection": "Too many declarations. What specifically changes in my process, and in what timeframe?",
+            "result": "answered"
+          },
+          {
+            "objection": "Waiting for the materials. When will you send them?",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "The current setup stops being defensible in two scenarios: a payment gets stuck with no SLA path — or diligence comes and there's no audit trail. Your current setup has both risks. Mellow removes them specifically.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Elena, audit season always brings pressure on documentation. Mellow is a CoR with a full trail on each contractor: documents, KYC, payouts — all structured. We remove manual reconciliation and give you a scheme that's easier to explain to leadership and auditors. What's the weakest spot?",
+      "ts": "2026-04-20T03:12:23.896Z"
+    },
+    {
+      "role": "bot",
+      "text": "Context noted. I need the boundary: what's exactly in your scope, what's mine — clearly, without declarations.",
+      "ts": "2026-04-20T03:12:23.896Z"
+    },
+    {
+      "role": "seller",
+      "text": "The current setup stops being defensible in two scenarios: a payment gets stuck with no SLA path — or diligence comes and there's no audit trail. Your current setup has both risks. Mellow removes them specifically.",
+      "ts": "2026-04-20T03:12:23.897Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a summary: flow, SLA and what gets removed from manual reconciliation. If the numbers are real — we'll talk.",
+      "ts": "2026-04-20T03:12:23.897Z"
+    },
+    {
+      "role": "seller",
+      "text": "On SLA: a named escalation owner, defined response time in the contract, incident trail documented. Not general support — a process with accountability. What's most important to you heading into the next step?",
+      "ts": "2026-04-20T03:12:23.898Z"
+    },
+    {
+      "role": "bot",
+      "text": "Too many declarations. What specifically changes in my process, and in what timeframe?",
+      "ts": "2026-04-20T03:12:23.898Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-20T03:12:23.899Z"
+    },
+    {
+      "role": "bot",
+      "text": "Waiting for the materials. When will you send them?",
+      "ts": "2026-04-20T03:12:23.899Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-20T03:12:23.900Z"
+    },
+    {
+      "role": "bot",
+      "text": "Agreed. Waiting for your email.",
+      "ts": "2026-04-20T03:12:23.900Z"
+    }
+  ]
+}

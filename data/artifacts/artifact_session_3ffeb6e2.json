@@ -1,0 +1,246 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_3ffeb6e2",
+  "saved_at": "2026-04-24T08:52:59.801Z",
+  "started_at": "2026-04-24T08:52:53.290Z",
+  "finished_at": "2026-04-24T08:52:59.674Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "fx_trust_shock_finance",
+    "name": "Дмитрий Карпов"
+  },
+  "signal_card": {
+    "id": "fx-trust-shock-finance-card-1",
+    "signal_type": "POST_ONBOARDING_RISK",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "objections": [
+          {
+            "objection": "Ok, you at least saw the context. Right away: what exactly does Mellow control, and where does your responsibility end?",
+            "result": "answered"
+          },
+          {
+            "objection": "Sounds right. But the right words aren't an argument. What specifically will be different?",
+            "result": "answered"
+          },
+          {
+            "objection": "Fine. Send the flow and SLA. If it's grounded, we can talk.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Specifically on cost, Mellow covers KYC, contractor docs, and the payment chain with audit trail on our side. Which part do you want more precision on?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+      "ts": "2026-04-24T08:52:53.703Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok, you at least saw the context. Right away: what exactly does Mellow control, and where does your responsibility end?",
+      "ts": "2026-04-24T08:52:53.704Z"
+    },
+    {
+      "role": "seller",
+      "text": "What is most critical for you right now in the contractor setup: scope boundary, audit trail, or manual reconciliation?",
+      "ts": "2026-04-24T08:52:54.071Z"
+    },
+    {
+      "role": "bot",
+      "text": "Sounds right. But the right words aren't an argument. What specifically will be different?",
+      "ts": "2026-04-24T08:52:54.072Z"
+    },
+    {
+      "role": "seller",
+      "text": "Specifically on cost, Mellow covers KYC, contractor docs, and the payment chain with audit trail on our side. Which part do you want more precision on?",
+      "ts": "2026-04-24T08:52:54.415Z"
+    },
+    {
+      "role": "bot",
+      "text": "Fine. Send the flow and SLA. If it's grounded, we can talk.",
+      "ts": "2026-04-24T08:52:54.416Z"
+    },
+    {
+      "role": "seller",
+      "text": "The point here is the mechanism, not the pitch: KYC, contractor docs, payout flow, incident trail. Which piece matters most in your case?",
+      "ts": "2026-04-24T08:52:54.803Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:54.803Z"
+    },
+    {
+      "role": "seller",
+      "text": "Low-pressure next step: I can send a short one-pager for your case, and if it is concrete enough, then we can talk. Does that work?",
+      "ts": "2026-04-24T08:52:55.168Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:55.168Z"
+    },
+    {
+      "role": "seller",
+      "text": "Next step: one-pager today and a short review call right after. What slot works for you?",
+      "ts": "2026-04-24T08:52:55.545Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:55.545Z"
+    },
+    {
+      "role": "seller",
+      "text": "Low-pressure next step: I can send a short one-pager for your case, and if it is concrete enough, then we can talk. Does that work?",
+      "ts": "2026-04-24T08:52:55.918Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:55.918Z"
+    },
+    {
+      "role": "seller",
+      "text": "Low-pressure next step: I can send a short one-pager for your case, and if it is concrete enough, then we can talk. Does that work?",
+      "ts": "2026-04-24T08:52:56.283Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:56.283Z"
+    },
+    {
+      "role": "seller",
+      "text": "I can send a short summary on flow, scope, and SLA first so you can review it without a call. Would that help?",
+      "ts": "2026-04-24T08:52:56.636Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:56.636Z"
+    },
+    {
+      "role": "seller",
+      "text": "Low-pressure next step: I can send a short one-pager for your case, and if it is concrete enough, then we can talk. Does that work?",
+      "ts": "2026-04-24T08:52:57.049Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:57.049Z"
+    },
+    {
+      "role": "seller",
+      "text": "Low-pressure next step: I can send a short one-pager for your case, and if it is concrete enough, then we can talk. Does that work?",
+      "ts": "2026-04-24T08:52:57.434Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:57.434Z"
+    },
+    {
+      "role": "seller",
+      "text": "I can send a short summary on flow, scope, and SLA first so you can review it without a call. Would that help?",
+      "ts": "2026-04-24T08:52:57.929Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:57.929Z"
+    },
+    {
+      "role": "seller",
+      "text": "I can send a short summary on flow, scope, and SLA first so you can review it without a call. Would that help?",
+      "ts": "2026-04-24T08:52:58.327Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:58.328Z"
+    },
+    {
+      "role": "seller",
+      "text": "Low-pressure next step: I can send a short one-pager for your case, and if it is concrete enough, then we can talk. Does that work?",
+      "ts": "2026-04-24T08:52:58.725Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:58.726Z"
+    },
+    {
+      "role": "seller",
+      "text": "I can send a short summary on flow, scope, and SLA first so you can review it without a call. Would that help?",
+      "ts": "2026-04-24T08:52:59.087Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:59.087Z"
+    },
+    {
+      "role": "seller",
+      "text": "I can send a short summary on flow, scope, and SLA first so you can review it without a call. Would that help?",
+      "ts": "2026-04-24T08:52:59.525Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T08:52:59.526Z"
+    }
+  ]
+}

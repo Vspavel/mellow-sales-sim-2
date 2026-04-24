@@ -1,0 +1,114 @@
+# Sales Simulator — Андрей Волков
+
+Session: session_ec16b444
+Saved at: 2026-04-24T03:33:05.146Z
+Started: 2026-04-20T07:49:36.113Z
+Finished: 2026-04-20T07:49:36.132Z
+Seller: sdr_agent
+Persona: Андрей Волков (andrey)
+Signal card: andrey-card-2 | FUNDRAISING_DILIGENCE | Heat: warm
+
+Dialogue type: email
+Language: en
+
+## Verdict: PASS
+*Ready for next step*
+
+## Summary
+
+Good run: you held context, answered on-point, and brought the conversation to a next step.
+
+## Criteria
+
+- K1. Contextual opening: PASS — First message anchors to a specific signal from the card.
+- K6. Email format: PASS — Messages use correct email format: greeting and sign-off present.
+- K2. Scope & responsibility boundary: PASS — Seller stated Mellow's control scope without overclaiming.
+- K3. Persona language fit: PASS — Language is adapted to the chosen persona.
+- K4. Core objection handling: PASS — At least two key objections addressed substantively.
+- K5. Clear next step: PASS — Next step stated concretely.
+
+## Transcript
+
+[Seller] Subject: Stellarpath: Сейчас нет истории, которую можно уверенно показать на следующем раунде.
+
+Hi Андрей Волков,
+
+Andrey, I saw that Northstar has 45 contractors across complex geographies and a legal review coming up — and that payment sat stuck for 23 days. Mellow's scope: KYC, documents, payment chain, audit trail.
+
+We're clear on what we don't take on — misclassification risk stays on your side. Does this speak to what you're dealing with before the review?
+
+Best,
+Pavel
+
+[Андрей Волков] Sdr_agent,
+
+Thanks for reaching out. Ok, you at least saw the context. Right away: what exactly does Mellow control, and where does your responsibility end?
+
+Best,
+Андрей
+
+[Seller] Hi Андрей Волков,
+
+The current setup stops being defensible in two scenarios: a payment gets stuck with no SLA path — or diligence comes and there's no audit trail. Your current setup has both risks.
+
+Mellow removes them specifically.
+
+Best,
+Pavel
+
+[Андрей Волков] Sdr_agent,
+
+Thanks for reaching out. Ok. Send me a brief written summary: payment flow, audit story, scope boundary.
+
+If it's concrete, I'll do a 20-minute call.
+
+Best,
+Андрей
+
+[Seller] Hi Андрей Волков,
+
+On SLA: a named escalation owner, defined response time in the contract, incident trail documented. Not general support — a process with accountability.
+
+Would it make sense to compare this against your current flow?
+
+Best,
+Pavel
+
+[Андрей Волков] Sdr_agent,
+
+Thanks for reaching out. I haven't heard enough specifics. What exactly changes in the process, besides the nice words about compliance?
+
+Best,
+Андрей
+
+[Seller] Hi Андрей Волков,
+
+I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.
+
+Would it make sense to compare this against your current flow?
+
+Best,
+Pavel
+
+[Андрей Волков] Sdr_agent,
+
+Thanks for reaching out. Agreed. Waiting for your email.
+
+Best,
+Андрей
+
+[Seller] Hi Андрей Волков,
+
+I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.
+
+Would it make sense to compare this against your current flow?
+
+Best,
+Pavel
+
+[Андрей Волков] Sdr_agent,
+
+Thanks for reaching out. Ok. Send it over — I'll review.
+
+Best,
+Андрей

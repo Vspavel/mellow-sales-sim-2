@@ -1,0 +1,146 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_71bcd5da",
+  "saved_at": "2026-04-24T03:33:04.909Z",
+  "started_at": "2026-04-23T17:44:01.817Z",
+  "finished_at": "2026-04-23T17:44:46.896Z",
+  "seller_username": "masa-qa",
+  "persona": {
+    "id": "rate_floor_cfo",
+    "name": "Марина Белова"
+  },
+  "signal_card": {
+    "id": "rate-floor-cfo-card-1",
+    "signal_type": "RATE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Marina, I see you are comparing rates and Mellow is above market range. I will not argue the benchmark. The question is where the premium is actually justified for Altura — what are the biggest friction points in your current contractor payment setup?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Mellow controls contractor KYC, documentation, payout chain, and the audit trail on every transaction. What we do not take on: misclassification risk and your strategic legal decisions. That boundary is explicit and documented. The extra cost versus Wise/Payoneer is the structured audit trail and SLA on incident handling — particularly relevant if you have a compliance review coming.",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Mellow controls contractor KYC, documentation, payout chain, and the audit trail on every transaction. What we do not take on: misclassification risk and your strategic legal decisions. That boundary is explicit and documented. The extra cost versus Wise/Payoneer is the structured audit trail and SLA on incident handling — particularly relevant if you have a compliance review coming.",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Mellow controls contractor KYC, documentation, payout chain, and the audit trail on every transaction. What we do not take on: misclassification risk and your strategic legal decisions. That boundary is explicit and documented. The extra cost versus Wise/Payoneer is the structured audit trail and SLA on incident handling — particularly relevant if you have a compliance review coming.",
+        "objections": [
+          {
+            "objection": "Ok, you at least saw the context. Right away: what exactly does Mellow control, and where does your responsibility end?",
+            "result": "answered"
+          },
+          {
+            "objection": "Ok. Send me a brief written summary: payment flow, audit story, scope boundary.",
+            "result": "answered"
+          },
+          {
+            "objection": "I haven't heard enough specifics. What exactly changes in the process, besides the nice words about compliance?",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Mellow controls contractor KYC, documentation, payout chain, and the audit trail on every transaction. What we do not take on: misclassification risk and your strategic legal decisions. That boundary is explicit and documented. The extra cost versus Wise/Payoneer is the structured audit trail and SLA on incident handling — particularly relevant if you have a compliance review coming.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Marina, I see you are comparing rates and Mellow is above market range. I will not argue the benchmark. The question is where the premium is actually justified for Altura — what are the biggest friction points in your current contractor payment setup?",
+      "ts": "2026-04-23T17:44:08.241Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok, you at least saw the context. Right away: what exactly does Mellow control, and where does your responsibility end?",
+      "ts": "2026-04-23T17:44:08.370Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow controls contractor KYC, documentation, payout chain, and the audit trail on every transaction. What we do not take on: misclassification risk and your strategic legal decisions. That boundary is explicit and documented. The extra cost versus Wise/Payoneer is the structured audit trail and SLA on incident handling — particularly relevant if you have a compliance review coming.",
+      "ts": "2026-04-23T17:44:15.929Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok. Send me a brief written summary: payment flow, audit story, scope boundary.",
+      "ts": "2026-04-23T17:44:15.931Z"
+    },
+    {
+      "role": "seller",
+      "text": "To make it concrete: what does Altura currently use for contractor payments, and is the current cost fully visible or are there surprise charges?",
+      "ts": "2026-04-23T17:44:15.989Z"
+    },
+    {
+      "role": "bot",
+      "text": "I haven't heard enough specifics. What exactly changes in the process, besides the nice words about compliance?",
+      "ts": "2026-04-23T17:44:15.993Z"
+    },
+    {
+      "role": "seller",
+      "text": "What changes: instead of reconciling payments manually each month, every transaction gets a documented audit trail automatically. SLA on payment issue resolution is under 48 hours. For a CFO doing investor diligence, that documentation stack is the difference between a clean answer and three weeks of manual reconstruction. Can we schedule a 20-minute review of your specific setup?",
+      "ts": "2026-04-23T17:44:21.801Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T17:44:21.801Z"
+    },
+    {
+      "role": "seller",
+      "text": "What changes: instead of reconciling payments manually each month, every transaction gets a documented audit trail automatically. SLA on payment issue resolution is under 48 hours.",
+      "ts": "2026-04-23T17:44:27.075Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T17:44:27.076Z"
+    },
+    {
+      "role": "seller",
+      "text": "Marina, I will send you a one-pager: flow, SLA, and what the audit trail looks like before diligence. If it speaks to your situation, a 20-minute call this week — does that work?",
+      "ts": "2026-04-23T17:44:46.761Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-23T17:44:46.879Z"
+    }
+  ]
+}

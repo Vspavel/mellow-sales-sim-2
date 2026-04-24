@@ -1,0 +1,112 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_fbfb9a2a",
+  "saved_at": "2026-04-24T07:48:00.919Z",
+  "started_at": "2026-04-24T07:47:57.894Z",
+  "finished_at": "2026-04-24T07:48:00.778Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "direct_contract_transition",
+    "name": "Екатерина Левина"
+  },
+  "signal_card": {
+    "id": "direct-contract-transition-card-1",
+    "signal_type": "WORKFORCE_MIX_CHANGE",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS_WITH_NOTES",
+    "verdict_label": "Хорошо, но можно сильнее",
+    "summary_for_seller": "Прогон рабочий, но доверие и next step пока держатся не на всех ключевых местах.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "Первое сообщение слишком общее и теряет контекст сигнала.",
+        "evidence_quote": "Екатерина, вижу, что у вас структура roster изменилась и появился более узкий direct-contract вопрос. Не предлагаю широкий restart. Хочу понять, для какого именно slice новый контур может быть полезен.",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Нет ясной границы ответственности и конкретики по зоне контроля Mellow.",
+        "evidence_quote": "Где процесс ломается чаще всего: payout status, follow-ups или incidents?",
+        "blocking": false,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Екатерина, вижу, что у вас структура roster изменилась и появился более узкий direct-contract вопрос. Не предлагаю широкий restart. Хочу понять, для какого именно slice новый контур может быть полезен.",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Где процесс ломается чаще всего: payout status, follow-ups или incidents?",
+        "objections": [
+          {
+            "objection": "Если это реально про changed workforce mix, то скажите узко: для какой части структуры это вообще practically useful?",
+            "result": "answered"
+          },
+          {
+            "objection": "Ок. Тогда не в общем, а в дизайне пилота: как это выглядит для узкой части структуры, а не для всей компании?",
+            "result": "answered"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Где процесс ломается чаще всего: payout status, follow-ups или incidents?",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Екатерина, вижу, что у вас структура roster изменилась и появился более узкий direct-contract вопрос. Не предлагаю широкий restart. Хочу понять, для какого именно slice новый контур может быть полезен.",
+      "ts": "2026-04-24T07:47:58.250Z"
+    },
+    {
+      "role": "bot",
+      "text": "Если это реально про changed workforce mix, то скажите узко: для какой части структуры это вообще practically useful?",
+      "ts": "2026-04-24T07:47:58.250Z"
+    },
+    {
+      "role": "seller",
+      "text": "Где процесс ломается чаще всего: payout status, follow-ups или incidents?",
+      "ts": "2026-04-24T07:47:59.209Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. Тогда не в общем, а в дизайне пилота: как это выглядит для узкой части структуры, а не для всей компании?",
+      "ts": "2026-04-24T07:47:59.209Z"
+    },
+    {
+      "role": "seller",
+      "text": "Давайте не в широкий звонок, а в узкий walkthrough на 15 минут только по самому острому месту. Такой формат ок?",
+      "ts": "2026-04-24T07:48:00.490Z"
+    },
+    {
+      "role": "system",
+      "text": "[No reply — the prospect went silent. Try a follow-up.]",
+      "ts": "2026-04-24T07:48:00.490Z"
+    }
+  ]
+}

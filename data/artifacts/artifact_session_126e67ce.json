@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_126e67ce",
+  "saved_at": "2026-04-24T03:33:06.884Z",
+  "started_at": "2026-04-19T00:03:30.518Z",
+  "finished_at": "2026-04-19T00:03:30.528Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "head_finance",
+    "name": "Елена Мартин"
+  },
+  "signal_card": {
+    "id": "head-finance-card-1",
+    "signal_type": "FINANCE_CONTROL_GAP",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Елена, перед audit — ручная сверка contractor payouts и разрозненные данные. Mellow = control + explainability. Зона ответственности — чёткая."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Елена, перед audit — ручная сверка contractor payouts и разрозненные данные. Mellow = control + explainability. Зона ответственности — чёткая.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Елена, перед audit — ручная сверка contractor payouts и разрозненные данные. Mellow = control + explainability. Зона ответственности — чёткая."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Елена, перед audit — ручная сверка contractor payouts и разрозненные данные. Mellow = control + explainability. Зона ответственности — чёткая.",
+        "objections": [
+          {
+            "objection": "Хорошо, контекст finance operations вы увидели. Что именно вы контролируете в цепочке, а что остаётся на стороне клиента?",
+            "result": "answered"
+          },
+          {
+            "objection": "Ок. А что я получаю кроме ещё одной прослойки? Мне нужны контроль и меньше ручной сверки, а не новый vendor ради vendor.",
+            "result": "answered"
+          },
+          {
+            "objection": "И отдельно, как вы работаете с НДФЛ и выплатами по людям с российским паспортом? Мне нужна граница, а не витрина.",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Скину flow и SLA. Если приземлённо — 20 минут?"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Елена Мартин. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-19T00:03:30.518Z"
+    },
+    {
+      "role": "seller",
+      "text": "Елена, перед audit — ручная сверка contractor payouts и разрозненные данные. Mellow = control + explainability. Зона ответственности — чёткая.",
+      "ts": "2026-04-19T00:03:30.521Z"
+    },
+    {
+      "role": "bot",
+      "text": "Хорошо, контекст finance operations вы увидели. Что именно вы контролируете в цепочке, а что остаётся на стороне клиента?",
+      "ts": "2026-04-19T00:03:30.521Z"
+    },
+    {
+      "role": "seller",
+      "text": "Control: документы, KYC, платёжный flow, audit trail. Ручная сверка уходит. SLA прописан. Как выглядит сейчас monthly close по contractor spend?",
+      "ts": "2026-04-19T00:03:30.523Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок. А что я получаю кроме ещё одной прослойки? Мне нужны контроль и меньше ручной сверки, а не новый vendor ради vendor.",
+      "ts": "2026-04-19T00:03:30.523Z"
+    },
+    {
+      "role": "seller",
+      "text": "Скину flow и SLA. Если приземлённо — 20 минут?",
+      "ts": "2026-04-19T00:03:30.526Z"
+    },
+    {
+      "role": "bot",
+      "text": "И отдельно, как вы работаете с НДФЛ и выплатами по людям с российским паспортом? Мне нужна граница, а не витрина.",
+      "ts": "2026-04-19T00:03:30.526Z"
+    }
+  ]
+}

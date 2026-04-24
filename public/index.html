@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mellow Sales Simulator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <main class="content">
+        <section class="phase-panel" id="setupPanel">
+          <header class="panel-header">
+            <p class="phase-label">Mellow</p>
+            <h1>Sales Simulator</h1>
+          </header>
+
+          <div class="launch-card">
+            <div class="field-group">
+              <label class="field-label" for="personaSelect">Role</label>
+              <div class="persona-row">
+                <select id="personaSelect" class="text-input persona-select">
+                  <option value="">Choose a role...</option>
+                </select>
+                <button id="addPersonaInlineBtn" class="ghost-btn add-inline-btn" type="button">+add</button>
+              </div>
+            </div>
+
+            <p class="persona-summary muted" id="selectedPersonaMeta"></p>
+
+            <div class="field-group">
+              <span class="field-label">Dialogue type</span>
+              <div class="segmented-control" id="dialogueTypePicker">
+                <button type="button" class="seg-btn is-active" id="dialogueTypeMessenger">Messenger</button>
+                <button type="button" class="seg-btn" id="dialogueTypeEmail">Email</button>
+              </div>
+              <p class="muted seg-hint" id="dialogueTypeHint">Short, conversational turns. Think LinkedIn DM or Telegram.</p>
+            </div>
+
+            <div id="setupCta" class="hidden">
+              <button id="startConversationBtn" class="launch-btn">Start simulation</button>
+            </div>
+
+            <details class="run-details" id="runDetailsDisclosure">
+              <summary class="run-details-toggle">Run details</summary>
+              <div class="run-details-body">
+                <div class="field-group">
+                  <p class="field-label">System prompt</p>
+                  <p class="preview-intro" id="selectedPersonaPrompt"></p>
+                </div>
+                <div class="field-group">
+                  <p class="field-label">Email behavior layer</p>
+                  <p class="preview-intro" id="selectedPersonaEmailPrompt"></p>
+                </div>
+                <div class="field-group">
+                  <p class="field-label">Required fields</p>
+                  <ul id="requiredFieldsList" class="required-fields-list"></ul>
+                </div>
+                <div id="signalBrief" class="hidden">
+                  <div class="signal-card" id="signalCard"></div>
+                </div>
+                <div class="detail-actions">
+                  <button id="editPersonaBtn" class="ghost-btn hidden" type="button">Edit role</button>
+                </div>
+              </div>
+            </details>
+
+            <div class="run-details">
+              <button type="button" id="randomizerToggle" class="run-details-toggle randomizer-toggle">Randomizer settings</button>
+              <div class="run-details-body hidden" id="randomizerPanel">
+                <div class="field-group">
+                  <label class="field-label" for="variabilitySelect">Signal variability</label>
+                  <select id="variabilitySelect" class="text-input">
+                    <option value="off">Off — same card every run</option>
+                    <option value="low">Low — slight variation</option>
+                    <option value="medium" selected>Medium — default</option>
+                    <option value="high">High — maximum variation</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <p class="field-label">Signal types</p>
+                  <div class="signal-type-grid">
+                    <label class="signal-type-label"><input class="signal-type-cb" type="checkbox" value="COMPLIANCE_PRESSURE" checked /> Compliance check</label>
+                    <label class="signal-type-label"><input class="signal-type-cb" type="checkbox" value="PAIN_SIGNAL" checked /> Operational payment failure</label>
+                    <label class="signal-type-label"><input class="signal-type-cb" type="checkbox" value="FUNDRAISING_DILIGENCE" checked /> Post-round diligence</label>
+                    <label class="signal-type-label"><input class="signal-type-cb" type="checkbox" value="TEAM_SCALING" checked /> Team growth overload</label>
+                    <label class="signal-type-label"><input class="signal-type-cb" type="checkbox" value="OPERATIONS_OVERLOAD" checked /> Ops overload</label>
+                    <label class="signal-type-label"><input class="signal-type-cb" type="checkbox" value="FINANCE_CONTROL_GAP" checked /> Finance control gap</label>
+                    <label class="signal-type-label"><input class="signal-type-cb" type="checkbox" value="LEGAL_REVIEW_TRIGGER" checked /> Legal review trigger</label>
+                    <label class="signal-type-label"><input class="signal-type-cb" type="checkbox" value="OUTSIDE_COUNSEL_CHECK" checked /> Outside counsel check</label>
+                  </div>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">
+                    <input type="checkbox" id="randomFactorToggle" />
+                    Enable random interruption factor
+                  </label>
+                  <p class="muted seg-hint">When enabled, the persona may go silent, say they're busy, or defer — simulating real outreach unpredictability.</p>
+                </div>
+                <div id="randomFactorPanel" class="hidden">
+                  <div class="prob-grid">
+                    <label class="field-group">
+                      <span class="field-label">Ghost (silence) %</span>
+                      <input id="ghostProbInput" class="text-input prob-input" type="number" min="0" max="100" value="15" />
+                    </label>
+                    <label class="field-group">
+                      <span class="field-label">Busy / no time %</span>
+                      <input id="busyProbInput" class="text-input prob-input" type="number" min="0" max="100" value="10" />
+                    </label>
+                    <label class="field-group">
+                      <span class="field-label">Write later / defer %</span>
+                      <input id="deferProbInput" class="text-input prob-input" type="number" min="0" max="100" value="10" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="launch-secondary">
+              <button id="createPersonaBtn" class="ghost-btn" type="button">Manage personas</button>
+              <button id="openAnalyticsBtn" class="ghost-btn" type="button">Analytics</button>
+              <button id="openHistoryBtn" class="ghost-btn" type="button">История бесед</button>
+              <button id="resetBtn" class="ghost-btn hidden" type="button">New run</button>
+            </div>
+          </div>
+
+          <!-- hidden sentinel for JS compat -->
+          <h1 id="selectedPersonaName" class="hidden"></h1>
+          <div id="emptySetup" class="hidden"></div>
+        </section>
+
+        <section class="phase-panel hidden" id="runPanel">
+          <header class="panel-header">
+            <p class="phase-label">Run</p>
+            <div class="run-meta">
+              <div class="run-meta-top">
+                <strong id="runStatus"></strong>
+                <span id="channelBadge" class="channel-badge channel-badge--messenger">Messenger</span>
+              </div>
+              <span class="muted run-focus" id="runFocus"></span>
+            </div>
+          </header>
+
+          <div class="run-overview">
+            <section class="run-insight-card" id="personaSummaryCard">
+              <div class="run-insight-head">
+                <p class="phase-label">Persona</p>
+              </div>
+              <div id="personaSummaryPanel"></div>
+            </section>
+
+            <section class="run-insight-card" id="runSignalCard">
+              <div class="run-insight-head">
+                <p class="phase-label">Active signal</p>
+                <span id="runSignalBadge" class="channel-badge channel-badge--messenger">Selected by session</span>
+              </div>
+              <div id="runSignalPanel"></div>
+            </section>
+
+            <section class="run-insight-card">
+              <div class="run-insight-head">
+                <p class="phase-label">Live buyer state</p>
+                <span id="buyerStateTurnMeta" class="muted run-insight-meta">Baseline before first seller turn</span>
+              </div>
+              <div id="buyerStateLivePanel"></div>
+            </section>
+          </div>
+
+          <div id="transcript" class="transcript" aria-live="polite"></div>
+
+          <div id="suggestionPanel" class="suggestion-panel hidden">
+            <p class="suggestion-label">How a good seller might respond</p>
+            <p id="suggestionMeta" class="suggestion-meta muted"></p>
+            <p id="suggestionText" class="suggestion-text"></p>
+            <button id="useSuggestionBtn">Use</button>
+          </div>
+
+          <p class="composer-focus" id="composerFocus"></p>
+          <form id="messageForm" class="composer">
+            <textarea id="messageInput" rows="3" placeholder="Write your first touch or next message"></textarea>
+            <div class="composer-row">
+              <div class="hint-controls">
+                <select id="hintLangSelect" class="hint-lang-select">
+                  <option value="ru" selected>Русский</option>
+                  <option value="en">English</option>
+                </select>
+                <button type="button" id="suggestBtn" class="ghost-btn">Hint</button>
+              </div>
+              <button type="submit">Send</button>
+            </div>
+          </form>
+
+          <div class="run-footer">
+            <button id="finishBtn" class="secondary-btn" disabled>Finish run</button>
+          </div>
+        </section>
+
+        <section class="phase-panel hidden" id="analyticsPanel">
+          <header class="panel-header">
+            <p class="phase-label">Analytics</p>
+            <h1>Sales Simulator analytics</h1>
+          </header>
+          <div class="launch-card">
+            <div class="split-row align-center analytics-head-row">
+              <div>
+                <p class="muted" id="analyticsGeneratedAt">Loading analytics...</p>
+              </div>
+              <div class="detail-actions">
+                <button id="refreshAnalyticsBtn" class="ghost-btn" type="button">Refresh</button>
+                <button id="backFromAnalyticsBtn" class="ghost-btn" type="button">Back</button>
+              </div>
+            </div>
+
+            <div class="analytics-grid" id="analyticsKpis">
+              <div class="run-insight-card analytics-kpi-card">
+                <div class="run-insight-head"><p class="phase-label">Main KPI</p></div>
+                <div class="analytics-kpi-value" id="analyticsSuccessRate">—</div>
+                <div class="muted">Successful dialogues, where success = buyer agreed to a call or meeting</div>
+              </div>
+              <div class="run-insight-card analytics-kpi-card">
+                <div class="run-insight-head"><p class="phase-label">Finished runs</p></div>
+                <div class="analytics-kpi-value" id="analyticsFinishedRuns">—</div>
+              </div>
+              <div class="run-insight-card analytics-kpi-card">
+                <div class="run-insight-head"><p class="phase-label">Successful dialogues</p></div>
+                <div class="analytics-kpi-value" id="analyticsSuccessfulDialogs">—</div>
+              </div>
+            </div>
+
+            <div class="run-insight-card">
+              <div class="run-insight-head"><p class="phase-label">By persona</p></div>
+              <div id="analyticsPersonaTable"></div>
+            </div>
+
+            <div class="run-insight-card">
+              <div class="run-insight-head">
+                <p class="phase-label">Dialogues</p>
+                <span id="analyticsDialogueCount" class="muted run-insight-meta"></span>
+              </div>
+              <div class="analytics-filters">
+                <select id="filterPersona" class="analytics-filter-select">
+                  <option value="">All personas</option>
+                </select>
+                <select id="filterOutcome" class="analytics-filter-select">
+                  <option value="">All outcomes</option>
+                  <option value="booked">Meeting booked</option>
+                  <option value="not_booked">No meeting</option>
+                </select>
+                <select id="filterVerdict" class="analytics-filter-select">
+                  <option value="">All verdicts</option>
+                  <option value="PASS">Pass</option>
+                  <option value="PASS_WITH_NOTES">Pass with notes</option>
+                  <option value="FAIL">Fail</option>
+                  <option value="BLOCKER">Blocker</option>
+                </select>
+                <select id="sortDialogues" class="analytics-filter-select">
+                  <option value="date_desc">Newest first</option>
+                  <option value="date_asc">Oldest first</option>
+                  <option value="persona">By persona</option>
+                  <option value="outcome">Meeting booked first</option>
+                  <option value="score_desc">Score high → low</option>
+                  <option value="score_asc">Score low → high</option>
+                </select>
+              </div>
+              <div id="analyticsRecentRuns"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="phase-panel hidden" id="historyPanel">
+          <header class="panel-header">
+            <p class="phase-label">История бесед</p>
+            <h1>Сохранённые беседы</h1>
+          </header>
+          <div class="launch-card">
+            <div class="split-row align-center analytics-head-row">
+              <div>
+                <p class="muted" id="historyMeta">Загрузка...</p>
+              </div>
+              <div class="detail-actions">
+                <button id="refreshHistoryBtn" class="ghost-btn" type="button">Обновить</button>
+                <button id="backFromHistoryBtn" class="ghost-btn" type="button">Назад</button>
+              </div>
+            </div>
+            <div class="history-bulk-actions detail-actions hidden" id="historyBulkActions">
+              <button id="historySelectAllBtn" class="ghost-btn" type="button">Выбрать все</button>
+              <button id="historyDeselectAllBtn" class="ghost-btn" type="button">Снять выбор</button>
+              <button id="historyDownloadSelectedBtn" class="secondary-btn" type="button">Скачать выбранные</button>
+              <button id="historyDownloadAllBtn" class="ghost-btn" type="button">Скачать все</button>
+            </div>
+            <div id="historyList" class="history-list"></div>
+          </div>
+        </section>
+
+        <section class="phase-panel hidden" id="reviewPanel">
+          <header class="panel-header">
+            <p class="phase-label">Review</p>
+            <h1 id="reviewTitle">Run result</h1>
+          </header>
+          <div id="assessment"></div>
+          <div class="run-footer">
+            <button id="startAnotherBtn" class="ghost-btn" type="button">Start another run</button>
+            <button id="backToHistoryBtn" class="ghost-btn hidden" type="button">Back to history</button>
+            <button id="downloadResultBtn" class="secondary-btn hidden" type="button">Download</button>
+            <button id="copyShareLinkBtn" class="ghost-btn hidden" type="button">Copy link</button>
+            <button id="sendResultBtn" class="secondary-btn hidden" type="button">Send result email</button>
+            <span id="sendResultStatus" class="muted" style="font-size:0.85em"></span>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="historyViewModal" class="modal-shell hidden">
+      <div class="modal-card">
+        <div class="split-row">
+          <div>
+            <p class="phase-label">История бесед</p>
+            <h2 id="historyViewTitle"></h2>
+          </div>
+          <button id="historyViewClose" class="ghost-btn" type="button">Закрыть</button>
+        </div>
+        <p class="muted" id="historyViewMeta"></p>
+        <div id="historyViewVerdict" style="margin:8px 0"></div>
+        <div class="detail-actions" style="margin-bottom:12px">
+          <a id="historyViewDownloadJson" class="ghost-btn" download>JSON</a>
+          <a id="historyViewDownloadMd" class="ghost-btn" download>MD</a>
+        </div>
+        <div id="historyViewCriteria" class="coaching-list" style="margin-bottom:16px"></div>
+        <div id="historyViewTranscript" class="transcript" style="max-height:400px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <div id="personaEditor" class="modal-shell hidden">
+      <div class="modal-card">
+        <div class="split-row">
+          <div>
+            <p class="phase-label">Persona editor</p>
+            <h2 id="personaEditorTitle">Add role</h2>
+          </div>
+          <button id="cancelPersonaBtn" class="ghost-btn" type="button">Close</button>
+        </div>
+
+        <form id="personaForm" class="persona-form">
+          <input type="hidden" name="id" />
+
+          <label class="field-group">
+            <span class="field-label">System prompt</span>
+            <textarea name="system_prompt" class="text-input" rows="8" placeholder="Paste the buyer system prompt here first"></textarea>
+          </label>
+
+          <label class="field-group">
+            <span class="field-label">Email subsystem prompt</span>
+            <textarea name="email_prompt" class="text-input" rows="5" placeholder="Add the email-specific behavior layer for this persona"></textarea>
+          </label>
+
+          <div class="split-row align-start">
+            <button id="promptExtractBtn" class="secondary-btn" type="button">Extract fields from prompt</button>
+            <span id="promptExtractStatus" class="muted extract-status"></span>
+          </div>
+
+          <div class="split-grid">
+            <label class="field-group">
+              <span class="field-label">Name</span>
+              <input name="name" class="text-input" />
+            </label>
+
+            <label class="field-group">
+              <span class="field-label">Role</span>
+              <input name="role" class="text-input" required />
+            </label>
+          </div>
+
+          <label class="field-group">
+            <span class="field-label">Role essence</span>
+            <textarea name="intro" class="text-input" rows="2"></textarea>
+          </label>
+
+          <div class="split-grid">
+            <label class="field-group">
+              <span class="field-label">Archetype</span>
+              <input name="archetype" class="text-input" />
+            </label>
+            <label class="field-group">
+              <span class="field-label">Tone</span>
+              <input name="tone" class="text-input" />
+            </label>
+          </div>
+
+          <label class="field-group">
+            <span class="field-label">Required fields JSON</span>
+            <textarea name="required_fields" class="text-input code-input" rows="8"></textarea>
+          </label>
+
+          <label class="field-group">
+            <span class="field-label">Signals JSON</span>
+            <textarea name="cards" class="text-input code-input" rows="14"></textarea>
+          </label>
+
+          <div class="editor-actions">
+            <button id="deletePersonaBtn" class="danger-btn hidden" type="button">Delete role</button>
+            <button id="cancelPersonaBtn2" class="secondary-btn" type="button">Cancel</button>
+            <button id="savePersonaBtn" type="submit">Save role</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="historyViewModal" class="modal-shell hidden">
+      <div class="modal-card history-view-modal-card">
+        <div class="split-row">
+          <div>
+            <p class="phase-label">Беседа</p>
+            <h2 id="historyViewTitle">—</h2>
+          </div>
+          <div class="detail-actions">
+            <a id="historyViewDownloadJson" class="ghost-btn" download>JSON</a>
+            <a id="historyViewDownloadMd" class="ghost-btn" download>Markdown</a>
+            <button id="historyViewClose" class="ghost-btn" type="button">Закрыть</button>
+          </div>
+        </div>
+        <div id="historyViewMeta" class="muted history-view-meta"></div>
+        <div id="historyViewVerdict" class="history-view-verdict"></div>
+        <div id="historyViewCriteria" class="history-view-criteria"></div>
+        <div id="historyViewTranscript" class="history-view-transcript transcript"></div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

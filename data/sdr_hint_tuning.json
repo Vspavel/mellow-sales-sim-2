@@ -1,0 +1,63 @@
+{
+  "openers": {
+    "ops_manager": [
+      "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side."
+    ],
+    "eng_manager": [
+      "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side."
+    ]
+  },
+  "concerns": {
+    "alexey": {
+      "op_value": [
+        "Concretely for ops: less manual status chasing, less reconciliation overhead, and a named owner for incidents. That is the before/after change, not a generic platform claim."
+      ]
+    },
+    "eng_manager": {
+      "op_value": [
+        "Concretely for ops: less manual status chasing, less reconciliation overhead, and a named owner for incidents. That is the before/after change, not a generic platform claim.",
+        "Ops impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions."
+      ],
+      "scope": [
+        "Scope boundary in one line: Mellow owns contractor docs, KYC, payment-chain operations, and audit trail; your legal/finance team owns legal qualification and strategic risk decisions. No overclaiming beyond that line."
+      ]
+    },
+    "ops_manager": {
+      "scope": [
+        "Scope boundary in one line: Mellow owns contractor docs, KYC, payment-chain operations, and audit trail; your legal/finance team owns legal qualification and strategic risk decisions. No overclaiming beyond that line."
+      ],
+      "op_value": [
+        "Ops impact with boundaries: manual payment follow-ups and reconciliation are replaced by Mellow-owned flow plus audit trail, while your team still owns legal qualification decisions.",
+        "Concretely for ops: less manual status chasing, less reconciliation overhead, and a named owner for incidents. That is the before/after change, not a generic platform claim."
+      ],
+      "incident": [
+        "Objection answer with mechanism: define incident trigger, named owner, response SLA, and the exact artifact trail produced after each escalation."
+      ]
+    },
+    "cfo_price_pressure": {
+      "price": [
+        "Acknowledge the fee gap directly, then reframe through all-in economics, audit trail, payment-chain reliability, and reduced finance fire drills.",
+        "Do not defend price in the abstract. Name the cheaper anchor, then explain what risk and manual work still remain outside that cheaper headline rate."
+      ]
+    },
+    "category_confusion_buyer": {
+      "category": [
+        "Reset the map simply: CoR, EoR, CM, and direct contracts solve different operating problems. Pick the right contour before pitching benefits.",
+        "Plain-language clarification beats jargon. Diagnose the buyer model first, then explain why the recommended structure fits."
+      ]
+    },
+    "fx_transparency_finance": {
+      "pricing": [
+        "State fee plus FX mechanics upfront. Trust rises when the buyer sees the full cost picture before committing.",
+        "Treat all-in economics as part of the product conversation, not a small-print finance detail."
+      ]
+    },
+    "sanctions_churn_ops": {
+      "risk": [
+        "Separate what Mellow controls from what external banks or sanctions regimes control. Honest boundaries matter more than reassurance here.",
+        "If the situation is structurally unstable, say so and propose a realistic next diagnostic step instead of forcing a close."
+      ]
+    }
+  },
+  "next_steps": {}
+}

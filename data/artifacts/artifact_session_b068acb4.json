@@ -1,0 +1,270 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_b068acb4",
+  "saved_at": "2026-04-24T03:33:04.953Z",
+  "started_at": "2026-04-23T08:33:31.966Z",
+  "finished_at": "2026-04-23T08:33:35.880Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "cm_winback",
+    "name": "Ирина Соколова"
+  },
+  "signal_card": {
+    "id": "cm-winback-card-3",
+    "signal_type": "DIRECT_CONTRACT_NEED",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "objections": [
+          {
+            "objection": "Context noted. But while it works — why switch?",
+            "result": "answered"
+          },
+          {
+            "objection": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+            "result": "answered"
+          },
+          {
+            "objection": "Fine. Send a brief: what disappears from manual, case study, rough numbers.",
+            "result": "answered"
+          },
+          {
+            "objection": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+      "ts": "2026-04-23T08:33:32.081Z"
+    },
+    {
+      "role": "bot",
+      "text": "Context noted. But while it works — why switch?",
+      "ts": "2026-04-23T08:33:32.081Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:33:32.321Z"
+    },
+    {
+      "role": "bot",
+      "text": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+      "ts": "2026-04-23T08:33:32.322Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? Which part of your process is eating the most time right now?",
+      "ts": "2026-04-23T08:33:32.546Z"
+    },
+    {
+      "role": "bot",
+      "text": "Fine. Send a brief: what disappears from manual, case study, rough numbers.",
+      "ts": "2026-04-23T08:33:32.547Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+      "ts": "2026-04-23T08:33:32.741Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:32.741Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:33:32.965Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:32.966Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:33:33.174Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:33.174Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:33:33.375Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:33.375Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:33:33.596Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:33.597Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:33:33.825Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:33.825Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:33:34.051Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:34.051Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:33:34.283Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:34.283Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:33:34.480Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:34.481Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:33:34.696Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:34.697Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:33:34.901Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:34.901Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:33:35.129Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:35.129Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? Which part of your process is eating the most time right now?",
+      "ts": "2026-04-23T08:33:35.305Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:35.305Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:33:35.510Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:35.510Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you one screen with the flow and what specifically stops being manual. If the numbers are real — can we schedule 20 minutes this week?",
+      "ts": "2026-04-23T08:33:35.751Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a very short description of that slice: who exactly you mean and why the fit exists now. If the logic is clean, we can continue.",
+      "ts": "2026-04-23T08:33:35.752Z"
+    }
+  ]
+}

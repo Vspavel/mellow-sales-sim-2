@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_80561036",
+  "saved_at": "2026-04-24T03:33:06.887Z",
+  "started_at": "2026-04-19T00:03:30.180Z",
+  "finished_at": "2026-04-19T00:03:30.192Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "eng_manager",
+    "name": "Марк Левин"
+  },
+  "signal_card": {
+    "id": "eng-manager-card-1",
+    "signal_type": "TEAM_SCALING",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": null,
+    "summary_for_seller": "Хороший прогон: ты держал контекст, отвечал по делу и довёл разговор до следующего шага.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Марк, команда Docklane блокируется на старте новых подрядчиков — 5-7 дней через HR/Finance/Legal. Mellow убирает эту цепочку."
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Продавец обозначил зону контроля Mellow без магических обещаний.",
+        "evidence_quote": "Хороший внутренний кейс для finance: меньше эскалаций, чистый process, время team не тратится на payment firefighting.",
+        "blocking": false
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Язык адаптирован под выбранную персону.",
+        "evidence_quote": "Хороший внутренний кейс для finance: меньше эскалаций, чистый process, время team не тратится на payment firefighting."
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "Минимум два ключевых возражения закрыты содержательно.",
+        "evidence_quote": "Хороший внутренний кейс для finance: меньше эскалаций, чистый process, время team не тратится на payment firefighting.",
+        "objections": [
+          {
+            "objection": "Ок, контекст вы увидели. Но почему мне это не станет ещё одним лишним vendor, которого потом надо продавать finance?",
+            "result": "answered"
+          },
+          {
+            "objection": "Хорошо. А как это помогает мне занести разговор в finance без тяжёлого enterprise theatre?",
+            "result": "answered"
+          },
+          {
+            "objection": "Пока много слов. Где конкретный апгрейд по скорости, процессу или удобству?",
+            "result": "answered"
+          }
+        ]
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "FAIL",
+        "short_reason": "Разговор закончился без чёткого next step.",
+        "evidence_quote": "Если вопросы — пиши."
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "system",
+      "text": "Сессия создана для Марк Левин. Начни с первого касания на основе SDE-card.",
+      "ts": "2026-04-19T00:03:30.180Z"
+    },
+    {
+      "role": "seller",
+      "text": "Марк, команда Docklane блокируется на старте новых подрядчиков — 5-7 дней через HR/Finance/Legal. Mellow убирает эту цепочку.",
+      "ts": "2026-04-19T00:03:30.183Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ок, контекст вы увидели. Но почему мне это не станет ещё одним лишним vendor, которого потом надо продавать finance?",
+      "ts": "2026-04-19T00:03:30.183Z"
+    },
+    {
+      "role": "seller",
+      "text": "Хороший внутренний кейс для finance: меньше эскалаций, чистый process, время team не тратится на payment firefighting.",
+      "ts": "2026-04-19T00:03:30.187Z"
+    },
+    {
+      "role": "bot",
+      "text": "Хорошо. А как это помогает мне занести разговор в finance без тяжёлого enterprise theatre?",
+      "ts": "2026-04-19T00:03:30.187Z"
+    },
+    {
+      "role": "seller",
+      "text": "Если вопросы — пиши.",
+      "ts": "2026-04-19T00:03:30.189Z"
+    },
+    {
+      "role": "bot",
+      "text": "Пока много слов. Где конкретный апгрейд по скорости, процессу или удобству?",
+      "ts": "2026-04-19T00:03:30.189Z"
+    }
+  ]
+}

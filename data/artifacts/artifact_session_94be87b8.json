@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_94be87b8",
+  "saved_at": "2026-04-24T03:33:06.567Z",
+  "started_at": "2026-04-20T03:07:51.418Z",
+  "finished_at": "2026-04-20T03:07:51.424Z",
+  "seller_username": "longrun_cycle_11",
+  "persona": {
+    "id": "head_finance",
+    "name": "Елена Мартин"
+  },
+  "signal_card": {
+    "id": "head-finance-card-2",
+    "signal_type": "FUNDRAISING_DILIGENCE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Elena, ClearHarbor is preparing for the annual audit and finance is getting contractor controls in order. Mellow takes on documents, KYC, and the payment chain — with an audit trail that's explainable to leadership. We don't remove your entire risk — we remove manual reconciliation and give you a structured scheme. What's the most painful point right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Elena, ClearHarbor is preparing for the annual audit and finance is getting contractor controls in order. Mellow takes on documents, KYC, and the payment chain — with an audit trail that's explainable to leadership. We don't remove your entire risk — we remove manual reconciliation and give you a structured scheme. What's the most painful point right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Elena, ClearHarbor is preparing for the annual audit and finance is getting contractor controls in order. Mellow takes on documents, KYC, and the payment chain — with an audit trail that's explainable to leadership. We don't remove your entire risk — we remove manual reconciliation and give you a structured scheme. What's the most painful point right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Elena, ClearHarbor is preparing for the annual audit and finance is getting contractor controls in order. Mellow takes on documents, KYC, and the payment chain — with an audit trail that's explainable to leadership. We don't remove your entire risk — we remove manual reconciliation and give you a structured scheme. What's the most painful point right now?",
+        "objections": [
+          {
+            "objection": "Good. But I need to explain this upward — in two sentences, no pitch. What's exactly your zone?",
+            "result": "answered"
+          },
+          {
+            "objection": "What specifically breaks without Mellow?",
+            "result": "answered"
+          },
+          {
+            "objection": "Send a summary: flow, SLA and what gets removed from manual reconciliation. If the numbers are real — we'll talk.",
+            "result": "answered"
+          },
+          {
+            "objection": "Agreed. Waiting for your email.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "The current setup stops being defensible in two scenarios: a payment gets stuck with no SLA path — or diligence comes and there's no audit trail. Your current setup has both risks. Mellow removes them specifically. Which part of this maps most directly to your situation?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Elena, ClearHarbor is preparing for the annual audit and finance is getting contractor controls in order. Mellow takes on documents, KYC, and the payment chain — with an audit trail that's explainable to leadership. We don't remove your entire risk — we remove manual reconciliation and give you a structured scheme. What's the most painful point right now?",
+      "ts": "2026-04-20T03:07:51.419Z"
+    },
+    {
+      "role": "bot",
+      "text": "Good. But I need to explain this upward — in two sentences, no pitch. What's exactly your zone?",
+      "ts": "2026-04-20T03:07:51.419Z"
+    },
+    {
+      "role": "seller",
+      "text": "On SLA: a named escalation owner, defined response time in the contract, incident trail documented. Not general support — a process with accountability.",
+      "ts": "2026-04-20T03:07:51.420Z"
+    },
+    {
+      "role": "bot",
+      "text": "What specifically breaks without Mellow?",
+      "ts": "2026-04-20T03:07:51.420Z"
+    },
+    {
+      "role": "seller",
+      "text": "The current setup stops being defensible in two scenarios: a payment gets stuck with no SLA path — or diligence comes and there's no audit trail. Your current setup has both risks. Mellow removes them specifically. Which part of this maps most directly to your situation?",
+      "ts": "2026-04-20T03:07:51.421Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a summary: flow, SLA and what gets removed from manual reconciliation. If the numbers are real — we'll talk.",
+      "ts": "2026-04-20T03:07:51.421Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-20T03:07:51.422Z"
+    },
+    {
+      "role": "bot",
+      "text": "Agreed. Waiting for your email.",
+      "ts": "2026-04-20T03:07:51.422Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you a brief written summary: payment flow, audit story, and scope boundary. If it's concrete and grounded, can we find 20 minutes this week?",
+      "ts": "2026-04-20T03:07:51.423Z"
+    },
+    {
+      "role": "bot",
+      "text": "Waiting for the materials. When will you send them?",
+      "ts": "2026-04-20T03:07:51.424Z"
+    }
+  ]
+}

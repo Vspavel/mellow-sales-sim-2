@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_4b5d47b2",
+  "saved_at": "2026-04-24T03:33:06.177Z",
+  "started_at": "2026-04-20T03:09:45.973Z",
+  "finished_at": "2026-04-20T03:09:45.982Z",
+  "seller_username": "longrun_cycle_4",
+  "persona": {
+    "id": "ops_manager",
+    "name": "Ирина Коваль"
+  },
+  "signal_card": {
+    "id": "ops-manager-card-1",
+    "signal_type": "OPERATIONS_OVERLOAD",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS_WITH_NOTES",
+    "verdict_label": "Good, but can be stronger",
+    "summary_for_seller": "Workable run, but trust and next step are not landing on all key points yet.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Tone and delivery are not adapted to the chosen persona.",
+        "evidence_quote": "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Objections addressed weakly or not followed through.",
+        "evidence_quote": "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.",
+        "objections": [
+          {
+            "objection": "The current setup is slow but I own it. Switching has a cost too.",
+            "result": "partial"
+          },
+          {
+            "objection": "Wait. I still don't understand how to bring this to finance.",
+            "result": "partial"
+          },
+          {
+            "objection": "Send me one screen with the flow and what specifically stops being manual. If it's real, we can talk.",
+            "result": "partial"
+          },
+          {
+            "objection": "Agreed. Waiting for your email.",
+            "result": "partial"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Concrete boundary from line one: Mellow handles contractor documents, KYC, payment chain operations, and audit trail; legal qualification and strategic risk decisions remain on your side.",
+      "ts": "2026-04-20T03:09:45.974Z"
+    },
+    {
+      "role": "bot",
+      "text": "The current setup is slow but I own it. Switching has a cost too.",
+      "ts": "2026-04-20T03:09:45.974Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-20T03:09:45.976Z"
+    },
+    {
+      "role": "bot",
+      "text": "Wait. I still don't understand how to bring this to finance.",
+      "ts": "2026-04-20T03:09:45.976Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-20T03:09:45.977Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send me one screen with the flow and what specifically stops being manual. If it's real, we can talk.",
+      "ts": "2026-04-20T03:09:45.977Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-20T03:09:45.978Z"
+    },
+    {
+      "role": "bot",
+      "text": "Agreed. Waiting for your email.",
+      "ts": "2026-04-20T03:09:45.979Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-20T03:09:45.980Z"
+    },
+    {
+      "role": "bot",
+      "text": "Waiting for the materials. When will you send them?",
+      "ts": "2026-04-20T03:09:45.980Z"
+    }
+  ]
+}

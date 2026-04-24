@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_38f9bff6",
+  "saved_at": "2026-04-24T03:33:06.209Z",
+  "started_at": "2026-04-20T03:09:43.431Z",
+  "finished_at": "2026-04-20T03:09:43.457Z",
+  "seller_username": "longrun_cycle_2",
+  "persona": {
+    "id": "olga",
+    "name": "Olga Sokolova"
+  },
+  "signal_card": {
+    "id": "olga-card-1",
+    "signal_type": "OUTSIDE_COUNSEL_CHECK",
+    "heat": "warm",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Olga, I saw LexCo started an outside-counsel review because the current contractor flow lacks traceability. Mellow's scope is explicit: contractor documentation, KYC, payment chain, audit trail. We do not claim to remove the client's legal risk. Which boundary or evidence gap would you test first?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Olga, I saw LexCo started an outside-counsel review because the current contractor flow lacks traceability. Mellow's scope is explicit: contractor documentation, KYC, payment chain, audit trail. We do not claim to remove the client's legal risk. Which boundary or evidence gap would you test first?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Olga, I saw LexCo started an outside-counsel review because the current contractor flow lacks traceability. Mellow's scope is explicit: contractor documentation, KYC, payment chain, audit trail. We do not claim to remove the client's legal risk. Which boundary or evidence gap would you test first?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Olga, I saw LexCo started an outside-counsel review because the current contractor flow lacks traceability. Mellow's scope is explicit: contractor documentation, KYC, payment chain, audit trail. We do not claim to remove the client's legal risk. Which boundary or evidence gap would you test first?",
+        "objections": [
+          {
+            "objection": "Ok. What exactly does Mellow provide on documents, audit trail and process discipline, and where do you avoid overclaiming?",
+            "result": "answered"
+          },
+          {
+            "objection": "Three layers: Mellow, our legal, our finance — where do the lines run? Who owns the overlap? Без overclaim.",
+            "result": "answered"
+          },
+          {
+            "objection": "Let's be specific: where's the overlap between your zones and our legal side? Who owns the gap? Без overclaim.",
+            "result": "answered"
+          },
+          {
+            "objection": "Send a one-page summary: scope boundary, documents, incident SLA. If it's without fluff — we'll find time.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Olga, I saw LexCo started an outside-counsel review because the current contractor flow lacks traceability. Mellow's scope is explicit: contractor documentation, KYC, payment chain, audit trail. We do not claim to remove the client's legal risk. Which boundary or evidence gap would you test first?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Olga, I saw LexCo started an outside-counsel review because the current contractor flow lacks traceability. Mellow's scope is explicit: contractor documentation, KYC, payment chain, audit trail. We do not claim to remove the client's legal risk. Which boundary or evidence gap would you test first?",
+      "ts": "2026-04-20T03:09:43.434Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok. What exactly does Mellow provide on documents, audit trail and process discipline, and where do you avoid overclaiming?",
+      "ts": "2026-04-20T03:09:43.434Z"
+    },
+    {
+      "role": "seller",
+      "text": "When something breaks: named owner on our side, response SLA in the contract, full incident trail documented. The contractor gets notified, you get a status update — not a problem to resolve.",
+      "ts": "2026-04-20T03:09:43.444Z"
+    },
+    {
+      "role": "bot",
+      "text": "Three layers: Mellow, our legal, our finance — where do the lines run? Who owns the overlap? Без overclaim.",
+      "ts": "2026-04-20T03:09:43.444Z"
+    },
+    {
+      "role": "seller",
+      "text": "The boundary is explicit: our scope covers the payment chain, KYC and contractor documentation. Your legal and finance teams own the strategic decisions. The overlap is mapped — not assumed.",
+      "ts": "2026-04-20T03:09:43.448Z"
+    },
+    {
+      "role": "bot",
+      "text": "Let's be specific: where's the overlap between your zones and our legal side? Who owns the gap? Без overclaim.",
+      "ts": "2026-04-20T03:09:43.448Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send a written summary: what's in Mellow's scope, what's not, how it's evidenced. If it's without overclaiming — let's do a 20-minute walkthrough.",
+      "ts": "2026-04-20T03:09:43.452Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send a one-page summary: scope boundary, documents, incident SLA. If it's without fluff — we'll find time.",
+      "ts": "2026-04-20T03:09:43.452Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send a written summary: what's in Mellow's scope, what's not, how it's evidenced. If it's without overclaiming — let's do a 20-minute walkthrough.",
+      "ts": "2026-04-20T03:09:43.455Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send it. If it's clean, we'll find time. Без overclaim.",
+      "ts": "2026-04-20T03:09:43.455Z"
+    }
+  ]
+}

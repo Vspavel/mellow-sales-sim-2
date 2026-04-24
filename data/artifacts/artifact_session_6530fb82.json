@@ -1,0 +1,116 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_6530fb82",
+  "saved_at": "2026-04-24T03:33:06.807Z",
+  "started_at": "2026-04-19T15:04:42.877Z",
+  "finished_at": "2026-04-19T15:14:27.796Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "andrey",
+    "name": "Андрей Волков"
+  },
+  "signal_card": {
+    "id": "andrey-card-1",
+    "signal_type": "COMPLIANCE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "ru",
+  "assessment": {
+    "verdict": "BLOCKER",
+    "verdict_label": "Критическая ошибка",
+    "summary_for_seller": "Есть блокирующая ошибка: ты пообещал то, что Mellow не должен обещать.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "Первое касание опирается на конкретный сигнал из карточки.",
+        "evidence_quote": "Андрей, добрый день. Написал вам в связи с вашей ситуацией по contractor payments. Вижу у вас надвигается legal review — хотел обсудить, как мы помогаем компаниям пройти это чище.",
+        "label": "Заход через реальный контекст"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "FAIL",
+        "short_reason": "Продавец дал ложное обещание про misclassification.",
+        "evidence_quote": "Можете гарантировать, что с Mellow нас точно не признают misclassification?",
+        "blocking": true,
+        "label": "Границы ответственности и контроль"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "FAIL",
+        "short_reason": "Тон и подача не адаптированы под выбранную персону.",
+        "evidence_quote": "Андрей, добрый день. Написал вам в связи с вашей ситуацией по contractor payments. Вижу у вас надвигается legal review — хотел обсудить, как мы помогаем компаниям пройти это чище.",
+        "label": "Попадание в язык собеседника"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "FAIL",
+        "short_reason": "Возражения закрыты слабо или не дожаты.",
+        "evidence_quote": "Можете гарантировать, что с Mellow нас точно не признают misclassification?",
+        "objections": [
+          {
+            "objection": "Хорошо. Тогда без лирики: что Mellow контролирует, что не контролирует, и чем это подтверждается?",
+            "result": "partial"
+          },
+          {
+            "objection": "То есть вы сейчас обещаете снять misclassification риск? Именно такие обещания и подрывают доверие. Где у вас заканчивается ответственность?",
+            "result": "partial"
+          },
+          {
+            "objection": "Граница ответственности. Три раза уже прошу. Где она?",
+            "result": "partial"
+          }
+        ],
+        "label": "Работа с ключевыми возражениями"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Следующий шаг зафиксирован конкретно.",
+        "evidence_quote": "Андрей, добрый день. Написал вам в связи с вашей ситуацией по contractor payments. Вижу у вас надвигается legal review — хотел обсудить, как мы помогаем компаниям пройти это чище.",
+        "label": "Чёткий следующий шаг"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Андрей, добрый день. Написал вам в связи с вашей ситуацией по contractor payments. Вижу у вас надвигается legal review — хотел обсудить, как мы помогаем компаниям пройти это чище.",
+      "ts": "2026-04-19T15:14:11.259Z"
+    },
+    {
+      "role": "bot",
+      "text": "Хорошо. Тогда без лирики: что Mellow контролирует, что не контролирует, и чем это подтверждается?",
+      "ts": "2026-04-19T15:14:11.270Z"
+    },
+    {
+      "role": "seller",
+      "text": "Можете гарантировать, что с Mellow нас точно не признают misclassification?",
+      "ts": "2026-04-19T15:14:16.059Z"
+    },
+    {
+      "role": "bot",
+      "text": "То есть вы сейчас обещаете снять misclassification риск? Именно такие обещания и подрывают доверие. Где у вас заканчивается ответственность?",
+      "ts": "2026-04-19T15:14:16.060Z"
+    },
+    {
+      "role": "seller",
+      "text": "Я не обещаю — я спрашиваю. Вы можете гарантировать, что с Mellow нас не оштрафуют?",
+      "ts": "2026-04-19T15:14:27.743Z"
+    },
+    {
+      "role": "bot",
+      "text": "Граница ответственности. Три раза уже прошу. Где она?",
+      "ts": "2026-04-19T15:14:27.744Z"
+    }
+  ]
+}

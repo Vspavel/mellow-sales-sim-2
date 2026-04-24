@@ -1,0 +1,140 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_c73c9051",
+  "saved_at": "2026-04-24T03:33:06.047Z",
+  "started_at": "2026-04-20T03:09:56.042Z",
+  "finished_at": "2026-04-20T03:09:56.051Z",
+  "seller_username": "longrun_cycle_12",
+  "persona": {
+    "id": "cfo_round",
+    "name": "София Бреннер"
+  },
+  "signal_card": {
+    "id": "cfo-round-card-2",
+    "signal_type": "COMPLIANCE_PRESSURE",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "PASS",
+        "short_reason": "First message anchors to a specific signal from the card.",
+        "evidence_quote": "Sofia, you're structuring contractor controls post-round — and the next investor will look at this more closely. Mellow CoR: we take on documents, KYC, payment chain with audit trail. We don't try to close your legal risk entirely — we remove the grey zone in the payment chain. What's the weakest point right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Sofia, you're structuring contractor controls post-round — and the next investor will look at this more closely. Mellow CoR: we take on documents, KYC, payment chain with audit trail. We don't try to close your legal risk entirely — we remove the grey zone in the payment chain. What's the weakest point right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Sofia, you're structuring contractor controls post-round — and the next investor will look at this more closely. Mellow CoR: we take on documents, KYC, payment chain with audit trail. We don't try to close your legal risk entirely — we remove the grey zone in the payment chain. What's the weakest point right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Sofia, you're structuring contractor controls post-round — and the next investor will look at this more closely. Mellow CoR: we take on documents, KYC, payment chain with audit trail. We don't try to close your legal risk entirely — we remove the grey zone in the payment chain. What's the weakest point right now?",
+        "objections": [
+          {
+            "objection": "Got it, you're tracking the fundraise. Concretely: what simplifies for the next diligence, and where does Mellow's control stop?",
+            "result": "answered"
+          },
+          {
+            "objection": "Concretely: if a payment hangs for a week, what happens? Who escalates, in what timeframe?",
+            "result": "answered"
+          },
+          {
+            "objection": "Separately: contractor docs, tax handling and how that's explained to the next investor on diligence?",
+            "result": "answered"
+          },
+          {
+            "objection": "Fine. Send the flow and audit story — brief, no fluff. If it's real, we can talk for 20 minutes.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Sofia, you're structuring contractor controls post-round — and the next investor will look at this more closely. Mellow CoR: we take on documents, KYC, payment chain with audit trail. We don't try to close your legal risk entirely — we remove the grey zone in the payment chain. What's the weakest point right now?",
+      "ts": "2026-04-20T03:09:56.044Z"
+    },
+    {
+      "role": "bot",
+      "text": "Got it, you're tracking the fundraise. Concretely: what simplifies for the next diligence, and where does Mellow's control stop?",
+      "ts": "2026-04-20T03:09:56.044Z"
+    },
+    {
+      "role": "seller",
+      "text": "Mellow's scope is specific: KYC, contractor documentation, payment chain, and audit trail on each transaction — that's on our side. What we don't take on: misclassification risk and your strategic legal decisions. That's the boundary, in the contract, in writing.",
+      "ts": "2026-04-20T03:09:56.045Z"
+    },
+    {
+      "role": "bot",
+      "text": "Concretely: if a payment hangs for a week, what happens? Who escalates, in what timeframe?",
+      "ts": "2026-04-20T03:09:56.045Z"
+    },
+    {
+      "role": "seller",
+      "text": "On SLA: a named escalation owner, defined response time in the contract, incident trail documented. Not general support — a process with accountability.",
+      "ts": "2026-04-20T03:09:56.047Z"
+    },
+    {
+      "role": "bot",
+      "text": "Separately: contractor docs, tax handling and how that's explained to the next investor on diligence?",
+      "ts": "2026-04-20T03:09:56.047Z"
+    },
+    {
+      "role": "seller",
+      "text": "I'll send you a one-pager: flow, SLA, and how the audit trail looks before diligence. If it speaks to your situation — let's do a short call.",
+      "ts": "2026-04-20T03:09:56.048Z"
+    },
+    {
+      "role": "bot",
+      "text": "Fine. Send the flow and audit story — brief, no fluff. If it's real, we can talk for 20 minutes.",
+      "ts": "2026-04-20T03:09:56.048Z"
+    },
+    {
+      "role": "seller",
+      "text": "Let me send you a brief written summary: payment flow, audit story, and scope boundary. If it's concrete and grounded, can we find 20 minutes this week?",
+      "ts": "2026-04-20T03:09:56.049Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok. Send it over — I'll review.",
+      "ts": "2026-04-20T03:09:56.049Z"
+    }
+  ]
+}

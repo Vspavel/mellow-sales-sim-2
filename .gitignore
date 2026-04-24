@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.local
+.env.production
+
+# Runtime data
+data/sessions/
+data/logs/
+data/prompt_memory_runs/
+
+# Batch run artifacts
+sales-sim-batch-runs/
+*.log
+
+# OS
+.DS_Store

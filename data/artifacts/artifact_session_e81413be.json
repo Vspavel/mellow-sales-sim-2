@@ -1,0 +1,230 @@
+{
+  "artifact_version": "v1",
+  "session_id": "session_e81413be",
+  "saved_at": "2026-04-24T03:33:05.012Z",
+  "started_at": "2026-04-23T08:16:35.488Z",
+  "finished_at": "2026-04-23T08:16:38.671Z",
+  "seller_username": "pavel",
+  "persona": {
+    "id": "panic_churn_ops",
+    "name": "Ольга Миронова"
+  },
+  "signal_card": {
+    "id": "panic-churn-ops-card-1",
+    "signal_type": "CHURN_SIGNAL",
+    "heat": "hot",
+    "company_name": "",
+    "contact_name": "",
+    "pain_summary": ""
+  },
+  "dialogue_type": "messenger",
+  "language": "en",
+  "assessment": {
+    "verdict": "PASS",
+    "verdict_label": "Ready for next step",
+    "summary_for_seller": "Good run: you held context, answered on-point, and brought the conversation to a next step.",
+    "criteria": [
+      {
+        "id": "K1",
+        "name": "Contextual first contact",
+        "status": "FAIL",
+        "short_reason": "First message is too generic and misses the signal context.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Contextual opening"
+      },
+      {
+        "id": "K2",
+        "name": "Compliance and boundary of responsibility",
+        "status": "PASS",
+        "short_reason": "Seller stated Mellow's control scope without overclaiming.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "blocking": false,
+        "label": "Scope & responsibility boundary"
+      },
+      {
+        "id": "K3",
+        "name": "Language fit",
+        "status": "PASS",
+        "short_reason": "Language is adapted to the chosen persona.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "label": "Persona language fit"
+      },
+      {
+        "id": "K4",
+        "name": "Handling core objections",
+        "status": "PASS",
+        "short_reason": "At least two key objections addressed substantively.",
+        "evidence_quote": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+        "objections": [
+          {
+            "objection": "Ok but crypto + Wise has worked for two years. Why do I need this specifically now?",
+            "result": "answered"
+          },
+          {
+            "objection": "There's some relevance here, but the setup is still blurry. Explain it concretely: documents, payout flow, incident handling.",
+            "result": "answered"
+          },
+          {
+            "objection": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+            "result": "answered"
+          },
+          {
+            "objection": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+            "result": "answered"
+          }
+        ],
+        "label": "Core objection handling"
+      },
+      {
+        "id": "K5",
+        "name": "Next step",
+        "status": "PASS",
+        "short_reason": "Next step stated concretely.",
+        "evidence_quote": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+        "label": "Clear next step"
+      }
+    ]
+  },
+  "transcript": [
+    {
+      "role": "seller",
+      "text": "Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?",
+      "ts": "2026-04-23T08:16:35.588Z"
+    },
+    {
+      "role": "bot",
+      "text": "Ok but crypto + Wise has worked for two years. Why do I need this specifically now?",
+      "ts": "2026-04-23T08:16:35.589Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:16:35.786Z"
+    },
+    {
+      "role": "bot",
+      "text": "There's some relevance here, but the setup is still blurry. Explain it concretely: documents, payout flow, incident handling.",
+      "ts": "2026-04-23T08:16:35.786Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:16:35.992Z"
+    },
+    {
+      "role": "bot",
+      "text": "I'm interested, but I still don't understand the mechanism. What exactly does Mellow do step by step, and what stays on our side?",
+      "ts": "2026-04-23T08:16:35.992Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-23T08:16:36.208Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-23T08:16:36.208Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:16:36.431Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-23T08:16:36.431Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? Which part of your process is eating the most time right now?",
+      "ts": "2026-04-23T08:16:36.651Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-23T08:16:36.651Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+      "ts": "2026-04-23T08:16:36.854Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-23T08:16:36.854Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? Which part of your process is eating the most time right now?",
+      "ts": "2026-04-23T08:16:37.090Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-23T08:16:37.090Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? Which part of your process is eating the most time right now?",
+      "ts": "2026-04-23T08:16:37.293Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-23T08:16:37.293Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-23T08:16:37.511Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-23T08:16:37.512Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-23T08:16:37.747Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-23T08:16:37.748Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What else do you need for the next step?",
+      "ts": "2026-04-23T08:16:38.075Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-23T08:16:38.076Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation? What would take the most pain off your team specifically?",
+      "ts": "2026-04-23T08:16:38.365Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-23T08:16:38.365Z"
+    },
+    {
+      "role": "seller",
+      "text": "Pricing model: per contractor/month, with volume tiers. There's a pilot option to test on a subset before committing. Want me to send a rough calculation?",
+      "ts": "2026-04-23T08:16:38.553Z"
+    },
+    {
+      "role": "bot",
+      "text": "Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.",
+      "ts": "2026-04-23T08:16:38.553Z"
+    }
+  ]
+}
