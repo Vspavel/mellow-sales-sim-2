@@ -1433,9 +1433,9 @@ function getPersonaAcceptanceBias(session) {
 
 const PERSONA_SELLING_POLICY = {
   rate_floor_cfo: {
-    proof_focus: ['defendable_structure', 'incident_ownership', 'clarity_of_scheme'],
-    bridge_asset: 'defendable_structure_memo',
-    bridge_label: 'short structure + incident path memo',
+    proof_focus: ['cost_predictability', 'defendable_structure', 'incident_ownership', 'clarity_of_scheme'],
+    bridge_asset: 'cost_breakdown',
+    bridge_label: 'short premium logic breakdown with boundary and incident path',
   },
   fx_trust_shock_finance: {
     proof_focus: ['cost_predictability', 'clarity_of_scheme', 'defendable_structure', 'recovery_visibility', 'incident_ownership'],
@@ -2316,7 +2316,7 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
     ru: {
       proof: {
         rate_floor_cfo: [
-          `Для premium у finance proof должен быть защитимым: где у Mellow чёткая граница ответственности, кто ведёт инцидент и почему схема объясняется без серых зон. Что из этого вам важнее проверить первым?`,
+          `Для CFO premium должен держаться на экономике, а не на слове “надёжнее”: где выше headline rate окупается через меньше hidden cost, чёткую границу ответственности и понятный incident path. Что для вас важнее проверить первым: effective cost, boundary или failure path?`,
         ],
         fx_trust_shock_finance: [
           `Здесь value не в обещании “всё прозрачно”, а в заранее видимой total-cost логике: rate, FX, цепочка и что происходит при сбое. Какой слой математики вам важнее увидеть первым?`,
@@ -2324,7 +2324,7 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
       },
       bridge_step: {
         rate_floor_cfo: {
-          written_first: [`Могу сначала прислать короткий memo по defendable structure: зона Mellow, incident path и как это защищается внутри finance, без общего sales-шума. Посмотрите, и если логика выглядит приземлённо, тогда уже отдельно решим, нужен ли короткий review call. Подходит?`],
+          written_first: [`Могу сначала прислать короткий premium-breakdown под finance lens: где higher rate окупается или не окупается, какие cost layers видны заранее, и отдельно где у Mellow boundary и incident path. Без общего sales-шума. Если логика выглядит приземлённо, тогда уже решим, нужен ли короткий review call. Подходит?`],
         },
         fx_trust_shock_finance: {
           written_first: [`Следующий шаг без давления: пришлю короткий total-cost breakdown под ваш кейс, где отдельно видны rate, FX, payout chain и поведение при сбое. Если математика выглядит честно, следующим шагом возьмём короткий 15-минутный review call только по economics и fit. Ок?`],
@@ -2358,14 +2358,14 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
     en: {
       proof: {
         rate_floor_cfo: [
-          `For this premium question, the proof has to be defendable: where Mellow's responsibility boundary is clear, who owns incidents, and why the structure can be explained without grey zones. Which of those do you want to test first?`,
+          `For a CFO, premium only works if the economics hold, not just the wording: where the higher headline rate pays back through lower hidden cost, a clear responsibility boundary, and a credible incident path. Which do you want to test first: effective cost, boundary, or failure path?`,
         ],
         fx_trust_shock_finance: [
           `The value here is not “more transparency” in the abstract. It is visible total-cost logic up front: rate, FX, payout chain, and what happens if something slips. Which layer of that math do you want to see first?`,
         ],
       },
       bridge_step: {
-        rate_floor_cfo: { written_first: [`I can first send a short memo on the defendable structure: Mellow's boundary, incident path, and why finance can defend the scheme internally. Would that help?`] },
+        rate_floor_cfo: { written_first: [`I can first send a short premium-logic breakdown for finance: where the higher rate pays back or does not, which cost layers are visible up front, and separately Mellow's boundary and incident path. Would that help?`] },
         fx_trust_shock_finance: { written_first: [`Low-pressure next step: I can send a short total-cost breakdown for your case showing rate, FX, payout chain, and the failure path up front. Would that help?`] },
       },
       direct_ask: {
