@@ -904,9 +904,37 @@ function toEmailBuyerReply(base, session) {
   return `${sellerName},\n\n${firstParagraph}${secondParagraph ? `\n\n${secondParagraph}` : ''}\n\n${closing}`;
 }
 
+function normalizeSellerLanguage(text, lang = 'ru') {
+  let out = String(text || '').trim();
+  if (!out) return out;
+  if (lang === 'ru') {
+    const replacements = [
+      [/\bwritten outline\b/gi, 'письменная схема'],
+      [/\bone invoice\b/gi, 'единый счет'],
+      [/\badmin overhead\b/gi, 'лишняя ручная нагрузка'],
+      [/\bworkflow\b/gi, 'процесс'],
+      [/\bfit\b/gi, 'совпадение по задаче'],
+      [/\bcontour\b/gi, 'контур'],
+      [/\boutline\b/gi, 'схема'],
+      [/\breview call\b/gi, 'разборный созвон'],
+      [/\bcall\b/gi, 'созвон'],
+      [/\breview\b/gi, 'разбор'],
+      [/\bbrief\b/gi, 'краткий материал'],
+      [/\bmemo\b/gi, 'записка'],
+      [/\bslice\b/gi, 'срез'],
+      [/\bnext step\b/gi, 'следующий шаг'],
+      [/\bmarketing slang\b/gi, 'маркетинговый шум'],
+    ];
+    for (const [pattern, replacement] of replacements) out = out.replace(pattern, replacement);
+  }
+  return out.replace(/\s{2,}/g, ' ').replace(/\s+([,.;!?])/g, '$1').trim();
+}
+
 function adaptTextToDialogue(base, session, role) {
-  if (!isEmailMode(session)) return base;
-  return role === 'seller' ? toEmailSellerMessage(base, session) : toEmailBuyerReply(base, session);
+  const lang = session?.language === 'en' ? 'en' : 'ru';
+  const normalizedBase = role === 'seller' ? normalizeSellerLanguage(base, lang) : base;
+  if (!isEmailMode(session)) return normalizedBase;
+  return role === 'seller' ? toEmailSellerMessage(normalizedBase, session) : toEmailBuyerReply(normalizedBase, session);
 }
 
 function seedPersonaStore() {
@@ -1052,8 +1080,6 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
         meeting_booked_count: 0,
         meeting_booked_rate: 0,
         avg_turns: 0,
-        pass_rate: 0,
-        pass_vs_meeting_gap: 0,
         failure_breakdown: {},
         hint_stage_breakdown: {},
         stage_ask_breakdown: {},
@@ -1065,7 +1091,6 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     if (sessionHasMeetingBooked(session)) bucket.meeting_booked_count += 1;
     const sellerTurns = sellerMessages(session).length;
     bucket.avg_turns += sellerTurns;
-    if (session.assessment?.verdict === 'PASS' || session.assessment?.verdict === 'PASS_WITH_NOTES') bucket.pass_rate += 1;
     const failReason = session.dialogue_summary?.failure_reason || classifyMeetingFailureReason(session);
     bucket.failure_breakdown[failReason] = (bucket.failure_breakdown[failReason] || 0) + 1;
     failureBreakdown[failReason] = (failureBreakdown[failReason] || 0) + 1;
@@ -1094,7 +1119,6 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
 
   const personaStats = Object.values(byPersona)
     .map((bucket) => {
-      const passRate = bucket.runs ? Number((bucket.pass_rate / bucket.runs).toFixed(3)) : 0;
       const meetingRate = bucket.runs ? Number((bucket.meeting_booked_count / bucket.runs).toFixed(3)) : 0;
       const pHintRecords = hintRecordsByPersona[bucket.persona_id] || [];
       const pBridgeHints = pHintRecords.filter((r) => r.hint_stage === 'bridge_step');
@@ -1107,8 +1131,6 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
         success_rate: bucket.runs ? Number((bucket.successful_dialogues / bucket.runs).toFixed(3)) : 0,
         meeting_booked_rate: meetingRate,
         avg_turns: bucket.runs ? Number((bucket.avg_turns / bucket.runs).toFixed(2)) : 0,
-        pass_rate: passRate,
-        pass_vs_meeting_gap: Number((passRate - meetingRate).toFixed(3)),
         bridge_step_acceptance_rate: pBridgeHints.length ? Number((pBridgeAccepted / pBridgeHints.length).toFixed(3)) : 0,
         premature_ask_rate: pHintRecords.length ? Number((pPrematureAskCount / pHintRecords.length).toFixed(3)) : 0,
         repair_recovery_rate: pRepairHints.length ? Number((pRepairRecovered / pRepairHints.length).toFixed(3)) : 0,
@@ -1155,6 +1177,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       meeting_booked: sessionHasMeetingBooked(session),
       meeting_ask_count: session.meta?.meeting_ask_count || 0,
       assessment_verdict: session.assessment?.verdict || 'N/A',
+      review_verdict: session.assessment?.verdict || 'N/A',
       assessment_summary: session.assessment?.summary_for_seller || null,
       turning_point: session.assessment?.turning_point || null,
       assessment_criteria: (session.assessment?.criteria || []).map((c) => ({
@@ -1177,9 +1200,6 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     };
   });
 
-  const totalPassRate = finished.length
-    ? Number((finished.filter(s => s.assessment?.verdict === 'PASS' || s.assessment?.verdict === 'PASS_WITH_NOTES').length / finished.length).toFixed(3))
-    : 0;
   const totalMeetingRate = finished.length ? Number((meetingBooked.length / finished.length).toFixed(3)) : 0;
   const bridgeHints = hintRecords.filter((r) => r.hint_stage === 'bridge_step');
   const directAskHints = hintRecords.filter((r) => r.hint_stage === 'direct_ask');
@@ -1207,7 +1227,6 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       success_rate: finished.length ? Number((positive.length / finished.length).toFixed(3)) : 0,
       meeting_booked_count: meetingBooked.length,
       meeting_booked_rate: totalMeetingRate,
-      pass_vs_meeting_gap: Number((totalPassRate - totalMeetingRate).toFixed(3)),
       failure_breakdown: failureBreakdown,
       hint_stage_breakdown: totalHintStageBreakdown,
       bridge_step_acceptance_rate: bridgeHints.length ? Number((bridgeAccepted / bridgeHints.length).toFixed(3)) : 0,
@@ -7229,8 +7248,20 @@ function buildFirstHintSystemPrompt(session, snapshot, strategy = 'exploit', rec
     `1. Open through a specific signal, not a generic pitch`,
     `2. Use SPIN on the first turn: Situation first, then Problem. Do not jump to implication or pitch in the opener`,
     `3. Maximize trust and clarity — never overclaim, never use vague marketing language`,
-    `4. Be concise: 1–3 sentences, natural seller voice`,
-    `5. Opening turn is diagnosis only: ask at most one focused question and do NOT propose a call or meeting in the first message`,
+    `4. Sound like a real expert: high product mastery, but explained simply, precisely, and without term abuse`,
+    `5. Sound human, not AI: no buzzword stacks, no synthetic symmetry, no consultant tone`,
+    `6. Show sincere buyer empathy: care about the buyer's problem, notice both factual and emotional detail, and respond with calm attention rather than pressure`,
+    `7. Keep language clean: if the hint is in Russian, do not slip into English sales words unless it is a fixed market term`,
+    `8. Be concise: 1–3 sentences, natural seller voice`,
+    `9. Opening turn is diagnosis only: ask at most one focused question and do NOT propose a call or meeting in the first message`,
+    ``,
+    `## Seller tone of voice doctrine`,
+    `You are not a generic SDR. You are a mature product expert who understands Mellow deeply and therefore explains it simply, precisely, and convincingly.`,
+    `Your authority comes from clarity, not jargon. If a term is not necessary, do not use it.`,
+    `You genuinely care about the buyer's problem. Do not treat the buyer like an objection machine. Track both the factual issue and the emotional pressure around it.`,
+    `Write like a thoughtful human expert: attentive, calm, specific, commercially sharp, but never plastic, needy, or over-eager.`,
+    `Do not sound like AI-generated copy. Avoid symmetrical phrasing, stacked buzzwords, empty transitions, and over-produced wording.`,
+    `The buyer should feel: this person understands the product, understands my situation, and is trying to help me think clearly.`,
     ``,
     `## Selected signal`,
     `Signal type: ${card.signal_type || 'unknown'}`,
@@ -7291,7 +7322,10 @@ function buildFirstHintSystemPrompt(session, snapshot, strategy = 'exploit', rec
     `## Output format`,
     `Return ONLY the hint text. No preamble, no labels, no explanation, no quotes.`,
     `Write as if the SDR is sending this opening message directly to the buyer.`,
-    `Hard rules: no meeting ask, no calendar ask, no more than one question mark, and no broad multi-part pitch. The opening must follow SPIN Situation or Problem mode only.`,
+    `Use a human ToV: calm, specific, grounded, expert but easy to understand, attentive to the buyer's real pressure, slightly sharp when needed, but never robotic or over-styled.`,
+    `Writing test: if the line sounds like polished AI sales copy, rewrite it mentally before answering. Prefer clean human phrasing over impressive phrasing.`,
+    `Voice test: the seller should sound like a deeply informed expert who genuinely cares and can explain difficult product reality simply, precisely, and with emotional attentiveness.`,
+    `Hard rules: no meeting ask, no calendar ask, no more than one question mark, and no broad multi-part pitch. The opening must follow SPIN Situation or Problem mode only. In Russian, keep the wording fully Russian unless a fixed term is unavoidable.`,
   );
 
   return lines.join('\n');
@@ -7348,8 +7382,20 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
     `1. Book the meeting — every hint must move toward explicit buyer agreement on a call or meeting`,
     `2. Earn the ask — build trust and resolve concerns to create conditions for a credible ask`,
     `3. Avoid harmful patterns — never overclaim, never use vague marketing language`,
-    `4. Be concise: 1–3 sentences maximum, natural seller voice`,
-    `5. One hint = one action. Ask one question or propose one next step, never both multiple times.`,
+    `4. Sound like a real expert: deep product understanding explained simply, precisely, and without term abuse`,
+    `5. Sound human: no AI cadence, no buzzword piles, no consultant-style abstraction`,
+    `6. Be sincerely empathetic: care about the buyer's problem, track both factual and emotional detail, and avoid indifferent sales pressure`,
+    `7. Keep language clean: if the hint is in Russian, do not slip into English sales words unless it is a fixed market term`,
+    `8. Be concise: 1–3 sentences maximum, natural seller voice`,
+    `9. One hint = one action. Ask one question or propose one next step, never both multiple times.`,
+    ``,
+    `## Seller tone of voice doctrine`,
+    `You are not a generic SDR. You are a mature product expert who understands Mellow deeply and therefore explains it simply, precisely, and convincingly.`,
+    `Your authority comes from clarity, not jargon. If a term is not necessary, do not use it.`,
+    `You genuinely care about the buyer's problem. Do not treat the buyer like an objection machine. Track both the factual issue and the emotional pressure around it.`,
+    `Write like a thoughtful human expert: attentive, calm, specific, commercially sharp, but never plastic, needy, or over-eager.`,
+    `Do not sound like AI-generated copy. Avoid symmetrical phrasing, stacked buzzwords, empty transitions, and over-produced wording.`,
+    `The buyer should feel: this person understands the product, understands my situation, and is trying to help me think clearly.`,
     ``,
     `## Buyer context`,
     `Persona: ${persona?.name || 'Unknown'} (${persona?.archetype || 'finance'} archetype)`,
@@ -7479,7 +7525,10 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
     `## Output format`,
     `Return ONLY the hint text. No preamble, no labels, no explanation, no quotes.`,
     `Write as if the SDR is sending this message directly to the buyer.`,
-    `Hard rules: do not mix diagnosis + proof + ask in one hint. Do not include more than one question mark. Do not include a meeting ask unless the required hint mode is direct_ask or the allowed bridge-step form explicitly includes it. If you propose a next step, frame it as a Sandler-style upfront contract with clear purpose, scope, and expected outcome.`,
+    `Use a human ToV: concise, grounded, commercially sharp, expert but easy to understand, and genuinely attentive to the buyer's pressure, with natural rhythm rather than generated symmetry.`,
+    `Writing test: if the line sounds like polished AI sales copy, rewrite it mentally before answering. Prefer clear human phrasing over clever phrasing.`,
+    `Voice test: the seller should sound like a deeply informed expert who genuinely cares and can explain difficult product reality simply, precisely, and with emotional attentiveness.`,
+    `Hard rules: do not mix diagnosis + proof + ask in one hint. Do not include more than one question mark. Do not include a meeting ask unless the required hint mode is direct_ask or the allowed bridge-step form explicitly includes it. If you propose a next step, frame it as a Sandler-style upfront contract with clear purpose, scope, and expected outcome. In Russian, keep the wording fully Russian unless a fixed term is unavoidable.`,
   );
 
   return lines.join('\n');
@@ -7514,7 +7563,8 @@ async function generateLlmHint(session, lang = null, snapshot = null, strategy =
     });
     const text = response.content?.[0]?.text;
     if (!text) return null;
-    const hint = String(text).trim();
+    const effectiveLang = session?.language === 'en' ? 'en' : 'ru';
+    const hint = normalizeSellerLanguage(String(text).trim(), effectiveLang);
     // Track the opener for anti-repetition across sessions
     const firstLine = hint.split(/[.!?]/)[0].trim().slice(0, 120);
     if (firstLine) saveHintRecency([...recentOpeners, firstLine]);
