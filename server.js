@@ -1265,7 +1265,7 @@ function canMakeAsk(session) {
   // Once the buyer has already accepted a bounded artifact or post-artifact call contour,
   // the next move should be conversion, not more proving.
   if (['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) {
-    return trust >= 1.15;
+    return trust >= 1.05;
   }
 
   // Trust must be meaningfully above baseline (baseline ~1.0)
@@ -1274,8 +1274,8 @@ function canMakeAsk(session) {
   if (!activeConcern) return trust >= 1.2;
   // At least one concern addressed and buyer state trending toward next step
   if (resolved >= 1 && nextStepLikelihood >= 0.32) return true;
-  // High next-step likelihood even before concern resolution (rare but valid)
-  if (nextStepLikelihood >= 0.48) return true;
+  // Do not allow Sandler-breaking premature asks purely from model enthusiasm.
+  // A next step must be earned through at least one resolved concern or accepted bounded artifact path.
   return false;
 }
 
@@ -1337,19 +1337,25 @@ function detectRequestedArtifactType(session) {
 
 function getBuyerAcceptanceState(session) {
   if (session?.meta?.meeting_booked === true || sessionHasMeetingBooked(session)) return 'direct_call';
+  const previousState = session?.meta?.acceptance_state || 'not_ready';
   const lower = latestBuyerReplyText(session).toLowerCase();
-  if (!lower) return 'not_ready';
-  if (detectBuyerMeetingAcceptance(lower, session?.language || 'ru')) return 'direct_call';
-  if (/(созвон|встреч|call|meeting|walkthrough|review call)/i.test(lower) && /(потом|после|then|after|if|если)/i.test(lower)) {
-    return 'artifact_then_call';
+  if (!lower) return previousState;
+
+  let currentState = 'not_ready';
+  if (detectBuyerMeetingAcceptance(lower, session?.language || 'ru')) {
+    currentState = 'direct_call';
+  } else if (/(созвон|встреч|call|meeting|walkthrough|review call)/i.test(lower) && /(потом|после|then|after|if|если)/i.test(lower)) {
+    currentState = 'artifact_then_call';
+  } else if (/(walkthrough|review|15 минут|15-минут|15 minute|20 minute|созвон)/i.test(lower) && !buyerRequestedWrittenFirst(session)) {
+    currentState = 'narrow_walkthrough';
+  } else if (buyerRequestedWrittenFirst(session) || detectRequestedArtifactType(session)) {
+    currentState = 'artifact_only';
   }
-  if (/(walkthrough|review|15 минут|15-минут|15 minute|20 minute|созвон)/i.test(lower) && !buyerRequestedWrittenFirst(session)) {
-    return 'narrow_walkthrough';
+
+  if (currentState === 'not_ready' && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough', 'direct_call'].includes(previousState)) {
+    return previousState;
   }
-  if (buyerRequestedWrittenFirst(session) || detectRequestedArtifactType(session)) {
-    return 'artifact_only';
-  }
-  return 'not_ready';
+  return currentState;
 }
 
 function getAcceptanceEventType(session) {
@@ -1628,10 +1634,11 @@ function getHintPolicyContext(session) {
   }
 
   // When the buyer explicitly asks for written material or implementation shape,
-  // do not keep proving forever. Move to a bounded bridge step so the seller can
-  // offer the requested artifact plus a concrete follow-up call.
+  // move out of proof mode. But keep the pressure calibrated:
+  // - artifact_only => bounded bridge step (send artifact + light upfront contract)
+  // - artifact_then_call / narrow_walkthrough => direct ask is now earned
   if ((buyerAskedForMaterial || buyerAskedForImplementation || requestedArtifactType || ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) && sellerMessages(session).length >= 2 && !repairState) {
-    hintStage = 'direct_ask';
+    hintStage = acceptanceState === 'artifact_only' ? 'bridge_step' : 'direct_ask';
   }
 
   // Constrained retry paths: prevent infinite looping at bridge_step or direct_ask
@@ -1679,6 +1686,23 @@ function getSpinInstruction(session, policy = null) {
   return 'SPIN = Need-payoff. Translate momentum into a concrete next-step benefit. Show why a short call helps the buyer verify fit faster than more abstract discussion.';
 }
 
+function getSandlerInstruction(session, policy = null) {
+  const p = policy || getHintPolicyContext(session);
+  if (p.hintStage === 'diagnosis') {
+    return 'Sandler = pain-first qualification. Keep control of the conversation by asking one focused question, not pitching. Earn the right to continue before proposing anything.';
+  }
+  if (p.hintStage === 'proof') {
+    return 'Sandler = deepen pain before solution breadth. Tie the answer to the buyer\'s pain and business cost. No premature demo, no generic product tour.';
+  }
+  if (p.hintStage === 'repair') {
+    return 'Sandler = lower pressure and re-establish trust. Acknowledge friction, narrow the scope, and regain permission to continue.';
+  }
+  if (p.hintStage === 'bridge_step') {
+    return 'Sandler = upfront contract for the next micro-step. Offer one low-pressure, bounded next step with a clear purpose, scope, and expected outcome.';
+  }
+  return 'Sandler = clear upfront contract for the call. State the exact purpose, narrow scope, and why this next step is worth the buyer\'s time. No broad pitch.';
+}
+
 // computeHintSchema: produces the internal hint doctrine packet for a turn.
 // Schema fields:
 //   hint_stage           — which of the 5 allowed modes applies this turn
@@ -1691,6 +1715,7 @@ function computeHintSchema(session, policy) {
   const p = policy || getHintPolicyContext(session);
   const spinLane = getSpinLane(session, p);
   const spinInstruction = getSpinInstruction(session, p);
+  const sandlerInstruction = getSandlerInstruction(session, p);
   const bs = p.buyerState || {};
   const trust = Number(bs.trust || 0);
   const clarity = Number(bs.clarity || 0);
@@ -1715,7 +1740,7 @@ function computeHintSchema(session, policy) {
         ? `Active concern not yet surfaced: ${concern}`
         : 'Buyer motivation and main pain point not yet identified',
       missing_condition: "Identify the buyer's primary concern or pain point",
-      recommended_action: 'Ask one focused question to surface the next missing condition',
+      recommended_action: 'Ask one focused pain-first question to surface the next missing condition and earn permission to continue',
       forbidden_action: 'No meeting ask, no pitch, no multi-part question',
     },
     proof: {
@@ -1723,7 +1748,7 @@ function computeHintSchema(session, policy) {
         ? `Concern not yet resolved with concrete mechanism: ${concern}`
         : 'No active concern to resolve',
       missing_condition: `Resolve active concern with one concrete Mellow mechanism (${concern || 'scope'})`,
-      recommended_action: `Address the concern with one specific proof point or mechanism, prioritizing ${personaFocus}, then ask one follow-up if needed`,
+      recommended_action: `Address the concern with one specific proof point or mechanism, tie it to buyer pain and implication, then ask one follow-up if needed`,
       forbidden_action: 'No meeting ask, no broad pitch, no multiple proof points at once',
     },
     repair: {
@@ -1735,13 +1760,13 @@ function computeHintSchema(session, policy) {
     bridge_step: {
       obstacle_to_progress: `Not yet ask-ready — trust:${trust}/100, clarity:${clarity}/100, next_step:${nextStep}`,
       missing_condition: 'Buyer needs one bounded intermediate commitment before a direct ask is credible',
-      recommended_action: `Offer exactly one bounded next step matching ask type: ${p.askType || 'written_first'} using the preferred bridge asset (${personaPolicy.bridge_label})`,
+      recommended_action: `Offer exactly one low-pressure upfront contract matching ask type: ${p.askType || 'written_first'} using the preferred bridge asset (${personaPolicy.bridge_label}), with clear scope and outcome`,
       forbidden_action: 'No direct meeting ask, no broad call proposal, no multiple options at once',
     },
     direct_ask: {
       obstacle_to_progress: 'None — ask conditions are met',
       missing_condition: 'Explicit buyer agreement to a call or meeting',
-      recommended_action: `Propose the next step directly using ask type: ${p.askType || 'written_first'}`,
+      recommended_action: `Propose the next step directly using ask type: ${p.askType || 'written_first'}, with a clear upfront contract on purpose, scope, and expected outcome`,
       forbidden_action: 'No diagnosis, no proof, no additional qualification — commit to the ask',
     },
   };
@@ -1751,6 +1776,7 @@ function computeHintSchema(session, policy) {
     hint_stage: p.hintStage,
     spin_lane: spinLane,
     spin_instruction: spinInstruction,
+    sandler_instruction: sandlerInstruction,
     buyer_state_summary,
     obstacle_to_progress: s.obstacle_to_progress,
     missing_condition: s.missing_condition,
@@ -2254,10 +2280,10 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
       },
       bridge_step: {
         rate_floor_cfo: {
-          written_first: [`Могу сначала прислать короткий memo по defendable structure: зона Mellow, incident path и как это защищается внутри finance. Подходит?`],
+          written_first: [`Могу сначала прислать короткий memo по defendable structure: зона Mellow, incident path и как это защищается внутри finance. Если логика выглядит приземлённо, следующим шагом возьмём короткий 15-минутный review call только по boundary и fit. Подходит?`],
         },
         fx_trust_shock_finance: {
-          written_first: [`Следующий шаг без давления: пришлю короткий total-cost breakdown под ваш кейс, где отдельно видны rate, FX, payout chain и поведение при сбое. Ок?`],
+          written_first: [`Следующий шаг без давления: пришлю короткий total-cost breakdown под ваш кейс, где отдельно видны rate, FX, payout chain и поведение при сбое. Если математика выглядит честно, следующим шагом возьмём короткий 15-минутный review call только по economics и fit. Ок?`],
         },
       },
       direct_ask: {
@@ -2331,7 +2357,7 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
   const archetype = persona?.archetype || 'finance';
   const stagePatternBank = patternBank?.[policy.hintStage]?.[winPattern] || null;
 
-  if (personaStageBank && !['artifact_only', 'artifact_then_call'].includes(policy.acceptanceState)) {
+  if (personaStageBank) {
     if (policy.hintStage === 'proof') return pick(personaStageBank);
     const personaAskPool = personaStageBank[askType] || personaStageBank.written_first || personaStageBank.direct_call || null;
     if (personaAskPool?.length) return pick(personaAskPool);
@@ -2360,50 +2386,84 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
   const acceptanceAwarePools = (() => {
     const ru = lang !== 'en';
     const requestedArtifactType = policy.requestedArtifactType || detectRequestedArtifactType(session);
-    const wantsWrittenFirst = policy.acceptanceState === 'artifact_only' || policy.acceptanceState === 'artifact_then_call';
+    const acceptanceState = policy.acceptanceState;
+    const artifactOnly = acceptanceState === 'artifact_only';
+    const artifactThenCall = acceptanceState === 'artifact_then_call';
+    const callReady = artifactThenCall || acceptanceState === 'narrow_walkthrough';
 
-    if (wantsWrittenFirst && requestedArtifactType === 'cost_breakdown') {
-      return ru
-        ? [
-            `Ок, пришлю короткий cost breakdown по вашему кейсу сегодня, а чтобы не оставлять это на переписке, давайте сразу поставим 15-минутный review call после него. Какой слот вам удобен?`,
-            `Тогда следующий шаг такой: с моей стороны короткая математика по rate, FX и payout path, а затем короткий call на 15 минут, чтобы быстро проверить fit. Когда вам удобно?`,
-          ]
-        : [
-            `Understood. I'll send the short cost breakdown for your case today, and so this does not stay in email, let's put a 15-minute review call right after it. What slot works for you?`,
-            `Then the next step is simple: short math from my side on rate, FX, and payout path, followed by a 15-minute call to test fit quickly. What time works?`,
-          ];
+    if ((artifactOnly || artifactThenCall) && requestedArtifactType === 'cost_breakdown') {
+      return artifactOnly
+        ? (ru
+          ? [
+              `Ок, пришлю короткий cost breakdown по вашему кейсу сегодня. Если логика сойдётся, следующим шагом возьмём короткий 15-минутный review call только по rate, FX и payout path. Подходит?`,
+              `Тогда сделаем так: я отправлю короткую математику по rate, FX и payout path, без общего pitch. Если картина будет сходиться, сразу перейдём к короткому 15-минутному review call. Ок?`,
+            ]
+          : [
+              `Understood. I'll send the short cost breakdown for your case today. If the logic holds, the next step can be a short 15-minute review call only on rate, FX, and payout path. Does that work?`,
+              `Then let's do it this way: I'll send the short math on rate, FX, and payout path, with no broad pitch. If it looks grounded, we can move straight to a short 15-minute review call. Does that work?`,
+            ])
+        : (ru
+          ? [
+              `Ок, пришлю короткий cost breakdown по вашему кейсу сегодня, а потом сразу возьмём 15 минут только на review rate, FX и payout path. Какой слот вам удобен?`,
+              `Тогда следующий шаг такой: с моей стороны короткая математика по rate, FX и payout path, а затем короткий call на 15 минут, чтобы быстро проверить fit. Когда вам удобно?`,
+            ]
+          : [
+              `Understood. I'll send the short cost breakdown for your case today, then we can take 15 minutes just to review rate, FX, and payout path. What slot works for you?`,
+              `Then the next step is simple: short math from my side on rate, FX, and payout path, followed by a 15-minute call to test fit quickly. What time works?`,
+            ]);
     }
-    if (wantsWrittenFirst && requestedArtifactType === 'implementation_memo') {
-      return ru
-        ? [
-            `Ок, пришлю короткий implementation memo по вашему workflow, и чтобы сразу проверить реальный fit, давайте поставим 15-минутный review call после него. Какой слот вам подходит?`,
-            `Тогда сделаем так: я отправлю короткую схему по slice, workflow и границе ответственности, а потом коротко созвонимся на 15 минут только по этому контуру. Когда удобно?`,
-          ]
-        : [
-            `Understood. I'll send a short implementation memo for your workflow, and to check real fit right away, let's put a 15-minute review call after it. What slot works for you?`,
-            `Then let's do it this way: I'll send the short slice, workflow, and responsibility-boundary outline, then we can do a focused 15-minute call just on that contour. What time works?`,
-          ];
+    if ((artifactOnly || artifactThenCall) && requestedArtifactType === 'implementation_memo') {
+      return artifactOnly
+        ? (ru
+          ? [
+              `Ок, пришлю короткий implementation memo по вашему workflow. Если contour будет выглядеть рабочим, следующим шагом возьмём 15 минут только на review fit, workflow и границу ответственности. Подходит?`,
+              `Тогда так: я отправлю короткую схему по slice, workflow и границе ответственности. Если это ляжет на ваш кейс, сразу перейдём к узкому 15-минутному review call. Ок?`,
+            ]
+          : [
+              `Understood. I'll send a short implementation memo for your workflow. If the contour looks workable, the next step can be a 15-minute review only on fit, workflow, and responsibility boundary. Does that work?`,
+              `Then let's do it this way: I'll send the short slice, workflow, and responsibility-boundary outline. If it fits your case, we can move straight to a narrow 15-minute review call. Does that work?`,
+            ])
+        : (ru
+          ? [
+              `Ок, пришлю короткий implementation memo по вашему workflow, и потом коротко созвонимся на 15 минут только по этому контуру. Какой слот вам подходит?`,
+              `Тогда сделаем так: я отправлю короткую схему по slice, workflow и границе ответственности, а потом коротко созвонимся на 15 минут только по этому контуру. Когда удобно?`,
+            ]
+          : [
+              `Understood. I'll send a short implementation memo for your workflow, then we can do a focused 15-minute call just on that contour. What slot works for you?`,
+              `Then let's do it this way: I'll send the short slice, workflow, and responsibility-boundary outline, then we can do a focused 15-minute call just on that contour. What time works?`,
+            ]);
     }
-    if (wantsWrittenFirst && requestedArtifactType === 'competitor_brief') {
-      return ru
-        ? [
-            `Ок, пришлю короткий competitor brief по вашему сравнению, а потом коротко созвонимся на 15 минут, чтобы на вашем кейсе пройти cheaper option vs Mellow без общего pitch. Когда удобно?`,
-          ]
-        : [
-            `Understood. I'll send the short competitor brief for your comparison, then we can do a 15-minute call to walk cheaper option vs Mellow on your case, with no broad pitch. What time works?`,
-          ];
+    if ((artifactOnly || artifactThenCall) && requestedArtifactType === 'competitor_brief') {
+      return artifactOnly
+        ? (ru
+          ? [`Ок, пришлю короткий competitor brief по вашему сравнению. Если логика на вашем кейсе сойдётся, следующим шагом возьмём 15 минут только на cheaper option vs Mellow без общего pitch. Подходит?`]
+          : [`Understood. I'll send the short competitor brief for your comparison. If the logic holds on your case, the next step can be 15 minutes only on cheaper option vs Mellow, with no broad pitch. Does that work?`])
+        : (ru
+          ? [`Ок, пришлю короткий competitor brief по вашему сравнению, а потом коротко созвонимся на 15 минут, чтобы на вашем кейсе пройти cheaper option vs Mellow без общего pitch. Когда удобно?`]
+          : [`Understood. I'll send the short competitor brief for your comparison, then we can do a 15-minute call to walk cheaper option vs Mellow on your case, with no broad pitch. What time works?`]);
     }
-    if (wantsWrittenFirst && (requestedArtifactType === 'slice_map' || requestedArtifactType === 'generic_artifact' || policy.askType === 'narrow_walkthrough')) {
-      return ru
-        ? [
-            `Ок, пришлю короткий материал именно по вашему узкому сценарию, и чтобы сразу перевести это в решение, давайте зафиксируем короткий 15-минутный review call после него. Какой слот вам удобен?`,
-            `Давайте так: сначала короткий written outline по вашему кейсу, а потом 15 минут голосом только на спорные места и fit. Когда вам удобно?`,
-          ]
-        : [
-            `Understood. I'll send a short note for your narrow scenario, and so we can turn it into a decision quickly, let's lock a short 15-minute review call after it. What slot works for you?`,
-            `Let's do it this way: short written outline for your case first, then 15 minutes live just on the open points and fit. What time works?`,
-          ];
+    if ((artifactOnly || artifactThenCall) && (requestedArtifactType === 'slice_map' || requestedArtifactType === 'generic_artifact' || policy.askType === 'narrow_walkthrough')) {
+      return artifactOnly
+        ? (ru
+          ? [
+              `Ок, пришлю короткий материал именно по вашему узкому сценарию. Если увидим fit, следующим шагом возьмём короткий 15-минутный review call только на спорные места. Подходит?`,
+              `Давайте так: сначала короткий written outline по вашему кейсу, а если логика сойдётся, потом 15 минут голосом только на открытые вопросы и fit. Ок?`,
+            ]
+          : [
+              `Understood. I'll send a short note for your narrow scenario. If we see fit, the next step can be a short 15-minute review call only on the open points. Does that work?`,
+              `Let's do it this way: short written outline for your case first, and if the logic holds, then 15 minutes live just on the open points and fit. Does that work?`,
+            ])
+        : (ru
+          ? [
+              `Ок, пришлю короткий материал именно по вашему узкому сценарию, и потом зафиксируем короткий 15-минутный review call только на спорные места и fit. Какой слот вам удобен?`,
+              `Давайте так: сначала короткий written outline по вашему кейсу, а потом 15 минут голосом только на спорные места и fit. Когда вам удобно?`,
+            ]
+          : [
+              `Understood. I'll send a short note for your narrow scenario, then let's lock a short 15-minute review call only on the open points and fit. What slot works for you?`,
+              `Let's do it this way: short written outline for your case first, then 15 minutes live just on the open points and fit. What time works?`,
+            ]);
     }
+    if (callReady) return null;
     return null;
   })();
   if (acceptanceAwarePools?.length) return pick(acceptanceAwarePools);
@@ -2423,7 +2483,7 @@ function trackSellerTurnMetadata(session, sellerEntry, sellerText) {
   sellerEntry.acceptance_state_before = policy.acceptanceState;
   sellerEntry.ask_allowed_at_hint_time = policy.askAllowed;
   sellerEntry.repair_state_bool = policy.repairState;
-  sellerEntry.bridge_step_type = policy.hintStage === 'bridge_step' ? policy.askType : null;
+  sellerEntry.bridge_step_type = (policy.hintStage === 'bridge_step' || policy.hintStage === 'direct_ask') ? policy.askType : null;
   sellerEntry.ask_intent = policy.askIntent;
   sellerEntry.persona_acceptance_bias = getPersonaAcceptanceBias(session);
   sellerEntry.hint_variant = getHintVariant(session, policy.hintStage);
@@ -2479,7 +2539,7 @@ function classifyMeetingFailureReason(session) {
   if (acceptanceState === 'artifact_then_call') return 'artifact_then_call_not_landed';
   if (acceptanceState === 'narrow_walkthrough') return 'walkthrough_ready_but_not_booked';
   if (askCount === 0) return 'no_ask_made';
-  if (!askEvents.some((e) => e.stage === 'closing')) return 'premature_ask';
+  if (!askEvents.some((e) => e.ask_type && e.ask_type !== 'premature_ask')) return 'premature_ask';
   if (trust < 1.2) return 'trust_deficit';
   if (activeConcern && resolvedCount === 0) return 'unresolved_concerns';
   return 'ask_not_landed';
@@ -7269,6 +7329,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
   };
   const spinLane = getSpinLane(session, policy);
   const spinInstruction = getSpinInstruction(session, policy);
+  const sandlerInstruction = getSandlerInstruction(session, policy);
 
   const lines = [
     `You are an expert B2B sales coach writing a single seller hint for an SDR at Mellow.io.`,
@@ -7312,6 +7373,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
     `Forbidden action: ${hintSchema.forbidden_action}`,
     `SPIN lane for this turn: ${spinLane}`,
     `SPIN instruction: ${spinInstruction}`,
+    `Sandler instruction: ${sandlerInstruction}`,
     `Persona value priority: ${personaValueFrames}`,
     `Preferred bridge asset: ${personaSellingPolicy.bridge_label}`,
     ``,
@@ -7327,16 +7389,17 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
       ? [
           `⚡ ASK-READY: Conditions are met — propose the next step this turn.`,
           `Use SPIN Need-payoff, not a generic close: make the benefit of the short call explicit and concrete.`,
+          `Use Sandler upfront contract: state exactly what the call is for, how narrow it is, and what the buyer gets from it.`,
           `Ask type for this persona+state: ${askTypeDescriptions[askType] || askTypeDescriptions.written_first}`,
           `Be direct and specific. Match the ask format to the persona: finance/legal personas prefer a written artifact first, ops personas can go direct.`,
         ].join('\n')
       : policy.hintStage === 'repair'
-        ? `🔧 TRUST-REPAIR MODE: Trust dropped (miss_streak active, trust=${buyerState.trust}/100). Use SPIN Problem mode. Do NOT propose a meeting this turn. Sharpen the message, address the specific concern that caused the drop, and ask one focused question to rebuild momentum.`
+        ? `🔧 TRUST-REPAIR MODE: Trust dropped (miss_streak active, trust=${buyerState.trust}/100). Use SPIN Problem mode. Use Sandler low-pressure repair. Do NOT propose a meeting this turn. Sharpen the message, address the specific concern that caused the drop, and ask one focused question to rebuild momentum.`
         : policy.hintStage === 'bridge_step'
-          ? `🪜 BRIDGE-STEP MODE: Use SPIN Need-payoff. Do NOT jump to a broad call ask unless it matches the required ask type. Offer exactly one bounded next step that earns the later meeting: ${askTypeDescriptions[askType] || askTypeDescriptions.written_first}.`
+          ? `🪜 BRIDGE-STEP MODE: Use SPIN Need-payoff. Use Sandler upfront contract. Do NOT jump to a broad call ask unless it matches the required ask type. Offer exactly one bounded next step that earns the later meeting: ${askTypeDescriptions[askType] || askTypeDescriptions.written_first}. State purpose, scope, and expected outcome clearly.`
           : policy.hintStage === 'proof'
-            ? `🧾 PROOF MODE: Use SPIN Implication. Do NOT ask for a meeting this turn. Resolve the active concern by sharpening consequence, mechanism, or downside, then ask one focused follow-up question if needed.`
-            : `🔎 DIAGNOSIS MODE: Use SPIN ${spinLane === 'situation' ? 'Situation' : 'Problem'}. Do NOT pitch broadly and do NOT ask for a meeting. Ask one focused question that surfaces the next missing condition for progression.`,
+            ? `🧾 PROOF MODE: Use SPIN Implication. Use Sandler pain-first discipline. Do NOT ask for a meeting this turn. Resolve the active concern by sharpening consequence, mechanism, or downside, then ask one focused follow-up question if needed.`
+            : `🔎 DIAGNOSIS MODE: Use SPIN ${spinLane === 'situation' ? 'Situation' : 'Problem'}. Use Sandler pain-first qualification. Do NOT pitch broadly and do NOT ask for a meeting. Ask one focused question that surfaces the next missing condition for progression.`,
   ];
 
   if (contrastive.copy_from?.length) {
@@ -7416,7 +7479,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
     `## Output format`,
     `Return ONLY the hint text. No preamble, no labels, no explanation, no quotes.`,
     `Write as if the SDR is sending this message directly to the buyer.`,
-    `Hard rules: do not mix diagnosis + proof + ask in one hint. Do not include more than one question mark. Do not include a meeting ask unless the required hint mode is direct_ask or the allowed bridge-step form explicitly includes it.`,
+    `Hard rules: do not mix diagnosis + proof + ask in one hint. Do not include more than one question mark. Do not include a meeting ask unless the required hint mode is direct_ask or the allowed bridge-step form explicitly includes it. If you propose a next step, frame it as a Sandler-style upfront contract with clear purpose, scope, and expected outcome.`,
   );
 
   return lines.join('\n');
