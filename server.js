@@ -4,17 +4,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
-import pg from 'pg';
 import { createStorage } from './storage/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3210;
-const runtimeDataRoot = process.env.VERCEL
-  ? path.join('/tmp', 'mellow-sales-sim')
-  : path.join(__dirname, 'data');
-const dataDir = runtimeDataRoot;
+const dataDir = path.join(__dirname, 'data');
 const sessionsDir = path.join(dataDir, 'sessions');
 const logsDir = path.join(dataDir, 'logs');
 const sdrHintTuningFile = path.join(dataDir, 'sdr_hint_tuning.json');
@@ -24,21 +20,28 @@ const promptMemoryRunsDir = path.join(dataDir, 'prompt_memory_runs');
 const artifactsDir = path.join(dataDir, 'artifacts');
 const personasFile = path.join(dataDir, 'personas.json');
 const promptArtifactsFile = path.join(__dirname, '..', 'mellow-sales-sim-v1-artifacts.md');
-const packageMetadata = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
-const APP_NAME = packageMetadata.name || 'mellow-sales-sim';
-const APP_VERSION = packageMetadata.version || '0.0.0';
-const COMMIT_SHA = process.env.VERCEL_GIT_COMMIT_SHA || process.env.GIT_COMMIT_SHA || null;
-const SHORT_COMMIT_SHA = COMMIT_SHA ? COMMIT_SHA.slice(0, 7) : null;
-const DISPLAY_VERSION = SHORT_COMMIT_SHA ? `${APP_VERSION}+${SHORT_COMMIT_SHA}` : APP_VERSION;
 
-const storage = createStorage({ dataDir, sessionsDir, personasFile });
+const storage = await createStorage({
+  dataDir,
+  sessionsDir,
+  personasFile,
+  logsDir,
+  hintMemoryFile,
+  hintRecencyFile,
+  sdrHintTuningFile,
+  artifactsDir,
+  promptMemoryRunsDir,
+});
 await storage.init();
-fs.mkdirSync(logsDir, { recursive: true });
-fs.mkdirSync(promptMemoryRunsDir, { recursive: true });
-fs.mkdirSync(artifactsDir, { recursive: true });
+if (storage.driver === 'file') {
+  fs.mkdirSync(logsDir, { recursive: true });
+  fs.mkdirSync(artifactsDir, { recursive: true });
+  fs.mkdirSync(promptMemoryRunsDir, { recursive: true });
+}
 
 let sdrHintTuningCache = { mtimeMs: -1, data: { openers: {}, concerns: {}, next_steps: {} } };
 let hintMemoryCache = { mtimeMs: -1, data: { version: 'v2', records: [] } };
+let hintRecencyCache = [];
 const HINT_MEMORY_VERSION = 'v2';
 const HINT_MEMORY_MAX_RECORDS = 600;
 const HINT_MEMORY_RETRIEVAL_WINDOW = 240;
@@ -46,390 +49,7 @@ const HINT_MEMORY_MAX_SUCCESS = 3;
 const HINT_MEMORY_MAX_FAILURE = 2;
 const HINT_RECENCY_MAX = 8;
 const UCB_C = Number(process.env.HINT_UCB_C ?? 1.0);
-const MAX_DIALOGUE_MESSAGES = 20;
-
-function resolvePostgresConnection() {
-  return process.env.DATABASE_URL
-    || process.env.POSTGRES_URL
-    || process.env.POSTGRES_PRISMA_URL
-    || process.env.POSTGRES_URL_NON_POOLING
-    || '';
-}
-
-function shouldUsePostgresSsl(connectionString) {
-  if (!connectionString) return false;
-  try {
-    const url = new URL(connectionString);
-    if (url.searchParams.get('sslmode') === 'disable') return false;
-    return !['localhost', '127.0.0.1'].includes(url.hostname);
-  } catch {
-    return !/localhost|127\.0\.0\.1/.test(connectionString);
-  }
-}
-
-function createHintStateStore() {
-  const connectionString = resolvePostgresConnection();
-  const canUsePostgres = storage.driver === 'postgres' && Boolean(connectionString);
-  const { Pool } = pg;
-  const state = {
-    memoryRecords: [],
-    recencyOpeners: [],
-    tuningData: { openers: {}, concerns: {}, next_steps: {} },
-    flushChain: Promise.resolve(),
-    pool: null,
-  };
-
-  function ensurePool() {
-    if (!canUsePostgres) return null;
-    if (!state.pool) {
-      state.pool = new Pool({
-        connectionString,
-        ssl: shouldUsePostgresSsl(connectionString)
-          ? { rejectUnauthorized: String(process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED || 'false').trim().toLowerCase() === 'true' }
-          : false,
-        max: Math.max(1, Number(process.env.PG_POOL_MAX || 3)),
-        idleTimeoutMillis: Math.max(1000, Number(process.env.PG_IDLE_TIMEOUT_MS || 10000)),
-        connectionTimeoutMillis: Math.max(1000, Number(process.env.PG_CONNECT_TIMEOUT_MS || 5000)),
-        allowExitOnIdle: true,
-      });
-    }
-    return state.pool;
-  }
-
-  function queueFlush(task) {
-    if (!canUsePostgres) return;
-    state.flushChain = state.flushChain
-      .then(task)
-      .catch((error) => console.error('[hint-store] postgres sync failed:', error?.message || error));
-  }
-
-  async function readBlob(pool, key) {
-    const result = await pool.query('select payload from hint_state_blobs where blob_key = $1', [key]);
-    return result.rows[0]?.payload ?? null;
-  }
-
-  async function writeBlob(client, key, payload) {
-    await client.query(`
-      insert into hint_state_blobs (blob_key, payload, updated_at)
-      values ($1, $2::jsonb, now())
-      on conflict (blob_key) do update
-      set payload = excluded.payload,
-          updated_at = now()
-    `, [key, JSON.stringify(payload)]);
-  }
-
-  function readHintMemoryFile() {
-    try {
-      const parsed = JSON.parse(fs.readFileSync(hintMemoryFile, 'utf8'));
-      return Array.isArray(parsed)
-        ? parsed
-        : Array.isArray(parsed?.records)
-        ? parsed.records
-        : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function readHintRecencyFile() {
-    try {
-      const parsed = JSON.parse(fs.readFileSync(hintRecencyFile, 'utf8'));
-      return Array.isArray(parsed?.openers) ? parsed.openers : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function readTuningFile() {
-    try {
-      const parsed = JSON.parse(fs.readFileSync(sdrHintTuningFile, 'utf8'));
-      return {
-        openers: normalizeTuningMap(parsed?.openers),
-        concerns: normalizeTuningMap(parsed?.concerns),
-        next_steps: normalizeTuningMap(parsed?.next_steps),
-      };
-    } catch {
-      return { openers: {}, concerns: {}, next_steps: {} };
-    }
-  }
-
-  return {
-    async init() {
-      state.memoryRecords = readHintMemoryFile();
-      state.recencyOpeners = readHintRecencyFile();
-      state.tuningData = readTuningFile();
-      if (!canUsePostgres) return;
-
-      const pool = ensurePool();
-      const [{ rows: memoryRows }, recencyBlob, tuningBlob] = await Promise.all([
-        pool.query('select payload from hint_memory_records order by created_at asc, id asc'),
-        readBlob(pool, 'hint_recency'),
-        readBlob(pool, 'sdr_hint_tuning'),
-      ]);
-
-      const dbMemory = memoryRows.map((row) => row.payload).filter(Boolean);
-      const dbRecency = Array.isArray(recencyBlob?.openers) ? recencyBlob.openers : [];
-      const dbTuning = tuningBlob && typeof tuningBlob === 'object'
-        ? {
-            openers: normalizeTuningMap(tuningBlob.openers),
-            concerns: normalizeTuningMap(tuningBlob.concerns),
-            next_steps: normalizeTuningMap(tuningBlob.next_steps),
-          }
-        : null;
-
-      if (dbMemory.length > 0) state.memoryRecords = dbMemory;
-      if (dbRecency.length > 0) state.recencyOpeners = dbRecency;
-      if (dbTuning) state.tuningData = dbTuning;
-    },
-    async bootstrapFromFilesIfNeeded() {
-      if (!canUsePostgres) return;
-      const pool = ensurePool();
-      const [{ rows: memoryRows }, recencyBlob, tuningBlob] = await Promise.all([
-        pool.query('select id from hint_memory_records limit 1'),
-        readBlob(pool, 'hint_recency'),
-        readBlob(pool, 'sdr_hint_tuning'),
-      ]);
-      if (memoryRows.length > 0 && recencyBlob !== null && tuningBlob !== null) return;
-
-      const client = await pool.connect();
-      try {
-        await client.query('begin');
-        if (memoryRows.length === 0 && state.memoryRecords.length > 0) {
-          for (const record of state.memoryRecords) {
-            await client.query(`
-              insert into hint_memory_records (id, session_id, persona_id, created_at, updated_at, payload)
-              values ($1, $2, $3, $4, now(), $5::jsonb)
-              on conflict (id) do update
-              set session_id = excluded.session_id,
-                  persona_id = excluded.persona_id,
-                  created_at = excluded.created_at,
-                  payload = excluded.payload,
-                  updated_at = now()
-            `, [record.id, record.session_id || null, record.persona_id || null, record.created_at || new Date().toISOString(), JSON.stringify(record)]);
-          }
-        }
-        if (recencyBlob === null) {
-          await writeBlob(client, 'hint_recency', { openers: state.recencyOpeners.slice(-HINT_RECENCY_MAX) });
-        }
-        if (tuningBlob === null) {
-          await writeBlob(client, 'sdr_hint_tuning', state.tuningData);
-        }
-        await client.query('commit');
-      } catch (error) {
-        await client.query('rollback');
-        throw error;
-      } finally {
-        client.release();
-      }
-    },
-    getHintMemoryRecords() {
-      return state.memoryRecords;
-    },
-    saveHintMemoryRecords(records) {
-      state.memoryRecords = records;
-      queueFlush(async () => {
-        const pool = ensurePool();
-        const client = await pool.connect();
-        try {
-          await client.query('begin');
-          const ids = state.memoryRecords.map((record) => String(record.id)).filter(Boolean);
-          if (ids.length > 0) {
-            await client.query('delete from hint_memory_records where not (id = any($1::text[]))', [ids]);
-          } else {
-            await client.query('delete from hint_memory_records');
-          }
-          for (const record of state.memoryRecords) {
-            await client.query(`
-              insert into hint_memory_records (id, session_id, persona_id, created_at, updated_at, payload)
-              values ($1, $2, $3, $4, now(), $5::jsonb)
-              on conflict (id) do update
-              set session_id = excluded.session_id,
-                  persona_id = excluded.persona_id,
-                  created_at = excluded.created_at,
-                  payload = excluded.payload,
-                  updated_at = now()
-            `, [record.id, record.session_id || null, record.persona_id || null, record.created_at || new Date().toISOString(), JSON.stringify(record)]);
-          }
-          await client.query('commit');
-        } catch (error) {
-          await client.query('rollback');
-          throw error;
-        } finally {
-          client.release();
-        }
-      });
-    },
-    getHintRecencyOpeners() {
-      return state.recencyOpeners;
-    },
-    saveHintRecencyOpeners(openers) {
-      state.recencyOpeners = openers.slice(-HINT_RECENCY_MAX);
-      queueFlush(async () => {
-        const pool = ensurePool();
-        await writeBlob(pool, 'hint_recency', { openers: state.recencyOpeners });
-      });
-    },
-    getTuning() {
-      return state.tuningData;
-    },
-    saveTuning(data) {
-      state.tuningData = {
-        openers: normalizeTuningMap(data?.openers),
-        concerns: normalizeTuningMap(data?.concerns),
-        next_steps: normalizeTuningMap(data?.next_steps),
-      };
-      queueFlush(async () => {
-        const pool = ensurePool();
-        await writeBlob(pool, 'sdr_hint_tuning', state.tuningData);
-      });
-      return state.tuningData;
-    },
-    async getInfo() {
-      return {
-        driver: canUsePostgres ? 'postgres' : 'file',
-        hint_memory_records: state.memoryRecords.length,
-        hint_recency_count: state.recencyOpeners.length,
-        sdr_tuning_source: canUsePostgres ? 'postgres-blob' : 'file',
-      };
-    }
-  };
-}
-
-const hintStateStore = createHintStateStore();
-await hintStateStore.init();
-await hintStateStore.bootstrapFromFilesIfNeeded();
-
-function createArtifactStore() {
-  const connectionString = resolvePostgresConnection();
-  const canUsePostgres = storage.driver === 'postgres' && Boolean(connectionString);
-  const { Pool } = pg;
-  const state = { pool: null, flushChain: Promise.resolve() };
-
-  function ensurePool() {
-    if (!canUsePostgres) return null;
-    if (!state.pool) {
-      state.pool = new Pool({
-        connectionString,
-        ssl: shouldUsePostgresSsl(connectionString)
-          ? { rejectUnauthorized: String(process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED || 'false').trim().toLowerCase() === 'true' }
-          : false,
-        max: Math.max(1, Number(process.env.PG_POOL_MAX || 3)),
-        idleTimeoutMillis: Math.max(1000, Number(process.env.PG_IDLE_TIMEOUT_MS || 10000)),
-        connectionTimeoutMillis: Math.max(1000, Number(process.env.PG_CONNECT_TIMEOUT_MS || 5000)),
-        allowExitOnIdle: true,
-      });
-    }
-    return state.pool;
-  }
-
-  function queueFlush(task) {
-    if (!canUsePostgres) return;
-    state.flushChain = state.flushChain
-      .then(task)
-      .catch((error) => console.error('[artifact-store] postgres sync failed:', error?.message || error));
-  }
-
-  return {
-    canUsePostgres,
-
-    saveArtifact(sessionId, payload, markdown) {
-      queueFlush(async () => {
-        const pool = ensurePool();
-        await pool.query(
-          `insert into session_artifacts (session_id, payload, markdown, saved_at, updated_at)
-           values ($1, $2::jsonb, $3, $4, now())
-           on conflict (session_id) do update
-           set payload = excluded.payload,
-               markdown = excluded.markdown,
-               saved_at = excluded.saved_at,
-               updated_at = now()`,
-          [sessionId, JSON.stringify(payload), markdown, payload.saved_at || new Date().toISOString()]
-        );
-      });
-    },
-
-    saveLog(session) {
-      queueFlush(async () => {
-        const pool = ensurePool();
-        const date = String(session.finished_at || new Date().toISOString()).slice(0, 10);
-        await pool.query(
-          `insert into session_logs (session_id, finished_date, payload, updated_at)
-           values ($1, $2, $3::jsonb, now())
-           on conflict (session_id) do update
-           set finished_date = excluded.finished_date,
-               payload = excluded.payload,
-               updated_at = now()`,
-          [session.session_id, date, JSON.stringify(session)]
-        );
-      });
-    },
-
-    async listArtifacts() {
-      if (!canUsePostgres) return null;
-      const pool = ensurePool();
-      const result = await pool.query(
-        'select payload from session_artifacts order by saved_at desc'
-      );
-      if (result.rowCount === 0) return null;
-      return result.rows.map(({ payload }) => ({
-        session_id: payload.session_id,
-        saved_at: payload.saved_at,
-        started_at: payload.started_at,
-        finished_at: payload.finished_at,
-        seller_username: payload.seller_username,
-        persona: payload.persona,
-        signal_card: payload.signal_card,
-        dialogue_type: payload.dialogue_type,
-        verdict: payload.assessment?.verdict || null,
-      })).filter((a) => a.session_id);
-    },
-
-    async loadArtifactJson(sessionId) {
-      if (!canUsePostgres) return null;
-      const pool = ensurePool();
-      const result = await pool.query(
-        'select payload from session_artifacts where session_id = $1',
-        [sessionId]
-      );
-      return result.rows[0]?.payload ?? null;
-    },
-
-    async loadArtifactMarkdown(sessionId) {
-      if (!canUsePostgres) return null;
-      const pool = ensurePool();
-      const result = await pool.query(
-        'select markdown from session_artifacts where session_id = $1',
-        [sessionId]
-      );
-      const md = result.rows[0]?.markdown;
-      return (typeof md === 'string' && md.length > 0) ? md : null;
-    },
-
-    async loadArtifactsBulk(ids) {
-      if (!canUsePostgres) return null;
-      const pool = ensurePool();
-      const result = await pool.query(
-        'select session_id, payload from session_artifacts where session_id = any($1::text[]) order by saved_at desc',
-        [ids]
-      );
-      if (result.rowCount === 0) return null;
-      return result.rows.map(({ payload }) => payload).filter(Boolean);
-    },
-
-    async listArtifactIds(limit) {
-      if (!canUsePostgres) return null;
-      const pool = ensurePool();
-      const sql = limit
-        ? 'select session_id from session_artifacts order by saved_at desc limit $1'
-        : 'select session_id from session_artifacts order by saved_at desc';
-      const result = await pool.query(sql, limit ? [limit] : []);
-      if (result.rowCount === 0) return null;
-      return result.rows.map((row) => row.session_id).filter(Boolean);
-    },
-  };
-}
-
-const artifactStore = createArtifactStore();
+const MAX_DIALOGUE_MESSAGES = 30;
 
 function visibleDialogueMessages(session) {
   return (session?.transcript || []).filter((entry) => entry.role !== 'system');
@@ -467,22 +87,70 @@ function normalizeTuningList(value) {
     : [];
 }
 
+async function hydrateAuxiliaryStorage() {
+  try {
+    const [recentOpeners, tuning, hintRecords] = await Promise.all([
+      storage.loadHintRecency ? storage.loadHintRecency() : [],
+      storage.loadSdrHintTuning ? storage.loadSdrHintTuning() : { openers: {}, concerns: {}, next_steps: {} },
+      storage.loadHintMemoryStore ? storage.loadHintMemoryStore() : [],
+    ]);
+    hintRecencyCache = Array.isArray(recentOpeners) ? recentOpeners.slice(-HINT_RECENCY_MAX) : [];
+    sdrHintTuningCache = {
+      mtimeMs: Date.now(),
+      data: {
+        openers: normalizeTuningMap(tuning?.openers),
+        concerns: normalizeTuningMap(tuning?.concerns),
+        next_steps: normalizeTuningMap(tuning?.next_steps)
+      }
+    };
+    hintMemoryCache = {
+      mtimeMs: Date.now(),
+      data: {
+        version: HINT_MEMORY_VERSION,
+        records: Array.isArray(hintRecords) ? hintRecords : []
+      }
+    };
+  } catch (err) {
+    console.error('[storage] auxiliary hydrate error:', err?.message || err);
+  }
+}
+
+await hydrateAuxiliaryStorage();
+
 function loadHintRecency() {
-  return hintStateStore.getHintRecencyOpeners();
+  return Array.isArray(hintRecencyCache) ? hintRecencyCache : [];
 }
 
 function saveHintRecency(openers) {
-  const normalized = openers.slice(-HINT_RECENCY_MAX);
-  try {
-    fs.writeFileSync(hintRecencyFile, JSON.stringify({ openers: normalized }, null, 2));
-  } catch (_) {}
-  hintStateStore.saveHintRecencyOpeners(normalized);
+  const normalized = Array.isArray(openers) ? openers.slice(-HINT_RECENCY_MAX) : [];
+  hintRecencyCache = normalized;
+  if (storage.saveHintRecency) {
+    Promise.resolve(storage.saveHintRecency(normalized)).catch((err) => {
+      console.error('[hint-recency] save error:', err?.message || err);
+    });
+  }
 }
 
 function loadSdrHintTuning() {
-  const data = hintStateStore.getTuning();
-  sdrHintTuningCache = { mtimeMs: -1, data };
-  return data;
+  if (storage.driver === 'file') {
+    try {
+      const stat = fs.statSync(sdrHintTuningFile);
+      if (stat.mtimeMs !== sdrHintTuningCache.mtimeMs) {
+        const parsed = JSON.parse(fs.readFileSync(sdrHintTuningFile, 'utf8'));
+        sdrHintTuningCache = {
+          mtimeMs: stat.mtimeMs,
+          data: {
+            openers: normalizeTuningMap(parsed?.openers),
+            concerns: normalizeTuningMap(parsed?.concerns),
+            next_steps: normalizeTuningMap(parsed?.next_steps)
+          }
+        };
+      }
+    } catch {
+      sdrHintTuningCache = { mtimeMs: -1, data: { openers: {}, concerns: {}, next_steps: {} } };
+    }
+  }
+  return sdrHintTuningCache.data;
 }
 
 function tunedOpeners(personaId) {
@@ -1259,10 +927,12 @@ async function loadPersonaStore() {
   );
   if (!Object.keys(normalized).length) {
     const seeded = seedPersonaStore();
-    await storage.savePersonas(seeded);
+    if (storage.driver === 'file') {
+      await storage.savePersonas(seeded);
+    }
     return seeded;
   }
-  if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
+  if (JSON.stringify(parsed) !== JSON.stringify(normalized) && storage.driver === 'file') {
     await storage.savePersonas(normalized);
   }
   return normalized;
@@ -1275,12 +945,6 @@ async function savePersonaStore() {
 let personas = await loadPersonaStore();
 
 app.use(express.json());
-app.use((req, res, next) => {
-  res.setHeader('X-Mellow-App', APP_NAME);
-  res.setHeader('X-Mellow-Version', APP_VERSION);
-  res.setHeader('X-Mellow-Storage', storage.driver);
-  next();
-});
 app.use(express.static(path.join(__dirname, 'public')));
 
 function now() {
@@ -1310,6 +974,7 @@ function detectBuyerMeetingAcceptance(text, lang) {
     if (/\b(let'?s\s+(do\s+it|talk|connect|meet|schedule|chat|book)|sounds\s+good|that\s+works|i'?m\s+in|works\s+for\s+me|happy\s+to\s+(connect|meet|talk|chat)|sure,?\s*(let'?s|i'?d|we\s+can)|yes,?\s*(let'?s|sounds\s+good|absolutely)|absolutely,?\s*let'?s|great,?\s*let'?s|i'?d\s+be\s+(happy|glad|open)\s+to|book\s+it|set\s+it\s+up|schedule\s+(a\s+)?(call|meeting))\b/i.test(lower)) return true;
     // "yes" or "ok" combined with call/meeting reference (word-bounded to avoid "specifically" matching "call")
     if (/\b(yes|ok|okay|sure|great|good|fine|alright|works)\b/i.test(lower) && /(15|20)[- ]minute|\bcall\b|\bmeeting\b|\bwalkthrough\b/i.test(lower)) return true;
+    if (/\b(send|share)\b/i.test(lower) && /\b(brief|memo|one-pager|implementation plan|cost breakdown)\b/i.test(lower) && /\b(then|after that|right after|we can)\b/i.test(lower) && /\b(call|meeting|review)\b/i.test(lower)) return true;
     return false;
   } else {
     // Explicit deferral / resistance — reject before checking positives.
@@ -1338,6 +1003,7 @@ function detectBuyerMeetingAcceptance(text, lang) {
       RU_TAIL
     );
     if (standaloneAgree.test(lower) && /(созвон|встреч|звоним|call|meeting)/.test(lower)) return true;
+    if (/(пришлите|отправьте)/.test(lower) && /(brief|memo|one-pager|материал|план внедрения|cost breakdown|summary)/.test(lower) && /(потом|после этого|и тогда|дальше)/.test(lower) && /(созвон|встреч|review call|call)/.test(lower)) return true;
 
     return false;
   }
@@ -1351,7 +1017,8 @@ function sessionHasMeetingBooked(session) {
 }
 
 async function listStoredSessions() {
-  return (await storage.listSessions())
+  const raw = await storage.listSessions();
+  return raw
     .map((session) => {
       try {
         return ensureBuyerStateSessionFields(session);
@@ -1501,6 +1168,8 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       progression_score: summary.progression_score,
       stages_reached: summary.stages_reached,
       ask_events: summary.ask_events,
+      acceptance_events: summary.acceptance_events,
+      acceptance_state: summary.acceptance_state,
       hint_stage_breakdown: hintStageBreakdown,
       trust_final: summary.trust_final,
       ghost_turns: summary.ghost_turns,
@@ -1553,15 +1222,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
 }
 
 function loadHintMemoryStore() {
-  const normalized = hintStateStore.getHintMemoryRecords()
-    .map((record, index) => normalizeHintMemoryRecord(record, index))
-    .filter(Boolean)
-    .slice(-HINT_MEMORY_MAX_RECORDS);
-  hintMemoryCache = {
-    mtimeMs: -1,
-    data: { version: HINT_MEMORY_VERSION, records: normalized }
-  };
-  return normalized;
+  return Array.isArray(hintMemoryCache?.data?.records) ? hintMemoryCache.data.records : [];
 }
 
 function saveHintMemoryStore(records) {
@@ -1569,13 +1230,16 @@ function saveHintMemoryStore(records) {
     .map((record, index) => normalizeHintMemoryRecord(record, index))
     .filter(Boolean)
     .slice(-HINT_MEMORY_MAX_RECORDS);
-  fs.writeFileSync(hintMemoryFile, JSON.stringify({
-    version: HINT_MEMORY_VERSION,
-    updated_at: now(),
-    records: normalized
-  }, null, 2));
-  hintStateStore.saveHintMemoryRecords(normalized);
-  hintMemoryCache = { mtimeMs: -1, data: { version: HINT_MEMORY_VERSION, records: normalized } };
+  hintMemoryCache = { mtimeMs: Date.now(), data: { version: HINT_MEMORY_VERSION, records: normalized } };
+  if (storage.saveHintMemoryStore) {
+    Promise.resolve(storage.saveHintMemoryStore({
+      version: HINT_MEMORY_VERSION,
+      updated_at: now(),
+      records: normalized
+    })).catch((err) => {
+      console.error('[hint-memory] save error:', err?.message || err);
+    });
+  }
 }
 
 function normalizeHintText(text = '') {
@@ -1634,6 +1298,205 @@ function buyerRequestedWrittenFirst(session) {
   ]);
 }
 
+function buyerNeedsImplementationReview(session) {
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  return hasAny(lower, [
+    'api', 'mcp', 'integration', 'integrate', 'workflow', 'implementation team', 'implementation', 'onboarding team',
+    'enterprise', 'contractor administration', 'vendor management', 'zero cost', 'pilot',
+    'апи', 'интеграц', 'воркфло', 'внедрен', 'команда внедрения', 'enterprise', 'администрирование подрядчиков', 'zero cost', 'без затрат на старт', 'пилот'
+  ]);
+}
+
+function detectRequestedArtifactType(session) {
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  if (hasAny(lower, ['cost breakdown', 'total-cost', 'effective cost', 'pricing logic', 'math upfront', 'стоимост', 'цена', 'стоимость', 'effective cost', 'математ', 'экономик'])) {
+    return 'cost_breakdown';
+  }
+  if (hasAny(lower, ['competitor', 'compare', 'why you over cheaper', 'cheaper option', 'конкурент', 'дешевле', 'сравн', 'почему дороже'])) {
+    return 'competitor_brief';
+  }
+  if (hasAny(lower, ['implementation', 'integration', 'api', 'mcp', 'workflow', 'onboarding', 'pilot', 'внедрен', 'интеграц', 'api', 'mcp', 'воркфло', 'пилот'])) {
+    return 'implementation_memo';
+  }
+  if (hasAny(lower, ['slice', 'scope', 'who exactly', 'which use case', 'кого именно', 'какой срез', 'какой кейс', 'какой кусок'])) {
+    return 'slice_map';
+  }
+  if (hasAny(lower, ['send', 'share', 'brief', 'memo', 'one-pager', 'пришлите', 'отправьте', 'материал', 'brief', 'memo', 'summary'])) {
+    return 'generic_artifact';
+  }
+  return null;
+}
+
+function getBuyerAcceptanceState(session) {
+  if (session?.meta?.meeting_booked === true || sessionHasMeetingBooked(session)) return 'direct_call';
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  if (!lower) return 'not_ready';
+  if (detectBuyerMeetingAcceptance(lower, session?.language || 'ru')) return 'direct_call';
+  if (/(созвон|встреч|call|meeting|walkthrough|review call)/i.test(lower) && /(потом|после|then|after|if|если)/i.test(lower)) {
+    return 'artifact_then_call';
+  }
+  if (/(walkthrough|review|15 минут|15-минут|15 minute|20 minute|созвон)/i.test(lower) && !buyerRequestedWrittenFirst(session)) {
+    return 'narrow_walkthrough';
+  }
+  if (buyerRequestedWrittenFirst(session) || detectRequestedArtifactType(session)) {
+    return 'artifact_only';
+  }
+  return 'not_ready';
+}
+
+function getAcceptanceEventType(session) {
+  const state = getBuyerAcceptanceState(session);
+  const artifactType = detectRequestedArtifactType(session);
+  if (state === 'direct_call') return 'accepts_direct_call';
+  if (state === 'narrow_walkthrough') return 'accepts_narrow_walkthrough';
+  if (state === 'artifact_then_call') {
+    if (artifactType === 'cost_breakdown') return 'accepts_cost_breakdown_then_call';
+    if (artifactType === 'implementation_memo') return 'accepts_implementation_review_then_call';
+    if (artifactType === 'competitor_brief') return 'accepts_competitor_brief_then_call';
+    return 'accepts_artifact_then_call';
+  }
+  if (state === 'artifact_only') {
+    if (artifactType === 'cost_breakdown') return 'accepts_cost_breakdown';
+    if (artifactType === 'implementation_memo') return 'accepts_implementation_review';
+    if (artifactType === 'competitor_brief') return 'accepts_competitor_brief';
+    if (artifactType === 'slice_map') return 'accepts_slice_map';
+    return 'accepts_artifact';
+  }
+  return null;
+}
+
+function getPersonaAcceptanceBias(session) {
+  const persona = personaMeta(session) || {};
+  if (persona.archetype === 'finance') return 'cost_breakdown_first';
+  if (persona.archetype === 'ops') return 'workflow_review_first';
+  if (persona.archetype === 'legal') return 'artifact_before_call';
+  if (['panic_churn_ops', 'fx_trust_shock_finance', 'cm_winback'].includes(persona.id)) return 'trust_repair_before_direct_call';
+  return 'default';
+}
+
+const PERSONA_SELLING_POLICY = {
+  rate_floor_cfo: {
+    proof_focus: ['defendable_structure', 'incident_ownership', 'clarity_of_scheme'],
+    bridge_asset: 'defendable_structure_memo',
+    bridge_label: 'short structure + incident path memo',
+  },
+  fx_trust_shock_finance: {
+    proof_focus: ['cost_predictability', 'clarity_of_scheme', 'defendable_structure', 'recovery_visibility', 'incident_ownership'],
+    bridge_asset: 'cost_breakdown',
+    bridge_label: 'short total-cost breakdown with visible FX and incident path',
+  },
+  cm_winback: {
+    proof_focus: ['clarity_of_scheme', 'defendable_structure', 'slice_specific_fit'],
+    bridge_asset: 'slice_map',
+    bridge_label: 'narrow slice-fit map',
+  },
+  grey_pain_switcher: {
+    proof_focus: ['incident_ownership', 'defendable_structure', 'clarity_of_scheme'],
+    bridge_asset: 'incident_boundary_memo',
+    bridge_label: 'incident-owner + responsibility-boundary note',
+  },
+  direct_contract_transition: {
+    proof_focus: ['defendable_structure', 'slice_specific_fit', 'clarity_of_scheme'],
+    bridge_asset: 'slice_map',
+    bridge_label: 'narrow transition slice map',
+  },
+  panic_churn_ops: {
+    proof_focus: ['incident_ownership', 'defendable_structure', 'recovery_visibility', 'clarity_of_scheme'],
+    bridge_asset: 'recovery_plan',
+    bridge_label: 'short recovery and escalation plan',
+  },
+};
+
+function getPersonaSellingPolicy(session) {
+  const persona = personaMeta(session) || {};
+  const focus = PERSONA_SELLING_POLICY[persona.id] || {};
+  return {
+    proof_focus: focus.proof_focus || ['defendable_structure', 'clarity_of_scheme'],
+    bridge_asset: focus.bridge_asset || 'memo',
+    bridge_label: focus.bridge_label || 'short written brief',
+  };
+}
+
+function getPersonaValueFrameSummary(session) {
+  const labels = {
+    defendable_structure: 'defendable structure',
+    incident_ownership: 'incident ownership',
+    clarity_of_scheme: 'clarity of scheme',
+    cost_predictability: 'cost predictability',
+    recovery_visibility: 'recovery visibility',
+    slice_specific_fit: 'slice-specific fit',
+  };
+  return getPersonaSellingPolicy(session).proof_focus.map((key) => labels[key] || key).join(', ');
+}
+
+function getAskIntent(session) {
+  const artifactType = detectRequestedArtifactType(session);
+  const askType = getPersonaAskType(session);
+  if (artifactType === 'cost_breakdown') return 'cost_breakdown_review';
+  if (artifactType === 'competitor_brief') return 'competitor_proof_brief';
+  if (artifactType === 'implementation_memo') return askType === 'written_first' ? 'implementation_memo' : 'workflow_fit_review';
+  if (artifactType === 'slice_map') return 'slice_map_review';
+  if (askType === 'narrow_walkthrough') return 'narrow_feasibility_call';
+  if (askType === 'direct_call') return 'direct_call';
+  return 'artifact_then_call';
+}
+
+function detectBuyerWinPattern(session) {
+  const persona = personaMeta(session) || {};
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  const wholeTranscript = ((session?.transcript || [])
+    .filter((entry) => entry.role === 'bot')
+    .map((entry) => String(entry.text || '').toLowerCase())
+    .join(' '));
+
+  if (hasAny(lower, [
+    'only option', 'no other option', 'the only solution', 'only working', 'the only company',
+    'нет других вариантов', 'других вариантов нет', 'единственный вариант', 'единственное решение', 'только вы можете',
+    'russia', 'belarus', 'rubles', 'рубл', 'росси', 'беларус', 'банк перестал', 'bank stopped', 'can\'t pay'
+  ])) {
+    return 'only_working_option';
+  }
+
+  if (hasAny(wholeTranscript, [
+    'competitor', 'cheaper', 'lower rate', '3%', '2.5%', '3.5%', 'easystaff', '4dev', 'deel', 'remote', 'garnu', 'stape',
+    'конкурент', 'дешев', 'дешевле', 'ставк', 'процент', 'easystaff', '4dev', 'deel', 'remote', 'garnu', 'stape',
+    'reliable', 'reliability', 'sanctions-safe', 'hard geo', 'cis', 'pakistan', 'india', 'africa', 'latam', 'asia',
+    'надежн', 'надежност', 'санкц', 'тяжел', 'снг', 'пакистан', 'инд', 'африк', 'латам', 'ази'
+  ]) || ['rate_floor_cfo'].includes(persona.id)) {
+    return 'competitive_reliability';
+  }
+
+  if (buyerNeedsImplementationReview(session) || hasAny(wholeTranscript, [
+    'find and select', 'contract and pay', 'implementation team', 'workflow embedding', 'contractor administration',
+    'найти и выбрать', 'оформить сделку', 'оплатить фрилансера', 'команда внедрения', 'встроить в процессы', 'администрирование подрядчиков'
+  ])) {
+    return 'enterprise_embedding';
+  }
+
+  if (hasAny(wholeTranscript, [
+    'audit', 'due diligence', 'misclassification', 'investor', 'lawyer', 'legal team',
+    'аудит', 'дью дилидженс', 'misclassification', 'инвест', 'юрист', 'legal'
+  ]) || ['grey_pain_switcher', 'panic_churn_ops'].includes(persona.id)) {
+    return 'compliance_trigger';
+  }
+
+  if (hasAny(wholeTranscript, [
+    'crypto', 'cryptocurrency', 'informal', 'off-books', 'off the books',
+    'крипт', 'неформаль', 'в серую', 'серую схему'
+  ])) {
+    return 'crypto_replacement';
+  }
+
+  if (hasAny(wholeTranscript, [
+    'one invoice', 'single invoice', 'admin', 'manual', 'status chasing', 'reconciliation',
+    'один инвойс', 'ручн', 'сверк', 'статус', 'админ'
+  ])) {
+    return 'operational_simplicity';
+  }
+
+  return null;
+}
+
 // Detect when trust has been meaningfully damaged and needs explicit repair before asking.
 // Repair is needed when: miss streak active AND trust hasn't recovered to ask threshold yet.
 function needsTrustRepair(session) {
@@ -1652,11 +1515,21 @@ function getPersonaAskType(session) {
   const persona = personaMeta(session);
   const buyerState = normalizeBuyerState(session.buyer_state || buildInitialBuyerState(session), session);
   const clarity = Number(buyerState.clarity || 50);
+  const trust = Number(buyerState.trust || 50);
   const nextStepLikelihood = Number(buyerState.next_step_likelihood || 0);
   const missStreak = session.meta?.miss_streak || 0;
   if (buyerRequestedWrittenFirst(session)) return 'written_first';
+  if (buyerNeedsImplementationReview(session)) return clarity >= 58 ? 'narrow_walkthrough' : 'written_first';
   // Legal personas always want written review first — they need to assess before committing
   if (persona?.archetype === 'legal') return 'written_first';
+  if (persona?.id === 'fx_trust_shock_finance') {
+    if (clarity < 72 || trust < 62) return 'written_first';
+    return nextStepLikelihood >= 0.64 ? 'narrow_walkthrough' : 'written_first';
+  }
+  if (persona?.id === 'rate_floor_cfo') {
+    if (clarity < 66 || nextStepLikelihood < 0.58) return 'written_first';
+    return nextStepLikelihood >= 0.72 ? 'narrow_walkthrough' : 'written_first';
+  }
   // Trust was damaged (miss streak happened during follow-up) — offer a narrow scope walk
   if (missStreak >= 1) return 'narrow_walkthrough';
   // High buyer momentum — go direct
@@ -1673,6 +1546,7 @@ function getPersonaAskType(session) {
 // Replaces the previous three-stage model (opening / follow_up / closing).
 function getSellerProgressionStage(session) {
   const sellerTurnCount = sellerMessages(session).length;
+  const buyerTurnCount = (session?.transcript || []).filter((entry) => entry.role === 'bot').length;
   if (sellerTurnCount === 0) return 'opening';
   if (canMakeAsk(session)) return 'closing';
   if (needsTrustRepair(session)) return 'trust_repair';
@@ -1682,8 +1556,9 @@ function getSellerProgressionStage(session) {
   const nextStepLikelihood = Number(buyerState.next_step_likelihood || 0);
   // Pre-ask: trust is building, at least one concern addressed, buyer trending toward next step
   if (trust >= 1.2 && nextStepLikelihood >= 0.25 && resolvedCount >= 1) return 'pre_ask';
-  // Proof: active concern handling (at least one seller turn has landed)
-  if (resolvedCount >= 1 || sellerTurnCount >= 2) return 'proof';
+  // Proof should begin as soon as the buyer has replied once and exposed the first concern.
+  // Otherwise the simulator over-stays in diagnosis and keeps asking instead of answering.
+  if (resolvedCount >= 1 || (sellerTurnCount >= 1 && buyerTurnCount >= 1)) return 'proof';
   return 'diagnosis';
 }
 
@@ -1692,6 +1567,11 @@ function getHintPolicyContext(session) {
   const askAllowed = canMakeAsk(session);
   const repairState = needsTrustRepair(session);
   const askType = getPersonaAskType(session);
+  const askIntent = getAskIntent(session);
+  const acceptanceState = getBuyerAcceptanceState(session);
+  const requestedArtifactType = detectRequestedArtifactType(session);
+  const buyerAskedForMaterial = buyerRequestedWrittenFirst(session);
+  const buyerAskedForImplementation = buyerNeedsImplementationReview(session);
   const buyerState = normalizeBuyerState(session.buyer_state || buildInitialBuyerState(session), session);
   const trust = Number(buyerState.trust || 0);
   const clarity = Number(buyerState.clarity || 0);
@@ -1718,6 +1598,17 @@ function getHintPolicyContext(session) {
     hintStage = 'proof';
   }
 
+  // When the buyer explicitly asks for written material or implementation shape,
+  // do not keep proving forever. Move to a bounded bridge step so the seller can
+  // offer the requested artifact plus a concrete follow-up call.
+  if ((buyerAskedForMaterial || buyerAskedForImplementation || requestedArtifactType || acceptanceState === 'artifact_only') && sellerMessages(session).length >= 2 && !repairState) {
+    hintStage = askAllowed ? 'direct_ask' : 'bridge_step';
+  }
+
+  if (acceptanceState === 'artifact_then_call' && !repairState) {
+    hintStage = 'direct_ask';
+  }
+
   // Constrained retry paths: prevent infinite looping at bridge_step or direct_ask
   hintStage = getConstrainedHintStage(session, hintStage);
 
@@ -1727,6 +1618,9 @@ function getHintPolicyContext(session) {
     askAllowed,
     repairState,
     askType,
+    askIntent,
+    acceptanceState,
+    requestedArtifactType,
     buyerState,
     activeConcern: getActiveConcern(session),
   };
@@ -1753,6 +1647,8 @@ function computeHintSchema(session, policy) {
   const concern = p.activeConcern || null;
   const resolvedCount = Object.keys(session.meta?.resolved_concerns || {}).length;
   const missStreak = session.meta?.miss_streak || 0;
+  const personaPolicy = getPersonaSellingPolicy(session);
+  const personaFocus = getPersonaValueFrameSummary(session);
 
   const buyer_state_summary = [
     `trust:${trust}`,
@@ -1776,7 +1672,7 @@ function computeHintSchema(session, policy) {
         ? `Concern not yet resolved with concrete mechanism: ${concern}`
         : 'No active concern to resolve',
       missing_condition: `Resolve active concern with one concrete Mellow mechanism (${concern || 'scope'})`,
-      recommended_action: 'Address the concern with one specific proof point or mechanism, then ask one follow-up if needed',
+      recommended_action: `Address the concern with one specific proof point or mechanism, prioritizing ${personaFocus}, then ask one follow-up if needed`,
       forbidden_action: 'No meeting ask, no broad pitch, no multiple proof points at once',
     },
     repair: {
@@ -1788,7 +1684,7 @@ function computeHintSchema(session, policy) {
     bridge_step: {
       obstacle_to_progress: `Not yet ask-ready — trust:${trust}/100, clarity:${clarity}/100, next_step:${nextStep}`,
       missing_condition: 'Buyer needs one bounded intermediate commitment before a direct ask is credible',
-      recommended_action: `Offer exactly one bounded next step matching ask type: ${p.askType || 'written_first'}`,
+      recommended_action: `Offer exactly one bounded next step matching ask type: ${p.askType || 'written_first'} using the preferred bridge asset (${personaPolicy.bridge_label})`,
       forbidden_action: 'No direct meeting ask, no broad call proposal, no multiple options at once',
     },
     direct_ask: {
@@ -1890,6 +1786,7 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
   const policy = getHintPolicyContext(session);
   const concern = policy.activeConcern || 'scope';
   const askType = policy.askType;
+  const winPattern = detectBuyerWinPattern(session);
   const lines = {
     ru: {
       diagnosis: {
@@ -2005,13 +1902,420 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
     },
   };
 
+  const patternLines = {
+    ru: {
+      diagnosis: {
+        only_working_option: {
+          finance: [
+            `Что у вас сейчас реально не работает без Mellow: выплаты в РФ/РБ, рублёвый payout или защитимость схемы для finance/legal?`,
+            `Если убрать общие слова про цену, где именно тупик: нет рабочего канала выплат, нет предсказуемой рублёвой суммы или нет defendable flow?`,
+          ],
+          ops: [
+            `Где у вас сейчас реальный operational тупик: сами выплаты, коммуникация с contractor-ами или ручная сборка обходного процесса?`,
+            `Что сейчас ломается первым: payout path, спокойствие contractor-ов или внутренняя управляемость процесса?`,
+          ],
+        },
+        compliance_trigger: {
+          finance: [
+            `Что у вас сейчас более живое: риск misclassification / audit или то, что текущая схема просто плохо защищается внутри finance/legal?`,
+            `Какой именно trigger вас двигает: инвесторский review, legal discomfort или страх, что текущая схема не переживёт проверку?`,
+          ],
+          legal: [
+            `Что именно нужно выдержать: audit trail, разделение ответственности или defensibility схемы перед юристами/инвесторами?`,
+            `Какая часть текущей схемы выглядит самой слабой при legal review: документы, границы ответственности или сама цепочка выплат?`,
+          ],
+        },
+      },
+      proof: {
+        only_working_option: {
+          default: [
+            `Если у вас сейчас нет рабочего payout path в РФ/РБ, разговор не про абстрактный premium, а про working option. Mellow закрывает docs, KYC и payout chain так, чтобы схема реально работала, а не выглядела красиво на словах. Где нужна конкретика?`,
+            `Здесь лучший proof не “мы качественнее”, а “это реально работает в вашем контуре”. Если альтернатива не проводит нужный payout flow, дешевле не значит полезнее. Какой кусок механики вам важнее проверить?`,
+          ],
+        },
+        competitive_reliability: {
+          default: [
+            `Если конкурент дешевле, вопрос не в headline rate, а в том, кто реально выдерживает тяжёлые гео без серых зон и внезапных сбоев. Mellow дороже не “за бренд”, а за sanction-safe operability, устойчивый payout chain и defendable execution в СНГ, РФ/РБ и других hard geos. Что вам важнее доказать первым: reliability, controllability или downside cheaper option?`,
+            `Здесь premium нужно защищать не словами “лучший сервис”, а конкретной разницей: кто проведёт выплаты стабильно в tough geos, кто даст audit trail, кто не развалится при scrutiny, и кто возьмёт на себя внедрение, а не оставит клиента с tool-only experience. Какой из этих proof layers критичнее для вас?`,
+          ],
+        },
+        enterprise_embedding: {
+          default: [
+            `Если у вас enterprise-контур, value не только в самом payout, а в том, что Mellow можно встроить в процесс “найти и выбрать” и “оформить сделку и оплатить фрилансера” через APIs и MCP, плюс наша команда внедрения берёт на себя реальную интеграцию в contractor admin workflow. Где вам важнее увидеть proof: implementation ownership, process embedding или zero-cost-to-start contour?`,
+            `Это не просто кастомизация. Здесь Mellow продаётся как managed implementation layer: наша команда внедрения подстраивает flow под ваш vendor/contractor process, а старт для клиента можно сделать без upfront cost. Что вам важнее разобрать первым: integration shape, operating model или start-without-commitment logic?`,
+          ],
+        },
+        compliance_trigger: {
+          default: [
+            `Если trigger уже legal/audit, ценность не в лозунге compliance, а в defendable structure: документы, KYC, payout chain и audit trail по нашей зоне ответственности. Какой элемент нужно разобрать первым?`,
+            `Когда на столе misclassification, audit или investor review, рабочий ответ это не “мы safer”, а понятная граница ответственности и trail. Что вам критичнее: boundary, docs или payment evidence?`,
+          ],
+        },
+        crypto_replacement: {
+          default: [
+            `Если текущий путь держится на crypto или полуформальной схеме, главный value здесь не маркетинг, а замена хрупкого контура на defendable payout flow. Что вам важнее: legal defensibility или предсказуемость самих выплат?`,
+            `Здесь Mellow нужен не как “ещё один vendor”, а как выход из серого и нестабильного payment path. Где вам важнее конкретика: документы, payout flow или audit trail?`,
+          ],
+        },
+        operational_simplicity: {
+          default: [
+            `Если боль в ручной сборке процесса, value здесь в одном контуре: one invoice, docs, KYC и payout ops у Mellow вместо кусочной координации. Где у вас сейчас больше всего ручного трения?`,
+            `Здесь важна не общая “платформа”, а снятие конкретного admin overhead: один invoice, меньше chase-up и более чистый flow. Какой кусок боли у вас самый дорогой?`,
+          ],
+        },
+      },
+      bridge_step: {
+        only_working_option: {
+          written_first: [
+            `Следующий шаг без давления: я пришлю короткую карту рабочего payout flow именно под ваш кейс, чтобы было видно, где Mellow решает тупик, а потом уже созвон. Ок?`,
+          ],
+          direct_call: [
+            `Похоже, здесь уже важнее не переписка, а короткая проверка вашего payout scenario голосом. Давайте 15 минут только на working path. Подходит?`,
+          ],
+        },
+        competitive_reliability: {
+          written_first: [
+            `Могу сначала прислать короткий competitor-proof brief: где cheaper option выглядит дешевле, а где у него реально больше failure risk в hard geos, и как Mellow это закрывает. Если логика сойдётся, тогда созвон. Подходит?`,
+          ],
+          narrow_walkthrough: [
+            `Давайте короткий walkthrough на 15 минут только по competitive comparison: reliability, sanctions-safe operability и what breaks in cheaper setups. Такой формат ок?`,
+          ],
+          direct_call: [
+            `Похоже, спор уже не про цену, а про reliability under pressure. Есть смысл коротко созвониться на 15 минут и пройти именно competitor trade-off. Подходит?`,
+          ],
+        },
+        enterprise_embedding: {
+          written_first: [
+            `Следующий шаг без давления: пришлю короткий implementation brief, как Mellow встраивается в ваш contractor workflow через APIs/MCP и что наша команда внедрения берёт на себя, при zero cost to start. Если логика ок, тогда созвон. Подходит?`,
+          ],
+          narrow_walkthrough: [
+            `Предлагаю узкий walkthrough на 15 минут только по implementation contour: team, APIs/MCP, workflow embedding и zero-cost start. Такой формат ок?`,
+          ],
+          direct_call: [
+            `Похоже, здесь уже полезнее коротко пройти implementation shape голосом, чем переписываться. Найдём 15 минут на workflow-fit review?`,
+          ],
+        },
+        compliance_trigger: {
+          written_first: [
+            `Могу сначала прислать короткий memo по boundary, docs и audit trail под ваш кейс, чтобы finance/legal посмотрели без звонка. Подходит?`,
+          ],
+          narrow_walkthrough: [
+            `Давайте не в общий звонок, а в короткий walkthrough только по legal / audit contour вашего кейса. Такой формат ок?`,
+          ],
+        },
+      },
+      direct_ask: {
+        only_working_option: {
+          direct_call: [
+            `Предлагаю короткий созвон на 20 минут и быстро пройдём ваш payout scenario, чтобы понять, где Mellow реально закрывает тупик. Когда удобно?`,
+          ],
+          written_first: [
+            `Я пришлю короткую схему payout flow под ваш кейс сегодня, и если логика сходится, сразу поставим короткий созвон. Какой слот потом вам удобен?`,
+          ],
+        },
+        competitive_reliability: {
+          written_first: [
+            `Я пришлю короткий competitive brief сегодня: почему Mellow не cheapest, но strongest по reliability в hard geos и где cheaper option создаёт hidden downside. Если логика ок, сразу поставим короткий созвон. Какой слот удобен?`,
+          ],
+          narrow_walkthrough: [
+            `Давайте поставим короткий 15-минутный созвон только по competitor trade-off и reliability proof, без общего pitch. Когда удобно?`,
+          ],
+          direct_call: [
+            `Предлагаю короткий созвон на 20 минут и пройдём именно конкурентную развилку: почему Mellow выигрывает не ценой, а надёжностью и controllability в hard geos. Когда удобно?`,
+          ],
+        },
+        enterprise_embedding: {
+          written_first: [
+            `Я пришлю implementation memo сегодня: team, APIs/MCP, workflow embedding и zero-cost start. Если это попадает в ваш enterprise contour, сразу поставим короткий review call. Какой слот удобен?`,
+          ],
+          narrow_walkthrough: [
+            `Давайте поставим короткий созвон на 15 минут только по enterprise implementation contour, без product theatre. Когда удобно?`,
+          ],
+          direct_call: [
+            `Предлагаю 20-минутный call и быстро пройдём, как Mellow встроится в ваш contractor process с нашей командой внедрения и без upfront start cost. Когда удобно?`,
+          ],
+        },
+        compliance_trigger: {
+          written_first: [
+            `Предлагаю следующий шаг: короткий memo по defendable structure сегодня и затем review call с теми, кто смотрит legal/finance часть. Какой формат вам удобнее?`,
+          ],
+          narrow_walkthrough: [
+            `Давайте поставим короткий созвон только по legal / audit contour и проверим, выдерживает ли схема ваш review. Когда удобно?`,
+          ],
+        },
+      },
+    },
+    en: {
+      diagnosis: {
+        only_working_option: {
+          finance: [
+            `What is actually broken today without Mellow: payments into RU/BY, ruble payout predictability, or the fact that the setup is not defensible for finance/legal?`,
+            `If we strip out generic price talk, where is the real dead end: no working payout route, no predictable ruble amount, or no defensible flow?`,
+          ],
+          ops: [
+            `Where is the real operational dead end today: the payout path itself, contractor communication, or the manual workaround around it?`,
+            `What breaks first in the current setup: payout execution, contractor calm, or internal control of the process?`,
+          ],
+        },
+        compliance_trigger: {
+          finance: [
+            `What is more live for you right now: misclassification / audit risk, or the fact that the current setup is hard to defend internally?`,
+            `What is the actual trigger here: investor review, legal discomfort, or a sense that the current setup will not survive scrutiny?`,
+          ],
+          legal: [
+            `What exactly needs to hold up: audit trail, scope boundary, or the defensibility of the structure in front of legal / investors?`,
+            `Which part of the current setup looks weakest in legal review: documentation, boundary of responsibility, or the payment chain itself?`,
+          ],
+        },
+      },
+      proof: {
+        only_working_option: {
+          default: [
+            `If there is no working payout path into RU/BY today, this is not really a premium-vs-cheap conversation. It is a working-option conversation. Mellow covers docs, KYC, and the payout chain so the setup actually works. Which part needs more precision?`,
+            `The strongest proof here is not “we are better”, but “this works in your contour.” If the alternative cannot execute the payout path you need, cheaper is not the real benchmark. Which mechanism do you want to test first?`,
+          ],
+        },
+        competitive_reliability: {
+          default: [
+            `If the competitor is cheaper, the real question is not headline rate. It is who actually stays reliable in hard geos without grey zones or surprise breakdowns. Mellow is more expensive not for branding, but for sanctions-safe operability, durable payout rails, and defensible execution across CIS, RU/BY, and other hard geographies. Which proof matters more first: reliability, controllability, or the downside of the cheaper option?`,
+            `The premium case here should not sound like “better service.” It should sound like specific superiority: stable payouts in tough geos, audit trail, resilience under scrutiny, and an implementation team that embeds the flow instead of leaving the client with tool-only adoption. Which proof layer matters most in your case?`,
+          ],
+        },
+        enterprise_embedding: {
+          default: [
+            `If your contour is enterprise, the value is not only payout execution. It is that Mellow can be embedded into the client's “find and select” and “contract / pay freelancer” workflows via APIs and MCP, with our implementation team owning the actual rollout. Where do you want proof first: implementation ownership, workflow embedding, or the zero-cost-to-start contour?`,
+            `This is more than customization. Mellow can be sold as a managed implementation layer: our team shapes the flow around your contractor admin process, and the client can start without upfront implementation cost. What matters most first: integration shape, operating model, or start-without-commitment logic?`,
+          ],
+        },
+        compliance_trigger: {
+          default: [
+            `If the trigger is already legal / audit, the value is not a compliance slogan. It is a defendable structure: documentation, KYC, payout chain, and audit trail within our scope. Which piece should we unpack first?`,
+            `When misclassification, audit, or investor review is on the table, the answer is not “we are safer” but a clear responsibility boundary plus trail. What matters most first: boundary, docs, or payment evidence?`,
+          ],
+        },
+        crypto_replacement: {
+          default: [
+            `If the current path depends on crypto or informal payments, the value here is replacing a fragile setup with a defensible payout flow. What matters more in your case: legal defensibility or payout predictability?`,
+            `This is not about adding another vendor. It is about getting out of a grey and unstable payment path. Where do you need specificity first: docs, payout flow, or audit trail?`,
+          ],
+        },
+        operational_simplicity: {
+          default: [
+            `If the pain is the manual patchwork around the process, the value is one contour: one invoice, docs, KYC, and payout ops with Mellow instead of fragmented coordination. Where is the biggest manual drag today?`,
+            `The point here is not “platform” in the abstract. It is removing specific admin overhead: one invoice, less chasing, and a cleaner flow. Which pain is costing you the most right now?`,
+          ],
+        },
+      },
+      bridge_step: {
+        only_working_option: {
+          written_first: [
+            `Low-pressure next step: I can send a short map of the working payout flow for your exact case, so you can see where Mellow resolves the dead end before we talk. Would that help?`,
+          ],
+          direct_call: [
+            `It may be more useful to pressure-test your payout scenario live for 15 minutes than keep this abstract. Open to a short call just on the working path?`,
+          ],
+        },
+        competitive_reliability: {
+          written_first: [
+            `I can first send a short competitor-proof brief showing where the cheaper option looks cheaper and where it creates more failure risk in hard geos, plus how Mellow closes that gap. If the logic holds, we can talk right after. Would that help?`,
+          ],
+          narrow_walkthrough: [
+            `We can do a short 15-minute walkthrough just on the competitive trade-off: reliability, sanctions-safe operability, and what breaks in cheaper setups. Would that help?`,
+          ],
+          direct_call: [
+            `It looks like the real argument is no longer price but reliability under pressure. A short 15-minute call just on that competitor trade-off may be the cleanest next step. Open to that?`,
+          ],
+        },
+        enterprise_embedding: {
+          written_first: [
+            `Low-pressure next step: I can send a short implementation brief showing how Mellow fits into your contractor workflow via APIs/MCP, what our implementation team owns, and how the client starts at zero cost. If it fits, we can talk right after. Would that help?`,
+          ],
+          narrow_walkthrough: [
+            `We can do a short 15-minute walkthrough just on the implementation contour: team, APIs/MCP, workflow embedding, and zero-cost start. Would that work?`,
+          ],
+          direct_call: [
+            `It may be more useful to walk through the implementation shape live than keep this abstract in messages. Open to a short workflow-fit review?`,
+          ],
+        },
+        compliance_trigger: {
+          written_first: [
+            `I can send a short memo on boundary, docs, and audit trail for your case first, so finance/legal can review it without a call. Would that help?`,
+          ],
+          narrow_walkthrough: [
+            `Rather than a broad call, we can do a short walkthrough just on the legal / audit contour of your case. Would that work?`,
+          ],
+        },
+      },
+      direct_ask: {
+        only_working_option: {
+          direct_call: [
+            `Let's put a short 20-minute call on the calendar and pressure-test your payout scenario directly, so we can see where Mellow actually resolves the dead end. What time works?`,
+          ],
+          written_first: [
+            `I'll send a short payout-flow map for your case today, and if the logic holds, let's put a short call on the calendar right after. What slot works?`,
+          ],
+        },
+        competitive_reliability: {
+          written_first: [
+            `I'll send a short competitive brief today on why Mellow is not the cheapest but the strongest on reliability in hard geos, and where the cheaper option creates hidden downside. If the logic holds, let's put a short call on the calendar right after. What slot works?`,
+          ],
+          narrow_walkthrough: [
+            `Let's schedule a short 15-minute call just on the competitor trade-off and reliability proof, without a broad pitch. What time works?`,
+          ],
+          direct_call: [
+            `Let's schedule a short 20-minute call and go through the competitive fork directly: why Mellow wins not on price but on reliability and controllability in hard geos. What time works?`,
+          ],
+        },
+        enterprise_embedding: {
+          written_first: [
+            `I'll send an implementation memo today covering team, APIs/MCP, workflow embedding, and zero-cost start. If it fits your enterprise contour, let's put a short review call on the calendar right after. What slot works?`,
+          ],
+          narrow_walkthrough: [
+            `Let's schedule a short 15-minute call just on the enterprise implementation contour, without product theatre. What time works?`,
+          ],
+          direct_call: [
+            `Let's put a short 20-minute call on the calendar and walk through how Mellow would fit your contractor process with our implementation team and no upfront start cost. What time works?`,
+          ],
+        },
+        compliance_trigger: {
+          written_first: [
+            `Next step: short memo on the defendable structure today, then a review call with whoever owns the legal / finance check. Which format works better for you?`,
+          ],
+          narrow_walkthrough: [
+            `Let's schedule a short call just on the legal / audit contour and test whether the structure really clears your review bar. What time works?`,
+          ],
+        },
+      },
+    },
+  };
+
+  const personaSpecificLines = {
+    ru: {
+      proof: {
+        rate_floor_cfo: [
+          `Для premium у finance proof должен быть защитимым: где у Mellow чёткая граница ответственности, кто ведёт инцидент и почему схема объясняется без серых зон. Что из этого вам важнее проверить первым?`,
+        ],
+        fx_trust_shock_finance: [
+          `Здесь value не в обещании “всё прозрачно”, а в заранее видимой total-cost логике: rate, FX, цепочка и что происходит при сбое. Какой слой математики вам важнее увидеть первым?`,
+        ],
+      },
+      bridge_step: {
+        rate_floor_cfo: {
+          written_first: [`Могу сначала прислать короткий memo по defendable structure: зона Mellow, incident path и как это защищается внутри finance. Если логика сойдётся, тогда короткий review call. Подходит?`],
+        },
+        fx_trust_shock_finance: {
+          written_first: [`Следующий шаг без давления: пришлю короткий total-cost breakdown под ваш кейс, где отдельно видны rate, FX, payout chain и поведение при сбое. Если математика выглядит честно, тогда короткий review call. Ок?`],
+        },
+      },
+      direct_ask: {
+        rate_floor_cfo: {
+          written_first: [`Я пришлю короткий structure memo сегодня: зона ответственности, incident path и defendable logic для finance. Если всё выглядит приземлённо, давайте сразу поставим короткий review call. Какой слот удобен?`],
+        },
+        fx_trust_shock_finance: {
+          written_first: [`Я пришлю short total-cost breakdown сегодня: rate, FX, payout chain и что видно buyer до платежа. Если математика честная, давайте сразу поставим короткий review call. Когда удобно?`],
+        },
+      },
+    },
+    en: {
+      proof: {
+        rate_floor_cfo: [
+          `For this premium question, the proof has to be defendable: where Mellow's responsibility boundary is clear, who owns incidents, and why the structure can be explained without grey zones. Which of those do you want to test first?`,
+        ],
+        fx_trust_shock_finance: [
+          `The value here is not “more transparency” in the abstract. It is visible total-cost logic up front: rate, FX, payout chain, and what happens if something slips. Which layer of that math do you want to see first?`,
+        ],
+      },
+      bridge_step: {
+        rate_floor_cfo: { written_first: [`I can first send a short memo on the defendable structure: Mellow's boundary, incident path, and why finance can defend the scheme internally. If the logic holds, we can do a short review call after. Would that help?`] },
+        fx_trust_shock_finance: { written_first: [`Low-pressure next step: I can send a short total-cost breakdown for your case showing rate, FX, payout chain, and the failure path up front. If the math looks honest, we can do a short review call after. Would that help?`] },
+      },
+      direct_ask: {
+        rate_floor_cfo: { written_first: [`I'll send the short structure memo today, covering responsibility boundary, incident path, and the defendable finance logic. If it looks grounded, let's put a short review call on the calendar right after. What slot works?`] },
+        fx_trust_shock_finance: { written_first: [`I'll send the short total-cost breakdown today, covering rate, FX, payout chain, and what the buyer sees before payment. If the math feels honest, let's put a short review call on the calendar right after. What time works?`] },
+      },
+    },
+  };
+
   const langBank = lines[lang === 'en' ? 'en' : 'ru'];
+  const patternBank = patternLines[lang === 'en' ? 'en' : 'ru'];
+  const personaStageBank = personaSpecificLines[lang === 'en' ? 'en' : 'ru']?.[policy.hintStage]?.[persona?.id] || null;
   const archetype = persona?.archetype || 'finance';
-  if (policy.hintStage === 'diagnosis') return pick(langBank.diagnosis[archetype] || langBank.diagnosis.finance);
-  if (policy.hintStage === 'proof') return pick(langBank.proof.default);
+  const stagePatternBank = patternBank?.[policy.hintStage]?.[winPattern] || null;
+
+  if (personaStageBank) {
+    if (policy.hintStage === 'proof') return pick(personaStageBank);
+    const personaAskPool = personaStageBank[askType] || personaStageBank.written_first || personaStageBank.direct_call || null;
+    if (personaAskPool?.length) return pick(personaAskPool);
+  }
+
+  if (policy.hintStage === 'diagnosis') {
+    const pool = stagePatternBank?.[archetype] || stagePatternBank?.finance || langBank.diagnosis[archetype] || langBank.diagnosis.finance;
+    return pick(pool);
+  }
+  if (policy.hintStage === 'proof') {
+    const financeCostPool = lang === 'en'
+      ? [
+          `For finance, the proof is not a slogan. It is the economic mechanism: what the cheaper option still leaves exposed, what Mellow makes predictable, and where hidden cost or failure risk usually shows up later. Which part of that economic logic should we unpack first?`,
+          `If premium is the issue, the clean answer is concrete: reliable execution in hard geos, audit trail, fewer surprise breaks, and clearer total-cost visibility. Which piece of that do you need made explicit first?`,
+        ]
+      : [
+          `Для finance proof не в лозунге, а в экономической механике: что у дешёвого варианта остаётся неуправляемым, что Mellow делает предсказуемым и где потом обычно всплывает hidden cost или failure risk. Какой кусок этой логики вам важнее раскрыть первым?`,
+          `Если вопрос в premium, чистый ответ должен быть конкретным: надёжное исполнение в hard geos, audit trail, меньше сюрпризов на payout path и лучше видимая total-cost логика. Что из этого вам нужно сделать явным первым?`,
+        ];
+    const pool = (concern === 'cost' && archetype === 'finance' ? financeCostPool : null) || stagePatternBank?.default || langBank.proof.default;
+    return pick(pool);
+  }
   if (policy.hintStage === 'repair') return pick(langBank.repair.default);
   const bank = langBank[policy.hintStage] || langBank.bridge_step;
-  return pick(bank[askType] || bank.written_first || bank.default);
+  const patternStageBank = stagePatternBank || {};
+  const acceptanceAwarePools = (() => {
+    const ru = lang !== 'en';
+    if (policy.acceptanceState === 'artifact_only' && policy.askIntent === 'cost_breakdown_review') {
+      return ru
+        ? [
+            `Хороший следующий шаг такой: я пришлю короткий cost breakdown по вашему кейсу, а если математика выглядит честно и без сюрпризов, тогда сразу короткий review call на 15 минут. Такой формат ок?`,
+            `Давайте без широкого pitch: сначала прозрачная total-cost схема под ваш сценарий, потом короткий созвон только чтобы проверить, сходится ли economics. Подходит?`,
+          ]
+        : [
+            `A clean next step would be: I send a short cost breakdown for your case, and if the math looks honest and predictable, we do a short 15-minute review call. Would that work?`,
+            `Let's keep this narrow: first a transparent total-cost view for your scenario, then a short call only to test whether the economics hold. Would that help?`,
+          ];
+    }
+    if (policy.acceptanceState === 'artifact_only' && policy.askIntent === 'implementation_memo') {
+      return ru
+        ? [
+            `Предлагаю такой шаг: я пришлю короткий implementation memo по team, APIs/MCP и workflow embedding, а если contour выглядит fit, тогда короткий workflow review call на 15 минут. Ок?`,
+            `Можно пойти без давления: сначала короткая схема внедрения под ваш процесс, потом короткий созвон только по fit и объёму внедрения. Подходит?`,
+          ]
+        : [
+            `A clean next step is: I send a short implementation memo on team, APIs/MCP, and workflow embedding, and if the contour fits, we do a short 15-minute workflow review call. Does that work?`,
+            `We can keep this low-pressure: first a short implementation outline for your process, then a brief call only on fit and rollout scope. Would that help?`,
+          ];
+    }
+    if (policy.acceptanceState === 'artifact_only' && policy.askIntent === 'competitor_proof_brief') {
+      return ru
+        ? [
+            `Следующий шаг вижу так: я пришлю короткий competitor brief, где разложу cheaper option vs Mellow по reliability и hidden downside, а потом короткий review call на 15 минут, если логика сойдётся. Подходит?`,
+          ]
+        : [
+            `The clean next step is: I send a short competitor brief laying out cheaper option vs Mellow on reliability and hidden downside, then a short 15-minute review call if the logic holds. Would that work?`,
+          ];
+    }
+    if (policy.acceptanceState === 'artifact_then_call' && policy.hintStage === 'direct_ask') {
+      return ru
+        ? [
+            `Тогда давайте зафиксируем короткий review call сразу после материала, без широкого pitch, только чтобы пройти спорные места. Какой слот вам удобен?`,
+            `Ок, тогда следующий шаг простой: материал с моей стороны и короткий 15-минутный созвон после него, чтобы проверить fit. Когда вам удобно?`,
+          ]
+        : [
+            `Then let's lock a short review call right after the material, with no broad pitch, just to pressure-test the open points. What time works for you?`,
+            `Makes sense. Next step is simple: material from my side and a short 15-minute call after it to test fit. What slot works for you?`,
+          ];
+    }
+    return null;
+  })();
+  if (acceptanceAwarePools?.length) return pick(acceptanceAwarePools);
+  return pick(patternStageBank[askType] || patternStageBank.written_first || bank[askType] || bank.written_first || bank.default);
 }
 
 function hintTurnStage(session) {
@@ -2024,9 +2328,12 @@ function trackSellerTurnMetadata(session, sellerEntry, sellerText) {
   const policy = getHintPolicyContext(session);
   sellerEntry.turn_stage = stage;
   sellerEntry.hint_stage = policy.hintStage;
+  sellerEntry.acceptance_state_before = policy.acceptanceState;
   sellerEntry.ask_allowed_at_hint_time = policy.askAllowed;
   sellerEntry.repair_state_bool = policy.repairState;
   sellerEntry.bridge_step_type = policy.hintStage === 'bridge_step' ? policy.askType : null;
+  sellerEntry.ask_intent = policy.askIntent;
+  sellerEntry.persona_acceptance_bias = getPersonaAcceptanceBias(session);
   sellerEntry.hint_variant = getHintVariant(session, policy.hintStage);
   sellerEntry.hint_schema = computeHintSchema(session, policy);
   const mixedModeCheck = validateMixedMode(sellerText, policy.hintStage);
@@ -2036,12 +2343,31 @@ function trackSellerTurnMetadata(session, sellerEntry, sellerText) {
   if (isMeetingAsk) {
     session.meta.meeting_ask_count = (session.meta.meeting_ask_count || 0) + 1;
     if (!session.meta.ask_events) session.meta.ask_events = [];
-    const askType = stage === 'closing' ? 'closing_ask' : 'premature_ask';
-    session.meta.ask_events.push({ turn: sellerMessages(session).length, stage, ask_type: askType, hint_stage: policy.hintStage });
+    const bridgeStateOk = policy.hintStage === 'bridge_step' && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(policy.acceptanceState);
+    const askType = stage === 'closing' || bridgeStateOk ? policy.askIntent : 'premature_ask';
+    session.meta.ask_events.push({ turn: sellerMessages(session).length, stage, ask_type: askType, hint_stage: policy.hintStage, acceptance_state_before: policy.acceptanceState });
     sellerEntry.ask_type = askType;
     sellerEntry.premature_ask_bool = askType === 'premature_ask';
   } else {
     sellerEntry.premature_ask_bool = false;
+  }
+}
+
+function applyBuyerAcceptanceOutcome(session, sellerEntry, reply) {
+  if (!reply) return;
+  const acceptanceState = getBuyerAcceptanceState(session);
+  const acceptanceEvent = getAcceptanceEventType(session);
+  sellerEntry.acceptance_state_after = acceptanceState;
+  sellerEntry.acceptance_event = acceptanceEvent;
+  session.meta.acceptance_state = acceptanceState;
+  if (!session.meta.acceptance_events) session.meta.acceptance_events = [];
+  if (acceptanceEvent) {
+    session.meta.acceptance_events.push({
+      turn: sellerMessages(session).length,
+      event: acceptanceEvent,
+      acceptance_state: acceptanceState,
+      ask_intent: sellerEntry.ask_intent || null,
+    });
   }
 }
 
@@ -2050,11 +2376,15 @@ function classifyMeetingFailureReason(session) {
   if (sessionHasMeetingBooked(session)) return 'meeting_booked';
   const askCount = session.meta?.meeting_ask_count || 0;
   const askEvents = session.meta?.ask_events || [];
+  const acceptanceState = session.meta?.acceptance_state || 'not_ready';
   const ghostTurns = session.meta?.ghost_turns || 0;
   const trust = session.meta?.trust || 1;
   const resolvedCount = Object.keys(session.meta?.resolved_concerns || {}).length;
   const activeConcern = getActiveConcern(session);
   if (ghostTurns >= 2) return 'buyer_disengaged';
+  if (acceptanceState === 'artifact_only') return 'artifact_accepted_but_not_converted';
+  if (acceptanceState === 'artifact_then_call') return 'artifact_then_call_not_landed';
+  if (acceptanceState === 'narrow_walkthrough') return 'walkthrough_ready_but_not_booked';
   if (askCount === 0) return 'no_ask_made';
   if (!askEvents.some((e) => e.stage === 'closing')) return 'premature_ask';
   if (trust < 1.2) return 'trust_deficit';
@@ -2065,11 +2395,13 @@ function classifyMeetingFailureReason(session) {
 // Build a compact dialogue card summary for the review surface.
 function buildDialogueSummary(session) {
   const rawAskEvents = session.meta?.ask_events || [];
+  const acceptanceEvents = session.meta?.acceptance_events || [];
   const meetingBooked = sessionHasMeetingBooked(session);
   const failureReason = classifyMeetingFailureReason(session);
   const resolvedConcerns = Object.keys(session.meta?.resolved_concerns || {});
   const ghostTurns = session.meta?.ghost_turns || 0;
   const trust = Number((session.meta?.trust || 1).toFixed(2));
+  const acceptanceState = session.meta?.acceptance_state || getBuyerAcceptanceState(session);
 
   // Derive ordered stages reached and hint_stage_breakdown from transcript
   const stagesSeen = new Set();
@@ -2107,6 +2439,8 @@ function buildDialogueSummary(session) {
     seller_turns: sellerMessages(session).length,
     stages_reached: stagesReached,
     ask_events: askEvents,
+    acceptance_events: acceptanceEvents,
+    acceptance_state: acceptanceState,
     hint_stage_breakdown: hintStageBreakdown,
     failure_reason: failureReason,
     meeting_booked: meetingBooked,
@@ -3119,19 +3453,14 @@ function buildHintMemorySummary(personaId = null) {
 }
 
 function logFinishedRun(session) {
-  artifactStore.saveLog(session);
-  if (storage.driver === 'file') {
-    const date = (session.finished_at || now()).slice(0, 10);
-    const dayDir = path.join(logsDir, date);
-    fs.mkdirSync(dayDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(dayDir, `${session.session_id}.json`),
-      JSON.stringify(session, null, 2)
-    );
+  if (storage.saveFinishedLog) {
+    Promise.resolve(storage.saveFinishedLog(session)).catch((err) => {
+      console.error('[logs] save error:', err?.message || err);
+    });
   }
 }
 
-function saveArtifact(session) {
+function buildSessionArtifact(session) {
   try {
     const sid = session.session_id;
     const a = session.assessment || {};
@@ -3171,9 +3500,6 @@ function saveArtifact(session) {
       }))
     };
 
-    const jsonPath = path.join(artifactsDir, `artifact_${sid}.json`);
-    if (storage.driver === 'file') fs.writeFileSync(jsonPath, JSON.stringify(artifact, null, 2));
-
     const criteriaLines = (a.criteria || []).map((c) =>
       `- ${c.id}. ${c.label || c.name || c.id}: ${c.status}${c.short_reason ? ` — ${c.short_reason}` : ''}`
     ).join('\n');
@@ -3211,13 +3537,20 @@ function saveArtifact(session) {
       transcriptLines
     ].filter((line) => line !== undefined && line !== false).join('\n').replace(/\n{3,}/g, '\n\n').trimEnd();
 
-    artifactStore.saveArtifact(sid, artifact, md);
-    if (storage.driver === 'file') {
-      const mdPath = path.join(artifactsDir, `artifact_${sid}.md`);
-      fs.writeFileSync(mdPath, md);
-    }
+    return { artifact, markdown: md, sessionId: sid };
   } catch (err) {
-    console.error(`[artifacts] Failed to save artifact for session ${session.session_id}:`, err.message);
+    console.error(`[artifacts] Failed to build artifact for session ${session.session_id}:`, err.message);
+    return null;
+  }
+}
+
+function saveArtifact(session) {
+  const payload = buildSessionArtifact(session);
+  if (!payload) return;
+  if (storage.saveArtifact) {
+    Promise.resolve(storage.saveArtifact(payload)).catch((err) => {
+      console.error(`[artifacts] Failed to save artifact for session ${session.session_id}:`, err?.message || err);
+    });
   }
 }
 
@@ -4169,13 +4502,13 @@ function buildConcernOrder(personaId, seed = null) {
 // Check if seller's text addresses a specific concern
 function sellerAdvancesConcern(concern, lower) {
   const maps = {
-    scope:         ['документ', 'kyc', 'audit', 'trail', 'платеж', 'sla', 'цепоч', 'границ', 'ответствен', 'не снима', 'не берёт', 'огранич', 'warning'],
-    why_change:    ['риск', 'надёжн', 'надежн', 'документ', 'sla', 'системн', 'конкретн', 'не работа', 'сломает', 'уязвим'],
+    scope:         ['документ', 'kyc', 'audit', 'trail', 'платеж', 'sla', 'цепоч', 'границ', 'ответствен', 'не снима', 'не берёт', 'огранич', 'warning', 'api', 'mcp', 'внедрен'],
+    why_change:    ['риск', 'надёжн', 'надежн', 'документ', 'sla', 'системн', 'конкретн', 'не работа', 'сломает', 'уязвим', 'санкц', 'тяжел', 'снг', 'рф', 'беларус'],
     sla:           ['sla', 'эскалац', 'поддерж', 'инцидент', 'застр', 'статус', 'трекинг', '24 час', '48 час'],
     geo_tax:       ['ндфл', 'налог', 'россий', 'рф', 'паспорт', 'diligence', 'инвест'],
-    op_value:      ['убирает', 'убрать', 'меньше', 'быстрее', 'конкретн', 'часов', 'минут', 'без ручн', 'статус', 'предсказ', 'процесс'],
-    cost:          ['стоим', 'цен', 'дорог', 'бюджет', 'trial', 'пилот', 'деньг', 'месяц'],
-    internal_sell: ['finance', 'финансист', 'внутри', 'champion', 'материал', 'письм', 'pitch', 'аргумент', 'слайд'],
+    op_value:      ['убирает', 'убрать', 'меньше', 'быстрее', 'конкретн', 'часов', 'минут', 'без ручн', 'статус', 'предсказ', 'процесс', 'встро', 'автомат', 'внедрен'],
+    cost:          ['стоим', 'цен', 'дорог', 'бюджет', 'trial', 'пилот', 'деньг', 'месяц', 'zero cost', 'без затрат на старт', 'без upfront'],
+    internal_sell: ['finance', 'финансист', 'внутри', 'champion', 'материал', 'письм', 'pitch', 'аргумент', 'слайд', 'enterprise', 'implementation', 'api', 'mcp'],
     grey_zones:    ['серые зон', 'overlap', 'между', 'разделен', 'flow', 'chain', 'цепоч', 'границ'],
     incident:      ['инцидент', 'исключен', 'flow', 'trail', 'эскалац', 'документ', 'в срок'],
     next_step:     ['созвон', 'звон', '15 минут', '20 минут', 'follow', 'материал', 'memo', 'review', 'walkthrough', 'расч'],
@@ -4188,13 +4521,13 @@ function sellerAdvancesConcern(concern, lower) {
 // English keyword maps for concern detection (seller writes in English)
 function sellerAdvancesConcernEN(concern, lower) {
   const maps = {
-    scope:         ['document', 'kyc', 'audit', 'trail', 'payment chain', 'sla', 'chain', 'bound', 'responsible', 'responsibility', 'limit', 'warning', 'scope'],
-    why_change:    ['risk', 'reliable', 'document', 'sla', 'systemic', 'concrete', 'break', 'vulnerab', 'won\'t survive'],
+    scope:         ['document', 'kyc', 'audit', 'trail', 'payment chain', 'sla', 'chain', 'bound', 'responsible', 'responsibility', 'limit', 'warning', 'scope', 'api', 'mcp', 'implementation'],
+    why_change:    ['risk', 'reliable', 'document', 'sla', 'systemic', 'concrete', 'break', 'vulnerab', 'won\'t survive', 'sanction', 'hard geo', 'cis', 'pakistan', 'india', 'africa', 'latam', 'asia'],
     sla:           ['sla', 'escalat', 'support', 'incident', 'stuck', 'status', 'track', '24 hour', '48 hour', 'response time'],
     geo_tax:       ['tax', 'russia', ' rf ', 'passport', 'diligence', 'invest', 'sanction', 'geo', 'jurisdiction'],
-    op_value:      ['remov', 'fewer', 'faster', 'specific', 'hours', 'minutes', 'manual', 'status', 'predictable', 'process', 'saves'],
-    cost:          ['cost', 'price', 'expens', 'budget', 'trial', 'pilot', 'money', 'month'],
-    internal_sell: ['finance', 'internal', 'champion', 'material', 'letter', 'pitch', 'argument', 'slide', 'stakeholder'],
+    op_value:      ['remov', 'fewer', 'faster', 'specific', 'hours', 'minutes', 'manual', 'status', 'predictable', 'process', 'saves', 'embed', 'workflow', 'implementation'],
+    cost:          ['cost', 'price', 'expens', 'budget', 'trial', 'pilot', 'money', 'month', 'zero cost', 'no upfront'],
+    internal_sell: ['finance', 'internal', 'champion', 'material', 'letter', 'pitch', 'argument', 'slide', 'stakeholder', 'enterprise', 'implementation', 'api', 'mcp'],
     grey_zones:    ['grey zone', 'gray zone', 'overlap', 'between', 'divid', 'flow', 'chain', 'boundary', 'gap'],
     incident:      ['incident', 'exception', 'flow', 'trail', 'escalat', 'document', 'on time', 'on-time'],
     next_step:     ['call', 'meeting', '15 minute', '20 minute', 'follow', 'material', 'memo', 'review', 'walkthrough', 'calculation'],
@@ -6832,6 +7165,8 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
   const askType = policy.askType;
   const hintVariant = getHintVariant(session, policy.hintStage);
   const hintSchema = computeHintSchema(session, policy);
+  const personaSellingPolicy = getPersonaSellingPolicy(session);
+  const personaValueFrames = getPersonaValueFrameSummary(session);
 
   const askTypeDescriptions = {
     written_first: 'written artifact first (1-pager, memo, or brief), then invite a short call',
@@ -6879,6 +7214,8 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
     `Missing condition: ${hintSchema.missing_condition}`,
     `Recommended action: ${hintSchema.recommended_action}`,
     `Forbidden action: ${hintSchema.forbidden_action}`,
+    `Persona value priority: ${personaValueFrames}`,
+    `Preferred bridge asset: ${personaSellingPolicy.bridge_label}`,
     ``,
     ...(hintVariant !== 'first_attempt' ? [
       `## ⚠️ Retry variant: ${hintVariant}`,
@@ -7925,33 +8262,6 @@ function assess(session) {
 
 // ==================== API ROUTES ====================
 
-app.get('/version.json', (_req, res) => {
-  res.json({
-    app: APP_NAME,
-    version: APP_VERSION,
-    display_version: DISPLAY_VERSION,
-    commit_sha: COMMIT_SHA,
-    short_commit_sha: SHORT_COMMIT_SHA,
-    vercel_env: process.env.VERCEL_ENV || null,
-  });
-});
-
-app.get('/api/meta', async (_req, res) => {
-  res.json({
-    app: APP_NAME,
-    version: APP_VERSION,
-    display_version: DISPLAY_VERSION,
-    storage: await storage.getInfo(),
-    aux_storage: await hintStateStore.getInfo(),
-    artifact_storage: { driver: artifactStore.canUsePostgres ? 'postgres' : 'file' },
-    runtime: {
-      node: process.version,
-      vercel: Boolean(process.env.VERCEL),
-      commit_sha: process.env.VERCEL_GIT_COMMIT_SHA || process.env.GIT_COMMIT_SHA || null,
-    }
-  });
-});
-
 app.get('/api/personas', (_req, res) => {
   res.json(Object.values(personas));
 });
@@ -8148,6 +8458,7 @@ app.post('/api/sessions/:id/message', async (req, res) => {
   if (reply !== null) {
     session.transcript.push({ role: 'bot', text: reply, ts: now() });
     sellerEntry.buyer_reply_outcome = 'replied';
+    applyBuyerAcceptanceOutcome(session, sellerEntry, reply);
   } else {
     // Ghost turn: persona went silent. Mark in transcript so seller knows to follow up.
     session.transcript.push({ role: 'system', text: '[No reply — the prospect went silent. Try a follow-up.]', ts: now() });
@@ -8234,6 +8545,7 @@ app.post('/api/sessions/:id/auto-message', async (req, res) => {
   if (reply !== null) {
     session.transcript.push({ role: 'bot', text: reply, ts: now() });
     sellerEntry.buyer_reply_outcome = 'replied';
+    applyBuyerAcceptanceOutcome(session, sellerEntry, reply);
   } else {
     session.transcript.push({ role: 'system', text: '[No reply — the prospect went silent. Try a follow-up.]', ts: now() });
     session.meta.ghost_turns = (session.meta.ghost_turns || 0) + 1;
@@ -8437,40 +8749,7 @@ app.post('/api/sessions/bulk-download', async (req, res) => {
 // GET /api/artifacts — list all saved artifacts (metadata only, no transcript)
 app.get('/api/artifacts', async (_req, res) => {
   try {
-    const pgArtifacts = await artifactStore.listArtifacts();
-    if (pgArtifacts !== null) {
-      return res.json({ artifacts: pgArtifacts, total: pgArtifacts.length });
-    }
-
-    const files = fs.existsSync(artifactsDir)
-      ? fs.readdirSync(artifactsDir).filter((f) => f.startsWith('artifact_') && f.endsWith('.json'))
-      : [];
-
-    const artifacts = files.map((f) => {
-      try {
-        const raw = JSON.parse(fs.readFileSync(path.join(artifactsDir, f), 'utf8'));
-        return {
-          session_id: raw.session_id,
-          saved_at: raw.saved_at,
-          started_at: raw.started_at,
-          finished_at: raw.finished_at,
-          seller_username: raw.seller_username,
-          persona: raw.persona,
-          signal_card: raw.signal_card,
-          dialogue_type: raw.dialogue_type,
-          verdict: raw.assessment?.verdict || null,
-        };
-      } catch {
-        return null;
-      }
-    }).filter(Boolean);
-
-    artifacts.sort((a, b) => {
-      const ta = a.saved_at || a.finished_at || '';
-      const tb = b.saved_at || b.finished_at || '';
-      return tb.localeCompare(ta);
-    });
-
+    const artifacts = await storage.listArtifacts();
     res.json({ artifacts, total: artifacts.length });
   } catch (err) {
     res.status(500).json({ error: 'Failed to list artifacts', detail: err.message });
@@ -8479,40 +8758,20 @@ app.get('/api/artifacts', async (_req, res) => {
 
 // GET /api/artifacts/:id/download — download single artifact as JSON file
 app.get('/api/artifacts/:id/download', async (req, res) => {
-  try {
-    const pgPayload = await artifactStore.loadArtifactJson(req.params.id);
-    if (pgPayload !== null) {
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.json"`);
-      return res.json(pgPayload);
-    }
-    const jsonPath = path.join(artifactsDir, `artifact_${req.params.id}.json`);
-    if (!fs.existsSync(jsonPath)) return res.status(404).json({ error: 'Artifact not found' });
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.json"`);
-    res.send(fs.readFileSync(jsonPath));
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to load artifact', detail: err.message });
-  }
+  const artifact = await storage.loadArtifact(req.params.id);
+  if (!artifact) return res.status(404).json({ error: 'Artifact not found' });
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.json"`);
+  res.send(JSON.stringify(artifact, null, 2));
 });
 
 // GET /api/artifacts/:id/export — download single artifact as Markdown
 app.get('/api/artifacts/:id/export', async (req, res) => {
-  try {
-    const pgMd = await artifactStore.loadArtifactMarkdown(req.params.id);
-    if (pgMd !== null) {
-      res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.md"`);
-      return res.send(pgMd);
-    }
-    const mdPath = path.join(artifactsDir, `artifact_${req.params.id}.md`);
-    if (!fs.existsSync(mdPath)) return res.status(404).json({ error: 'Artifact not found' });
-    res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.md"`);
-    res.send(fs.readFileSync(mdPath, 'utf8'));
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to load artifact', detail: err.message });
-  }
+  const markdown = await storage.loadArtifactMarkdown(req.params.id);
+  if (!markdown) return res.status(404).json({ error: 'Artifact not found' });
+  res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.id}.md"`);
+  res.send(markdown);
 });
 
 // POST /api/artifacts/bulk-download — bulk download as single JSON file.
@@ -8520,50 +8779,27 @@ app.get('/api/artifacts/:id/export', async (req, res) => {
 app.post('/api/artifacts/bulk-download', async (req, res) => {
   const { ids } = req.body || {};
   const BULK_LIMIT = 500;
+  let targetIds;
 
   try {
+    if (Array.isArray(ids) && ids.length > 0) {
+      targetIds = ids;
+    } else {
+      targetIds = await storage.listArtifactIds(BULK_LIMIT);
+    }
+    if (!Array.isArray(targetIds) || targetIds.length === 0) return res.status(404).json({ error: 'No artifacts found' });
+
     const date = new Date().toISOString().slice(0, 10);
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-conversations-${date}.json"`);
 
-    let targetIds;
-    if (Array.isArray(ids) && ids.length > 0) {
-      targetIds = ids.slice(0, BULK_LIMIT);
-    } else {
-      targetIds = await artifactStore.listArtifactIds(BULK_LIMIT);
-      if (targetIds === null) {
-        targetIds = fs.existsSync(artifactsDir)
-          ? fs.readdirSync(artifactsDir)
-            .filter((f) => f.startsWith('artifact_') && f.endsWith('.json'))
-            .map((f) => f.replace(/^artifact_/, '').replace(/\.json$/, ''))
-            .slice(0, BULK_LIMIT)
-          : [];
-      }
-    }
+    const hydrated = (await Promise.all(targetIds.map((id) => storage.loadArtifact(id))))
+      .filter(Boolean);
+    if (hydrated.length === 0) return res.status(404).json({ error: 'No artifacts found' });
 
-    const pgArtifacts = await artifactStore.loadArtifactsBulk(targetIds);
-    if (pgArtifacts !== null && pgArtifacts.length > 0) {
-      res.write(`{"generated_at":${JSON.stringify(new Date().toISOString())},"count":${pgArtifacts.length},"conversations":[\n`);
-      pgArtifacts.forEach((artifact, i) => {
-        res.write(JSON.stringify(artifact) + (i < pgArtifacts.length - 1 ? ',\n' : '\n'));
-      });
-      return res.end(']}');
-    }
-
-    const artifactPaths = targetIds
-      .map((id) => path.join(artifactsDir, `artifact_${id}.json`))
-      .filter((p) => fs.existsSync(p));
-
-    if (artifactPaths.length === 0) return res.status(404).json({ error: 'No artifacts found' });
-
-    res.write(`{"generated_at":${JSON.stringify(new Date().toISOString())},"count":${artifactPaths.length},"conversations":[\n`);
-    artifactPaths.forEach((p, i) => {
-      try {
-        const raw = fs.readFileSync(p, 'utf8');
-        res.write(raw.trimEnd() + (i < artifactPaths.length - 1 ? ',\n' : '\n'));
-      } catch {
-        // skip unreadable artifact files
-      }
+    res.write(`{"generated_at":${JSON.stringify(new Date().toISOString())},"count":${hydrated.length},"conversations":[\n`);
+    hydrated.forEach((artifact, i) => {
+      res.write(JSON.stringify(artifact) + (i < hydrated.length - 1 ? ',\n' : '\n'));
     });
     res.end(']}');
   } catch (err) {
@@ -8572,12 +8808,12 @@ app.post('/api/artifacts/bulk-download', async (req, res) => {
 });
 
 // GET /download/:sessionId — public stable download link for a single artifact
-app.get('/download/:sessionId', (req, res) => {
-  const jsonPath = path.join(artifactsDir, `artifact_${req.params.sessionId}.json`);
-  if (!fs.existsSync(jsonPath)) return res.status(404).json({ error: 'Artifact not found' });
+app.get('/download/:sessionId', async (req, res) => {
+  const artifact = await storage.loadArtifact(req.params.sessionId);
+  if (!artifact) return res.status(404).json({ error: 'Artifact not found' });
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Content-Disposition', `attachment; filename="mellow-sim-${req.params.sessionId}.json"`);
-  res.send(fs.readFileSync(jsonPath));
+  res.send(JSON.stringify(artifact, null, 2));
 });
 
 app.get('*', (_req, res) => {
@@ -8601,8 +8837,8 @@ async function backfillArtifacts() {
     const sessions = (await listStoredSessions()).filter((s) => s.status === 'finished');
     let count = 0;
     for (const session of sessions) {
-      const p = path.join(artifactsDir, `artifact_${session.session_id}.json`);
-      if (!fs.existsSync(p)) {
+      const existing = await storage.loadArtifact(session.session_id);
+      if (!existing) {
         saveArtifact(session);
         count++;
       }
@@ -8616,9 +8852,9 @@ async function backfillArtifacts() {
 export default app;
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
-  app.listen(PORT, async () => {
+  app.listen(PORT, () => {
     console.log(`Mellow Sales Sim listening on http://localhost:${PORT}`);
     backfillHintMemoryScores();
-    await backfillArtifacts();
+    backfillArtifacts();
   });
 }

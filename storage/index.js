@@ -1,15 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const migrationsDir = path.join(__dirname, '..', 'db', 'migrations');
-
-let pgModulePromise = null;
 
 function clone(value) {
-  return JSON.parse(JSON.stringify(value));
+  return value == null ? value : JSON.parse(JSON.stringify(value));
 }
 
 function readJson(filePath, fallback = null) {
@@ -26,46 +19,60 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, JSON.stringify(value, null, 2));
 }
 
-async function loadPgModule() {
-  if (!pgModulePromise) pgModulePromise = import('pg');
-  return pgModulePromise;
+function normalizeArtifactSummary(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  return {
+    session_id: raw.session_id,
+    saved_at: raw.saved_at,
+    started_at: raw.started_at,
+    finished_at: raw.finished_at,
+    seller_username: raw.seller_username,
+    persona: raw.persona,
+    signal_card: raw.signal_card,
+    dialogue_type: raw.dialogue_type,
+    verdict: raw.assessment?.verdict || null,
+  };
 }
 
-function resolvePostgresConnection() {
-  const connectionString = process.env.DATABASE_URL
-    || process.env.POSTGRES_URL
-    || process.env.POSTGRES_PRISMA_URL
-    || process.env.POSTGRES_URL_NON_POOLING
-    || '';
-  const source = process.env.DATABASE_URL
-    ? 'DATABASE_URL'
-    : process.env.POSTGRES_URL
-    ? 'POSTGRES_URL'
-    : process.env.POSTGRES_PRISMA_URL
-    ? 'POSTGRES_PRISMA_URL'
-    : process.env.POSTGRES_URL_NON_POOLING
-    ? 'POSTGRES_URL_NON_POOLING'
-    : null;
-  return { connectionString, source };
+function normalizeSdrHintTuning(raw) {
+  const safeObject = (value) => (value && typeof value === 'object' && !Array.isArray(value) ? value : {});
+  const safeList = (value) => (Array.isArray(value) ? value.map((item) => String(item || '').trim()).filter(Boolean) : []);
+  const normalizeListMap = (value) => Object.fromEntries(
+    Object.entries(safeObject(value))
+      .map(([key, list]) => [String(key), safeList(list)])
+      .filter(([, list]) => list.length > 0)
+  );
+  const normalizeNestedListMap = (value) => Object.fromEntries(
+    Object.entries(safeObject(value)).map(([key, nested]) => [String(key), normalizeListMap(nested)])
+      .filter(([, nested]) => Object.keys(nested).length > 0)
+  );
+
+  return {
+    openers: normalizeListMap(raw?.openers),
+    concerns: normalizeNestedListMap(raw?.concerns),
+    next_steps: normalizeListMap(raw?.next_steps),
+  };
 }
 
-function shouldUsePostgresSsl(connectionString) {
-  if (!connectionString) return false;
-  try {
-    const url = new URL(connectionString);
-    if (url.searchParams.get('sslmode') === 'disable') return false;
-    return !['localhost', '127.0.0.1'].includes(url.hostname);
-  } catch {
-    return !/localhost|127\.0\.0\.1/.test(connectionString);
-  }
+function summarizePromptMemoryRun(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  return {
+    run_id: raw.runId || null,
+    generated_at: raw.generatedAt || null,
+    persona_id: raw.personaId || null,
+    cycle_count: Number.isFinite(Number(raw.cycleCount)) ? Number(raw.cycleCount) : 0,
+    memory_record_count: Number.isFinite(Number(raw.memoryRecordCount)) ? Number(raw.memoryRecordCount) : 0,
+  };
 }
 
-function createFileStorage({ dataDir, sessionsDir, personasFile }) {
+function createFileStorage({ dataDir, sessionsDir, personasFile, logsDir, hintMemoryFile, hintRecencyFile, sdrHintTuningFile, artifactsDir, promptMemoryRunsDir }) {
   return {
     driver: 'file',
     async init() {
       fs.mkdirSync(dataDir, { recursive: true });
       fs.mkdirSync(sessionsDir, { recursive: true });
+      fs.mkdirSync(logsDir, { recursive: true });
+      fs.mkdirSync(artifactsDir, { recursive: true });
     },
     async loadPersonas({ seedFactory }) {
       const parsed = readJson(personasFile);
@@ -92,360 +99,456 @@ function createFileStorage({ dataDir, sessionsDir, personasFile }) {
         .map((name) => readJson(path.join(sessionsDir, name)))
         .filter(Boolean);
     },
+    async findActiveSessionByChat(personaId, chatId) {
+      const sessions = await this.listSessions();
+      return sessions.find((session) => {
+        if (!session || session.status !== 'in_progress') return false;
+        const sessionPersonaId = session.bot_id || session.persona_id;
+        return sessionPersonaId === personaId && String(session.telegram_chat_id) === String(chatId);
+      }) || null;
+    },
     sessionFilePath(sessionId) {
       return path.join(sessionsDir, `${sessionId}.json`);
     },
-    async getInfo() {
-      return {
-        driver: 'file',
-        persistence: 'local-json',
-        sessions_dir: sessionsDir,
-        personas_file: personasFile,
-      };
-    }
+    async loadHintMemoryStore() {
+      const parsed = readJson(hintMemoryFile, { records: [] });
+      if (Array.isArray(parsed)) return parsed;
+      return Array.isArray(parsed?.records) ? parsed.records : [];
+    },
+    async saveHintMemoryStore(payload) {
+      writeJson(hintMemoryFile, payload);
+      return payload.records || [];
+    },
+    async loadHintRecency() {
+      const parsed = readJson(hintRecencyFile, { openers: [] });
+      return Array.isArray(parsed?.openers) ? parsed.openers : [];
+    },
+    async saveHintRecency(openers) {
+      writeJson(hintRecencyFile, { openers });
+      return openers;
+    },
+    async loadSdrHintTuning() {
+      return normalizeSdrHintTuning(readJson(sdrHintTuningFile, { openers: {}, concerns: {}, next_steps: {} }));
+    },
+    async saveSdrHintTuning(payload) {
+      const normalized = normalizeSdrHintTuning(payload);
+      writeJson(sdrHintTuningFile, normalized);
+      return normalized;
+    },
+    async saveFinishedLog(session) {
+      const date = String(session.finished_at || new Date().toISOString()).slice(0, 10);
+      const dayDir = path.join(logsDir, date);
+      fs.mkdirSync(dayDir, { recursive: true });
+      writeJson(path.join(dayDir, `${session.session_id}.json`), session);
+      return session;
+    },
+    async saveArtifact({ artifact, markdown, sessionId }) {
+      writeJson(path.join(artifactsDir, `artifact_${sessionId}.json`), artifact);
+      fs.mkdirSync(artifactsDir, { recursive: true });
+      fs.writeFileSync(path.join(artifactsDir, `artifact_${sessionId}.md`), markdown);
+      return artifact;
+    },
+    async loadArtifact(sessionId) {
+      return readJson(path.join(artifactsDir, `artifact_${sessionId}.json`));
+    },
+    async loadArtifactMarkdown(sessionId) {
+      try {
+        return fs.readFileSync(path.join(artifactsDir, `artifact_${sessionId}.md`), 'utf8');
+      } catch {
+        return null;
+      }
+    },
+    async listArtifacts() {
+      if (!fs.existsSync(artifactsDir)) return [];
+      return fs.readdirSync(artifactsDir)
+        .filter((f) => f.startsWith('artifact_') && f.endsWith('.json'))
+        .map((f) => readJson(path.join(artifactsDir, f)))
+        .map(normalizeArtifactSummary)
+        .filter(Boolean)
+        .sort((a, b) => String(b.saved_at || b.finished_at || '').localeCompare(String(a.saved_at || a.finished_at || '')));
+    },
+    async listArtifactIds(limit = null) {
+      const artifacts = await this.listArtifacts();
+      return artifacts.slice(0, limit || undefined).map((item) => item.session_id).filter(Boolean);
+    },
+    async savePromptMemoryRun({ run, markdown, runId }) {
+      writeJson(path.join(promptMemoryRunsDir, `${runId}.json`), run);
+      fs.mkdirSync(promptMemoryRunsDir, { recursive: true });
+      fs.writeFileSync(path.join(promptMemoryRunsDir, `${runId}.md`), markdown);
+      return run;
+    },
+    async loadPromptMemoryRun(runId) {
+      return readJson(path.join(promptMemoryRunsDir, `${runId}.json`));
+    },
+    async loadPromptMemoryRunMarkdown(runId) {
+      try {
+        return fs.readFileSync(path.join(promptMemoryRunsDir, `${runId}.md`), 'utf8');
+      } catch {
+        return null;
+      }
+    },
+    async listPromptMemoryRuns(limit = null) {
+      if (!fs.existsSync(promptMemoryRunsDir)) return [];
+      const items = fs.readdirSync(promptMemoryRunsDir)
+        .filter((name) => name.endsWith('.json'))
+        .map((name) => readJson(path.join(promptMemoryRunsDir, name)))
+        .map(summarizePromptMemoryRun)
+        .filter(Boolean)
+        .sort((a, b) => String(b.generated_at || '').localeCompare(String(a.generated_at || '')));
+      return items.slice(0, limit || undefined);
+    },
   };
 }
 
-function createPostgresStorage(config = {}) {
-  const resolved = resolvePostgresConnection();
-  const state = {
-    pool: null,
-    migrations: [],
-    initialized: false,
-    bootstrapped: false,
-    connectionString: resolved.connectionString,
-    connectionSource: resolved.source,
-  };
+async function createPostgresStorage(config) {
+  const { query } = await import('../db/client.js');
+  const fileFallback = createFileStorage(config);
 
-  function bootstrapEnabled() {
-    return String(process.env.POSTGRES_BOOTSTRAP_FROM_FILE || 'true').trim().toLowerCase() !== 'false';
-  }
-
-  async function getPool() {
-    if (state.pool) return state.pool;
-    if (!state.connectionString) {
-      throw new Error('STORAGE_DRIVER=postgres requires DATABASE_URL or one of POSTGRES_URL / POSTGRES_PRISMA_URL / POSTGRES_URL_NON_POOLING.');
-    }
-
-    if (globalThis.__mellowSalesSimPgPool) {
-      state.pool = globalThis.__mellowSalesSimPgPool;
-      return state.pool;
-    }
-
-    const { Pool } = await loadPgModule();
-    const ssl = shouldUsePostgresSsl(state.connectionString)
-      ? { rejectUnauthorized: String(process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED || 'false').trim().toLowerCase() === 'true' }
-      : false;
-
-    state.pool = new Pool({
-      connectionString: state.connectionString,
-      ssl,
-      max: Math.max(1, Number(process.env.PG_POOL_MAX || 3)),
-      idleTimeoutMillis: Math.max(1000, Number(process.env.PG_IDLE_TIMEOUT_MS || 10000)),
-      connectionTimeoutMillis: Math.max(1000, Number(process.env.PG_CONNECT_TIMEOUT_MS || 5000)),
-      allowExitOnIdle: true,
-    });
-    globalThis.__mellowSalesSimPgPool = state.pool;
-    return state.pool;
-  }
-
-  async function withClient(fn) {
-    const pool = await getPool();
-    const client = await pool.connect();
-    try {
-      return await fn(client);
-    } finally {
-      client.release();
-    }
-  }
-
-  async function ensureMigrationTable(client) {
-    await client.query(`
-      create table if not exists storage_migrations (
-        migration_id text primary key,
-        applied_at timestamptz not null default now()
+  async function initSchema() {
+    await query(`
+      CREATE TABLE IF NOT EXISTS personas (
+        id text PRIMARY KEY,
+        name text NOT NULL,
+        role text NOT NULL DEFAULT '',
+        archetype text NOT NULL DEFAULT '',
+        tone text NOT NULL DEFAULT '',
+        payload jsonb NOT NULL,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
       )
     `);
-  }
-
-  async function loadMigrationState(client) {
-    const result = await client.query('select migration_id, applied_at from storage_migrations order by migration_id asc');
-    state.migrations = result.rows.map((row) => ({
-      migration_id: row.migration_id,
-      applied_at: row.applied_at,
-    }));
-    return new Set(state.migrations.map((row) => row.migration_id));
-  }
-
-  async function applyMigrations() {
-    await withClient(async (client) => {
-      await ensureMigrationTable(client);
-      const applied = await loadMigrationState(client);
-      const files = fs.existsSync(migrationsDir)
-        ? fs.readdirSync(migrationsDir).filter((name) => name.endsWith('.sql')).sort()
-        : [];
-
-      for (const fileName of files) {
-        if (applied.has(fileName)) continue;
-        const sql = fs.readFileSync(path.join(migrationsDir, fileName), 'utf8').trim();
-        if (!sql) continue;
-        await client.query('begin');
-        try {
-          await client.query(sql);
-          await client.query('insert into storage_migrations (migration_id) values ($1)', [fileName]);
-          await client.query('commit');
-          applied.add(fileName);
-        } catch (error) {
-          await client.query('rollback');
-          throw new Error(`Failed to apply migration ${fileName}: ${error.message}`);
-        }
-      }
-
-      await loadMigrationState(client);
-    });
-  }
-
-  async function upsertRuntimeMeta(client, key, value) {
-    await client.query(`
-      insert into storage_runtime_meta (meta_key, meta_value, updated_at)
-      values ($1, $2::jsonb, now())
-      on conflict (meta_key) do update
-      set meta_value = excluded.meta_value,
-          updated_at = now()
-    `, [key, JSON.stringify(value)]);
-  }
-
-  async function upsertPersona(client, persona) {
-    const payload = clone(persona);
-    await client.query(`
-      insert into personas (id, name, role, archetype, tone, payload, created_at, updated_at)
-      values ($1, $2, $3, $4, $5, $6::jsonb, now(), now())
-      on conflict (id) do update
-      set name = excluded.name,
-          role = excluded.role,
-          archetype = excluded.archetype,
-          tone = excluded.tone,
-          payload = excluded.payload,
-          updated_at = now()
-    `, [
-      payload.id,
-      payload.name || payload.id,
-      payload.role || payload.name || payload.id,
-      payload.archetype || 'custom',
-      payload.tone || 'balanced',
-      JSON.stringify(payload),
-    ]);
-  }
-
-  async function upsertSession(client, session) {
-    const payload = clone(session);
-    await client.query(`
-      insert into sales_sessions (
-        session_id,
-        persona_id,
-        status,
-        started_at,
-        finished_at,
-        payload,
-        created_at,
-        updated_at
+    await query(`
+      CREATE TABLE IF NOT EXISTS sales_sessions (
+        session_id text PRIMARY KEY,
+        persona_id text NOT NULL,
+        status text NOT NULL,
+        started_at timestamptz,
+        finished_at timestamptz,
+        payload jsonb NOT NULL,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now(),
+        CONSTRAINT sales_sessions_persona_fk
+          FOREIGN KEY (persona_id) REFERENCES personas (id) ON DELETE RESTRICT
       )
-      values ($1, $2, $3, $4, $5, $6::jsonb, now(), now())
-      on conflict (session_id) do update
-      set persona_id = excluded.persona_id,
-          status = excluded.status,
-          started_at = excluded.started_at,
-          finished_at = excluded.finished_at,
-          payload = excluded.payload,
-          updated_at = now()
-    `, [
-      payload.session_id,
-      payload.bot_id || payload.persona_id || 'unknown',
-      payload.status || 'in_progress',
-      payload.started_at || null,
-      payload.finished_at || null,
-      JSON.stringify(payload),
-    ]);
+    `);
+    await query(`CREATE INDEX IF NOT EXISTS idx_sales_sessions_persona_id ON sales_sessions (persona_id)`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_sales_sessions_status ON sales_sessions (status)`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_sales_sessions_finished_at ON sales_sessions (finished_at DESC)`);
+    await query(`
+      CREATE TABLE IF NOT EXISTS storage_kv (
+        key text PRIMARY KEY,
+        payload jsonb NOT NULL,
+        updated_at timestamptz NOT NULL DEFAULT now()
+      )
+    `);
+    await query(`
+      CREATE TABLE IF NOT EXISTS session_artifacts (
+        session_id text PRIMARY KEY,
+        payload jsonb NOT NULL,
+        markdown text NOT NULL DEFAULT '',
+        saved_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      )
+    `);
+    await query(`CREATE INDEX IF NOT EXISTS idx_session_artifacts_saved_at ON session_artifacts (saved_at DESC)`);
+    await query(`
+      CREATE TABLE IF NOT EXISTS session_logs (
+        session_id text PRIMARY KEY,
+        finished_date date,
+        payload jsonb NOT NULL,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      )
+    `);
+    await query(`CREATE INDEX IF NOT EXISTS idx_session_logs_finished_date ON session_logs (finished_date DESC)`);
+    await query(`
+      CREATE TABLE IF NOT EXISTS prompt_memory_runs (
+        run_id text PRIMARY KEY,
+        persona_id text,
+        generated_at timestamptz,
+        cycle_count integer NOT NULL DEFAULT 0,
+        memory_record_count integer NOT NULL DEFAULT 0,
+        payload jsonb NOT NULL,
+        markdown text NOT NULL DEFAULT '',
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      )
+    `);
+    await query(`CREATE INDEX IF NOT EXISTS idx_prompt_memory_runs_generated_at ON prompt_memory_runs (generated_at DESC)`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_prompt_memory_runs_persona_id ON prompt_memory_runs (persona_id)`);
   }
 
-  async function tableCount(tableName) {
-    const pool = await getPool();
-    const result = await pool.query(`select count(*)::int as count from ${tableName}`);
-    return result.rows[0]?.count || 0;
+  async function getKv(key, fallback) {
+    const result = await query('SELECT payload FROM storage_kv WHERE key = $1', [key]);
+    if (result.rows[0]?.payload !== undefined) return result.rows[0].payload;
+    return fallback;
   }
 
-  async function bootstrapIfNeeded() {
-    if (state.bootstrapped || !bootstrapEnabled()) return;
+  async function putKv(key, payload) {
+    await query(
+      `INSERT INTO storage_kv (key, payload, updated_at)
+       VALUES ($1, $2::jsonb, now())
+       ON CONFLICT (key) DO UPDATE SET
+         payload = EXCLUDED.payload,
+         updated_at = now()`,
+      [key, JSON.stringify(payload)]
+    );
+    return payload;
+  }
 
-    const [personaCount, sessionCount] = await Promise.all([
-      tableCount('personas'),
-      tableCount('sales_sessions'),
-    ]);
-
-    const shouldImportPersonas = personaCount === 0;
-    const shouldImportSessions = sessionCount === 0;
-    if (!shouldImportPersonas && !shouldImportSessions) {
-      state.bootstrapped = true;
-      return;
+  async function hydrateKvFromFile(key, loader, isEmpty) {
+    const current = await getKv(key, null);
+    if (current && !isEmpty(current)) return current;
+    const fileValue = await loader();
+    if (fileValue && !isEmpty(fileValue)) {
+      await putKv(key, fileValue);
+      return fileValue;
     }
-
-    const filePersonas = readJson(config.personasFile);
-    const sessionFiles = fs.existsSync(config.sessionsDir)
-      ? fs.readdirSync(config.sessionsDir).filter((name) => name.endsWith('.json')).sort()
-      : [];
-
-    await withClient(async (client) => {
-      await client.query('begin');
-      try {
-        if (shouldImportPersonas && filePersonas && typeof filePersonas === 'object') {
-          const personaEntries = Array.isArray(filePersonas)
-            ? filePersonas.map((persona) => [persona.id, persona])
-            : Object.entries(filePersonas);
-          for (const [, persona] of personaEntries) {
-            if (persona?.id) await upsertPersona(client, persona);
-          }
-        }
-
-        if (shouldImportSessions) {
-          for (const fileName of sessionFiles) {
-            const session = readJson(path.join(config.sessionsDir, fileName));
-            if (session?.session_id) await upsertSession(client, session);
-          }
-        }
-
-        await upsertRuntimeMeta(client, 'bootstrap', {
-          enabled: true,
-          imported_personas: shouldImportPersonas,
-          imported_sessions: shouldImportSessions,
-          persona_file_present: Boolean(filePersonas),
-          session_file_count: sessionFiles.length,
-        });
-
-        await client.query('commit');
-      } catch (error) {
-        await client.query('rollback');
-        throw error;
-      }
-    });
-
-    state.bootstrapped = true;
-  }
-
-  async function ensureReady() {
-    if (state.initialized) return;
-    await applyMigrations();
-    await bootstrapIfNeeded();
-    await withClient((client) => upsertRuntimeMeta(client, 'storage_driver', {
-      driver: 'postgres',
-      connection_source: state.connectionSource,
-      bootstrap_from_file: bootstrapEnabled(),
-    }));
-    state.initialized = true;
+    return current;
   }
 
   return {
     driver: 'postgres',
-    config: clone(config),
+
     async init() {
-      await ensureReady();
+      await initSchema();
     },
+
     async loadPersonas({ seedFactory }) {
-      await ensureReady();
-      const pool = await getPool();
-      const result = await pool.query('select payload from personas order by id asc');
-      if (result.rowCount > 0) {
-        return Object.fromEntries(result.rows.map((row) => [row.payload.id, row.payload]));
+      const result = await query('SELECT payload FROM personas ORDER BY created_at');
+      if (result.rows.length === 0) {
+        return seedFactory();
       }
-
-      const seeded = seedFactory ? seedFactory() : {};
-      if (seeded && Object.keys(seeded).length > 0) {
-        await this.savePersonas(seeded);
-      }
-      return seeded;
+      const entries = result.rows.map(({ payload }) => [payload.id, payload]);
+      return Object.fromEntries(entries);
     },
+
     async savePersonas(personas) {
-      await ensureReady();
-      const sourceEntries = Array.isArray(personas)
-        ? personas.map((persona) => [persona.id, persona])
-        : Object.entries(personas || {});
-      const ids = sourceEntries.map(([id, persona]) => String(id || persona?.id || '')).filter(Boolean);
-
-      await withClient(async (client) => {
-        await client.query('begin');
-        try {
-          if (ids.length > 0) {
-            await client.query('delete from personas where not (id = any($1::text[]))', [ids]);
-          } else {
-            await client.query('delete from personas');
-          }
-
-          for (const [id, persona] of sourceEntries) {
-            const payload = persona && typeof persona === 'object' ? { ...persona, id: persona.id || id } : null;
-            if (payload?.id) await upsertPersona(client, payload);
-          }
-
-          await client.query('commit');
-        } catch (error) {
-          await client.query('rollback');
-          throw error;
-        }
-      });
-
+      const entries = Object.values(personas);
+      for (const p of entries) {
+        await query(
+          `INSERT INTO personas (id, name, role, archetype, tone, payload, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6::jsonb, now())
+           ON CONFLICT (id) DO UPDATE SET
+             name = EXCLUDED.name,
+             role = EXCLUDED.role,
+             archetype = EXCLUDED.archetype,
+             tone = EXCLUDED.tone,
+             payload = EXCLUDED.payload,
+             updated_at = now()`,
+          [p.id, p.name || '', p.role || '', p.archetype || '', p.tone || '', JSON.stringify(p)]
+        );
+      }
       return personas;
     },
-    async loadSession(sessionId) {
-      await ensureReady();
-      const pool = await getPool();
-      const result = await pool.query('select payload from sales_sessions where session_id = $1', [sessionId]);
-      if (result.rowCount > 0) return result.rows[0].payload;
 
-      const fileBacked = readJson(path.join(config.sessionsDir, `${sessionId}.json`));
-      if (fileBacked?.session_id && bootstrapEnabled()) {
-        await this.saveSession(fileBacked);
-        return fileBacked;
-      }
-      return null;
+    async loadSession(sessionId) {
+      const result = await query('SELECT payload FROM sales_sessions WHERE session_id = $1', [sessionId]);
+      return result.rows[0]?.payload ?? null;
     },
+
     async saveSession(session) {
-      await ensureReady();
-      const pool = await getPool();
-      await upsertSession(pool, session);
+      await query(
+        `INSERT INTO sales_sessions (session_id, persona_id, status, started_at, finished_at, payload, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6::jsonb, now())
+         ON CONFLICT (session_id) DO UPDATE SET
+           persona_id = EXCLUDED.persona_id,
+           status = EXCLUDED.status,
+           started_at = EXCLUDED.started_at,
+           finished_at = EXCLUDED.finished_at,
+           payload = EXCLUDED.payload,
+           updated_at = now()`,
+        [
+          session.session_id,
+          session.bot_id || session.persona_id || 'unknown',
+          session.status || 'in_progress',
+          session.started_at || null,
+          session.finished_at || null,
+          JSON.stringify(session),
+        ]
+      );
       return session;
     },
+
     async listSessions() {
-      await ensureReady();
-      const pool = await getPool();
-      const result = await pool.query(`
-        select payload
-        from sales_sessions
-        order by coalesce(finished_at, started_at, created_at) desc, session_id desc
-      `);
-      return result.rows.map((row) => row.payload).filter(Boolean);
+      const result = await query('SELECT payload FROM sales_sessions ORDER BY created_at DESC');
+      return result.rows.map(({ payload }) => payload);
     },
-    sessionFilePath(sessionId) {
-      return path.join(config.sessionsDir || '', `${sessionId}.json`);
+
+    async findActiveSessionByChat(personaId, chatId) {
+      const result = await query(
+        `SELECT payload
+           FROM sales_sessions
+          WHERE status = 'in_progress'
+            AND persona_id = $1
+            AND COALESCE(payload->>'telegram_chat_id', '') = $2
+          ORDER BY updated_at DESC
+          LIMIT 1`,
+        [personaId, String(chatId)]
+      );
+      return result.rows[0]?.payload ?? null;
     },
-    async getInfo() {
-      await ensureReady();
-      const pool = await getPool();
-      const meta = await pool.query('select meta_key, meta_value, updated_at from storage_runtime_meta order by meta_key asc');
-      return {
-        driver: 'postgres',
-        persistence: 'postgres-jsonb',
-        connection_source: state.connectionSource,
-        migrations: state.migrations.map((entry) => entry.migration_id),
-        bootstrap_from_file: bootstrapEnabled(),
-        runtime_meta: meta.rows.map((row) => ({
-          key: row.meta_key,
-          value: row.meta_value,
-          updated_at: row.updated_at,
-        })),
-      };
-    }
+
+    sessionFilePath() {
+      return null;
+    },
+
+    async loadHintMemoryStore() {
+      const payload = await hydrateKvFromFile(
+        'hint_memory',
+        () => fileFallback.loadHintMemoryStore().then((records) => ({ version: 'v2', records })),
+        (value) => !Array.isArray(value?.records) || value.records.length === 0
+      );
+      return Array.isArray(payload?.records) ? payload.records : [];
+    },
+
+    async saveHintMemoryStore(payload) {
+      await putKv('hint_memory', payload);
+      return payload.records || [];
+    },
+
+    async loadHintRecency() {
+      const payload = await hydrateKvFromFile(
+        'hint_recency',
+        () => fileFallback.loadHintRecency().then((openers) => ({ openers })),
+        (value) => !Array.isArray(value?.openers) || value.openers.length === 0
+      );
+      return Array.isArray(payload?.openers) ? payload.openers : [];
+    },
+
+    async saveHintRecency(openers) {
+      await putKv('hint_recency', { openers });
+      return openers;
+    },
+
+    async loadSdrHintTuning() {
+      const payload = await hydrateKvFromFile(
+        'sdr_hint_tuning',
+        () => fileFallback.loadSdrHintTuning(),
+        (value) => {
+          const normalized = normalizeSdrHintTuning(value);
+          return Object.keys(normalized.openers).length === 0
+            && Object.keys(normalized.concerns).length === 0
+            && Object.keys(normalized.next_steps).length === 0;
+        }
+      );
+      return normalizeSdrHintTuning(payload);
+    },
+
+    async saveSdrHintTuning(payload) {
+      const normalized = normalizeSdrHintTuning(payload);
+      await putKv('sdr_hint_tuning', normalized);
+      return normalized;
+    },
+
+    async saveFinishedLog(session) {
+      await query(
+        `INSERT INTO session_logs (session_id, finished_date, payload, updated_at)
+         VALUES ($1, $2, $3::jsonb, now())
+         ON CONFLICT (session_id) DO UPDATE SET
+           finished_date = EXCLUDED.finished_date,
+           payload = EXCLUDED.payload,
+           updated_at = now()`,
+        [session.session_id, String(session.finished_at || new Date().toISOString()).slice(0, 10), JSON.stringify(session)]
+      );
+      return session;
+    },
+
+    async saveArtifact({ artifact, markdown, sessionId }) {
+      await query(
+        `INSERT INTO session_artifacts (session_id, payload, markdown, saved_at, updated_at)
+         VALUES ($1, $2::jsonb, $3, $4, now())
+         ON CONFLICT (session_id) DO UPDATE SET
+           payload = EXCLUDED.payload,
+           markdown = EXCLUDED.markdown,
+           saved_at = EXCLUDED.saved_at,
+           updated_at = now()`,
+        [sessionId, JSON.stringify(artifact), markdown, artifact.saved_at || new Date().toISOString()]
+      );
+      return artifact;
+    },
+
+    async loadArtifact(sessionId) {
+      const result = await query('SELECT payload FROM session_artifacts WHERE session_id = $1', [sessionId]);
+      if (result.rows[0]?.payload) return result.rows[0].payload;
+      const fallback = await fileFallback.loadArtifact(sessionId);
+      if (fallback) await this.saveArtifact({ artifact: fallback, markdown: await fileFallback.loadArtifactMarkdown(sessionId) || '', sessionId });
+      return fallback;
+    },
+
+    async loadArtifactMarkdown(sessionId) {
+      const result = await query('SELECT markdown FROM session_artifacts WHERE session_id = $1', [sessionId]);
+      if (typeof result.rows[0]?.markdown === 'string' && result.rows[0].markdown.length > 0) return result.rows[0].markdown;
+      return fileFallback.loadArtifactMarkdown(sessionId);
+    },
+
+    async listArtifacts() {
+      const result = await query('SELECT payload FROM session_artifacts ORDER BY saved_at DESC');
+      if (result.rows.length === 0) return fileFallback.listArtifacts();
+      return result.rows.map(({ payload }) => normalizeArtifactSummary(payload)).filter(Boolean);
+    },
+
+    async listArtifactIds(limit = null) {
+      const sql = limit
+        ? 'SELECT session_id FROM session_artifacts ORDER BY saved_at DESC LIMIT $1'
+        : 'SELECT session_id FROM session_artifacts ORDER BY saved_at DESC';
+      const result = await query(sql, limit ? [limit] : []);
+      if (result.rows.length === 0) return fileFallback.listArtifactIds(limit);
+      return result.rows.map((row) => row.session_id).filter(Boolean);
+    },
+
+    async savePromptMemoryRun({ run, markdown, runId }) {
+      const summary = summarizePromptMemoryRun(run);
+      await query(
+        `INSERT INTO prompt_memory_runs (run_id, persona_id, generated_at, cycle_count, memory_record_count, payload, markdown, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, now())
+         ON CONFLICT (run_id) DO UPDATE SET
+           persona_id = EXCLUDED.persona_id,
+           generated_at = EXCLUDED.generated_at,
+           cycle_count = EXCLUDED.cycle_count,
+           memory_record_count = EXCLUDED.memory_record_count,
+           payload = EXCLUDED.payload,
+           markdown = EXCLUDED.markdown,
+           updated_at = now()`,
+        [
+          runId,
+          summary?.persona_id || null,
+          summary?.generated_at || new Date().toISOString(),
+          summary?.cycle_count || 0,
+          summary?.memory_record_count || 0,
+          JSON.stringify(run),
+          markdown || '',
+        ]
+      );
+      return run;
+    },
+
+    async loadPromptMemoryRun(runId) {
+      const result = await query('SELECT payload FROM prompt_memory_runs WHERE run_id = $1', [runId]);
+      if (result.rows[0]?.payload) return result.rows[0].payload;
+      const fallback = await fileFallback.loadPromptMemoryRun(runId);
+      if (fallback) await this.savePromptMemoryRun({ run: fallback, markdown: await fileFallback.loadPromptMemoryRunMarkdown(runId) || '', runId });
+      return fallback;
+    },
+
+    async loadPromptMemoryRunMarkdown(runId) {
+      const result = await query('SELECT markdown FROM prompt_memory_runs WHERE run_id = $1', [runId]);
+      if (typeof result.rows[0]?.markdown === 'string' && result.rows[0].markdown.length > 0) return result.rows[0].markdown;
+      return fileFallback.loadPromptMemoryRunMarkdown(runId);
+    },
+
+    async listPromptMemoryRuns(limit = null) {
+      const sql = limit
+        ? 'SELECT payload FROM prompt_memory_runs ORDER BY generated_at DESC NULLS LAST, created_at DESC LIMIT $1'
+        : 'SELECT payload FROM prompt_memory_runs ORDER BY generated_at DESC NULLS LAST, created_at DESC';
+      const result = await query(sql, limit ? [limit] : []);
+      if (result.rows.length === 0) return fileFallback.listPromptMemoryRuns(limit);
+      return result.rows.map(({ payload }) => summarizePromptMemoryRun(payload)).filter(Boolean);
+    },
   };
 }
 
-export function createStorage(config) {
+export async function createStorage(config) {
   const driver = String(process.env.STORAGE_DRIVER || 'file').trim().toLowerCase();
   if (driver === 'postgres') return createPostgresStorage(config);
   return createFileStorage(config);
