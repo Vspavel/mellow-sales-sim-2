@@ -1295,11 +1295,11 @@ function canMakeAsk(session) {
 
   // Finance personas, especially the rate-floor CFO, should not jump from artifact acceptance
   // straight into a call-close unless the buyer explicitly signals readiness to pressure-test live.
-  if (persona.id === 'rate_floor_cfo') {
+  if (['rate_floor_cfo', 'fx_trust_shock_finance'].includes(persona.id)) {
     if (acceptanceState === 'artifact_then_call') return trust >= 1.1;
     if (acceptanceState === 'artifact_only') {
       return trust >= 1.18
-        && ['cost_breakdown', 'competitor_brief', 'generic_artifact'].includes(requestedArtifactType)
+        && ['cost_breakdown', 'competitor_brief', 'generic_artifact', 'implementation_memo'].includes(requestedArtifactType)
         && buyerShowsFinanceCallReadiness(session);
     }
     if (acceptanceState === 'narrow_walkthrough') return trust >= 1.15 && buyerShowsFinanceCallReadiness(session);
@@ -1441,6 +1441,16 @@ const PERSONA_SELLING_POLICY = {
     proof_focus: ['cost_predictability', 'clarity_of_scheme', 'defendable_structure', 'recovery_visibility', 'incident_ownership'],
     bridge_asset: 'cost_breakdown',
     bridge_label: 'short total-cost breakdown with visible FX and incident path',
+  },
+  cfo_round: {
+    proof_focus: ['cost_predictability', 'defendable_structure', 'clarity_of_scheme', 'incident_ownership'],
+    bridge_asset: 'investor_readiness_memo',
+    bridge_label: 'short investor-readiness economics memo with control boundary',
+  },
+  head_finance: {
+    proof_focus: ['cost_predictability', 'clarity_of_scheme', 'defendable_structure', 'incident_ownership'],
+    bridge_asset: 'control_cost_memo',
+    bridge_label: 'short control-cost memo with manual-load reduction and audit trail',
   },
   cm_winback: {
     proof_focus: ['clarity_of_scheme', 'defendable_structure', 'slice_specific_fit'],
@@ -1604,6 +1614,14 @@ function getPersonaAskType(session) {
     if (clarity < 72 || trust < 62) return 'written_first';
     return nextStepLikelihood >= 0.64 ? 'narrow_walkthrough' : 'written_first';
   }
+  if (persona?.id === 'cfo_round') {
+    if (clarity < 66 || trust < 58 || nextStepLikelihood < 0.54) return 'written_first';
+    return nextStepLikelihood >= 0.68 ? 'narrow_walkthrough' : 'written_first';
+  }
+  if (persona?.id === 'head_finance') {
+    if (clarity < 64 || trust < 58 || nextStepLikelihood < 0.52) return 'written_first';
+    return nextStepLikelihood >= 0.66 ? 'narrow_walkthrough' : 'written_first';
+  }
   if (persona?.id === 'rate_floor_cfo') {
     if (['artifact_only', 'artifact_then_call'].includes(acceptanceState)) return 'written_first';
     if (clarity < 72 || trust < 64 || nextStepLikelihood < 0.66) return 'written_first';
@@ -1682,7 +1700,9 @@ function getHintPolicyContext(session) {
   // - artifact_only => bounded bridge step (send artifact + light upfront contract)
   // - artifact_then_call / narrow_walkthrough => direct ask is now earned
   if ((buyerAskedForMaterial || buyerAskedForImplementation || requestedArtifactType || ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) && sellerMessages(session).length >= 2 && !repairState) {
-    hintStage = acceptanceState === 'artifact_only' ? 'bridge_step' : 'direct_ask';
+    const personaId = personaMeta(session)?.id;
+    const forceDirectAfterArtifact = personaId === 'cfo_round' && acceptanceState === 'artifact_only';
+    hintStage = (acceptanceState === 'artifact_only' && !forceDirectAfterArtifact) ? 'bridge_step' : 'direct_ask';
   }
 
   // Constrained retry paths: prevent infinite looping at bridge_step or direct_ask
@@ -2321,6 +2341,12 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
         fx_trust_shock_finance: [
           `Здесь value не в обещании “всё прозрачно”, а в заранее видимой total-cost логике: rate, FX, цепочка и что происходит при сбое. Какой слой математики вам важнее увидеть первым?`,
         ],
+        cfo_round: [
+          `Для CFO перед следующим diligence proof не в красивой структуре самой по себе, а в economics of readiness: сколько ручной investor-prep и surprise-risk остаётся без Mellow, и что становится предсказуемым заранее. Что для вас важнее проверить первым: hidden prep cost, control boundary или incident path?`,
+        ],
+        head_finance: [
+          `Для Head of Finance ценность не в слове “audit-ready”, а в экономике контроля: сколько ручной сверки и reporting-noise снимается, что становится видимым заранее, и где не рождается новый серый слой. Что вам важнее раскрыть первым: manual-load reduction, audit trail или boundary?`,
+        ],
       },
       bridge_step: {
         rate_floor_cfo: {
@@ -2328,6 +2354,12 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
         },
         fx_trust_shock_finance: {
           written_first: [`Следующий шаг без давления: пришлю короткий total-cost breakdown под ваш кейс, где отдельно видны rate, FX, payout chain и поведение при сбое. Если математика выглядит честно, следующим шагом возьмём короткий 15-минутный review call только по economics и fit. Ок?`],
+        },
+        cfo_round: {
+          written_first: [`Могу сначала прислать короткий investor-readiness breakdown под finance lens: где сейчас остаётся hidden prep cost перед diligence, что становится explainable заранее, и отдельно где у Mellow boundary и incident path. Если логика выглядит приземлённо, следующим шагом возьмём короткий review call только по readiness и fit. Подходит?`],
+        },
+        head_finance: {
+          written_first: [`Следующий шаг без давления: пришлю короткий control-cost memo под ваш кейс, где отдельно видно что уходит из ручной сверки, какой audit trail появляется заранее и где проходит boundary без новых серых зон. Если логика выглядит честно, дальше возьмём короткий review call только по control economics и fit. Ок?`],
         },
       },
       direct_ask: {
@@ -2340,6 +2372,16 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
           narrow_walkthrough: [`Раз cost logic уже понятна, предлагаю короткий 15-минутный cost review call, чтобы быстро проверить FX, payout path и failure contour на вашем кейсе. Когда удобно?`],
           direct_call: [`Если математика выглядит честно, давайте сразу короткий cost review call на 15 минут, без широкого демо, только economics и fit. Какой слот удобен?`],
           written_first: [`Я пришлю short total-cost breakdown сегодня: rate, FX, payout chain и что видно buyer до платежа. Если математика честная, давайте сразу поставим короткий review call. Когда удобно?`],
+        },
+        cfo_round: {
+          narrow_walkthrough: [`Раз investor-readiness logic уже выглядит разумно, предлагаю короткий 15-минутный diligence review call, чтобы быстро пройти prep cost, boundary и incident path на вашем кейсе. Когда удобно?`],
+          direct_call: [`Если readiness economics сходятся, давайте сразу короткий 15-минутный diligence review call, без широкого pitch, только investor-facing logic и fit. Какой слот удобен?`],
+          written_first: [`Я пришлю короткий investor-readiness memo сегодня: hidden prep cost, зона ответственности и incident path перед diligence. Если логика выглядит приземлённо, давайте сразу поставим короткий review call. Когда удобно?`],
+        },
+        head_finance: {
+          narrow_walkthrough: [`Раз control logic уже выглядит приземлённо, предлагаю короткий 15-минутный finance control review call, чтобы пройти manual-load reduction, audit trail и boundary на вашем кейсе. Когда удобно?`],
+          direct_call: [`Если control economics выглядят честно, давайте сразу короткий 15-минутный finance control review call, без широкого демо, только reconciliation load, audit trail и fit. Какой слот удобен?`],
+          written_first: [`Я пришлю короткий control-cost memo сегодня: что уходит из ручной сверки, где появляется audit trail и где проходит boundary. Если логика приземлённая, давайте сразу поставим короткий review call. Когда удобно?`],
         },
         cm_winback: {
           narrow_walkthrough: [`Раз slice уже понятен, следующий шаг лучше узкий: короткий 15-минутный structure-fit call только по вашему non-RU/BY contour, без возврата в старый общий CoR разговор. Когда удобно?`],
@@ -2363,10 +2405,18 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
         fx_trust_shock_finance: [
           `The value here is not “more transparency” in the abstract. It is visible total-cost logic up front: rate, FX, payout chain, and what happens if something slips. Which layer of that math do you want to see first?`,
         ],
+        cfo_round: [
+          `For a CFO heading into diligence, proof is not a neat structure by itself. It is the economics of readiness: how much manual investor-prep and surprise risk stays without Mellow, and what becomes predictable up front. Which do you want to test first: hidden prep cost, control boundary, or failure path?`,
+        ],
+        head_finance: [
+          `For a Head of Finance, the value is not the phrase “audit-ready.” It is control economics: how much manual reconciliation and reporting noise comes out, what becomes visible up front, and where a new grey layer does not appear. Which do you want to unpack first: manual-load reduction, audit trail, or boundary?`,
+        ],
       },
       bridge_step: {
         rate_floor_cfo: { written_first: [`I can first send a short premium-logic breakdown for finance: where the higher rate pays back or does not, which cost layers are visible up front, and separately Mellow's boundary and incident path. Would that help?`] },
         fx_trust_shock_finance: { written_first: [`Low-pressure next step: I can send a short total-cost breakdown for your case showing rate, FX, payout chain, and the failure path up front. Would that help?`] },
+        cfo_round: { written_first: [`I can first send a short investor-readiness breakdown for finance: where hidden diligence-prep cost still sits today, what becomes explainable up front, and separately Mellow's boundary and incident path. Would that help?`] },
+        head_finance: { written_first: [`Low-pressure next step: I can send a short control-cost memo for your case showing what comes out of manual reconciliation, what audit trail becomes visible up front, and where the boundary sits without adding a grey layer. Would that help?`] },
       },
       direct_ask: {
         rate_floor_cfo: {
@@ -2378,6 +2428,16 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
           narrow_walkthrough: [`If the cost logic already looks clear, I suggest a short 15-minute cost review call to test FX, payout path, and failure contour on your case. What time works?`],
           direct_call: [`If the math feels honest, let's do a short 15-minute cost review call, no broad demo, just economics and fit. What slot works?`],
           written_first: [`I'll send the short total-cost breakdown today, covering rate, FX, payout chain, and what the buyer sees before payment. If the math feels honest, let's put a short review call on the calendar right after. What time works?`],
+        },
+        cfo_round: {
+          narrow_walkthrough: [`If the investor-readiness logic already looks grounded, I suggest a short 15-minute diligence review call to test prep cost, boundary, and failure path on your case. What time works?`],
+          direct_call: [`If the readiness economics hold, let's do a short 15-minute diligence review call, no broad pitch, just investor-facing logic and fit. What slot works?`],
+          written_first: [`I'll send the short investor-readiness memo today, covering hidden prep cost, responsibility boundary, and incident path ahead of diligence. If it looks grounded, let's put a short review call on the calendar right after. What time works?`],
+        },
+        head_finance: {
+          narrow_walkthrough: [`If the control logic already looks grounded, I suggest a short 15-minute finance control review call to test manual-load reduction, audit trail, and boundary on your case. What time works?`],
+          direct_call: [`If the control economics feel honest, let's do a short 15-minute finance control review call, no broad demo, just reconciliation load, audit trail, and fit. What slot works?`],
+          written_first: [`I'll send the short control-cost memo today, covering what comes out of manual reconciliation, where audit trail appears, and where the boundary sits. If it looks grounded, let's put a short review call on the calendar right after. What time works?`],
         },
         cm_winback: {
           narrow_walkthrough: [`If the slice already looks relevant, the next step should stay narrow: a short 15-minute structure-fit call only on your non-RU/BY contour, not a return to the old broad CoR conversation. What slot works?`],
@@ -2429,11 +2489,24 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
   const patternStageBank = stagePatternBank || {};
   const acceptanceAwarePools = (() => {
     const ru = lang !== 'en';
+    const personaId = persona?.id || personaMeta(session)?.id;
     const requestedArtifactType = policy.requestedArtifactType || detectRequestedArtifactType(session);
     const acceptanceState = policy.acceptanceState;
     const artifactOnly = acceptanceState === 'artifact_only';
     const artifactThenCall = acceptanceState === 'artifact_then_call';
     const callReady = artifactThenCall || acceptanceState === 'narrow_walkthrough';
+
+    if (personaId === 'cfo_round' && (artifactOnly || artifactThenCall) && requestedArtifactType === 'generic_artifact') {
+      return ru
+        ? [
+            `Ок, investor-readiness memo пришлю сегодня. И чтобы не растягивать это перед diligence, давайте сразу зафиксируем короткий 15-минутный review call только по prep cost, boundary и incident path. Какой слот вам удобен?`,
+            `Хорошо, короткий investor-readiness outline отправлю сегодня, а следующим шагом сразу возьмём 15 минут только на readiness logic и fit. Когда вам удобно?`,
+          ]
+        : [
+            `Understood. I'll send the investor-readiness memo today. To keep this moving ahead of diligence, let's also lock a short 15-minute review call only on prep cost, boundary, and incident path. What slot works for you?`,
+            `Sounds good. I'll send the short investor-readiness outline today, and the next step can be a focused 15-minute call only on readiness logic and fit. What time works for you?`,
+          ];
+    }
 
     if ((artifactOnly || artifactThenCall) && requestedArtifactType === 'cost_breakdown') {
       return artifactOnly
@@ -6366,8 +6439,8 @@ function getPersonaAskMessages(session, lang = 'ru') {
       },
       cfo_round: {
         written_first: [
-          `Пришлю investor-ready summary: audit trail, contractor documentation, payment chain с зоной контроля. Если это закрывает вопрос investor scrutiny — 20 минут на созвон до quarterly review. Подходит?`,
-          `Следующий шаг: пришлю документ — flow, документация, audit trail для investor level. Если там без воды — созвон на 20 минут до вашего дедлайна. Когда удобно?`,
+          `Пришлю investor-ready summary: где уходит ручной prep перед diligence, что становится explainable для инвестора и где зона контроля. Если это закрывает вопрос investor scrutiny — 20 минут на созвон до quarterly review. Подходит?`,
+          `Следующий шаг: пришлю документ — hidden prep cost, flow, документация и audit trail для investor level. Если там без воды — созвон на 20 минут до вашего дедлайна. Когда удобно?`,
         ],
         direct_call: [
           `Investor diligence — конкретный риск с конкретными сроками. Давайте 20 минут — покажу именно ту часть схемы, которую нужно привести в порядок до quarterly review.`,
@@ -6380,8 +6453,8 @@ function getPersonaAskMessages(session, lang = 'ru') {
       },
       head_finance: {
         written_first: [
-          `Пришлю summary: flow, audit trail, что именно убирается из ручной нагрузки — и как это объяснять leadership. Если там конкретно — 20 минут на созвон. Подходит?`,
-          `Следующий шаг: один экран с payment flow и audit story под ваш annual audit контекст. Если приземлённо — короткий созвон. Когда удобно?`,
+          `Пришлю summary: flow, audit trail, что именно уходит из ручной сверки и как это объяснять leadership. Если там конкретно — 20 минут на созвон. Подходит?`,
+          `Следующий шаг: один экран с payment flow, control-cost logic и audit story под ваш annual audit контекст. Если приземлённо — короткий созвон. Когда удобно?`,
         ],
         direct_call: [
           `Давайте 20 минут — покажу audit trail, payment flow и схему объяснимости для leadership. Конкретно под ваш сетап.`,
@@ -6529,8 +6602,8 @@ function getPersonaAskMessages(session, lang = 'ru') {
       },
       cfo_round: {
         written_first: [
-          `Let me send you an investor-ready summary: audit trail, contractor documentation, payment chain with control zone. If it closes the investor scrutiny question — 20 minutes for a call before the quarterly review. Does that work?`,
-          `Next step: I'll send a document — flow, documentation, audit trail for investor level. If it's without fluff — 20-minute call before your deadline. When works?`,
+          `Let me send you an investor-ready summary: where manual diligence prep comes out, what becomes explainable to the investor, and where the control zone sits. If it closes the investor scrutiny question — 20 minutes for a call before the quarterly review. Does that work?`,
+          `Next step: I'll send a document — hidden prep cost, flow, documentation, and audit trail for investor level. If it's without fluff — 20-minute call before your deadline. When works?`,
         ],
         direct_call: [
           `Investor diligence is a concrete risk with concrete timelines. Let's do 20 minutes — I'll show exactly the part of the setup that needs to be in order before the quarterly review.`,
@@ -6543,8 +6616,8 @@ function getPersonaAskMessages(session, lang = 'ru') {
       },
       head_finance: {
         written_first: [
-          `Let me send a summary: flow, audit trail, what specifically comes out of the manual workload — and how to explain it to leadership. If it's specific — 20 minutes for a call. Does that work?`,
-          `Next step: one page with payment flow and audit story for your annual audit context. If grounded — a short call. When works?`,
+          `Let me send a summary: flow, audit trail, what specifically comes out of manual reconciliation, and how to explain it to leadership. If it's specific — 20 minutes for a call. Does that work?`,
+          `Next step: one page with payment flow, control-cost logic, and audit story for your annual audit context. If grounded — a short call. When works?`,
         ],
         direct_call: [
           `Let's do 20 minutes — I'll show the audit trail, payment flow, and explainability structure for leadership. Specifically for your setup.`,
