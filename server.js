@@ -1267,7 +1267,18 @@ function normalizeHintText(text = '') {
 
 // Returns true when the seller has earned the right to propose a meeting or call.
 // Guards against premature asks that tank trust before value is established.
+function buyerShowsFinanceCallReadiness(session) {
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  return hasAny(lower, [
+    'где заканчивается ваша ответственность', 'где ваша ответственность заканчивается', 'what exactly is included', 'where does your responsibility end',
+    'как именно это выглядит', 'how exactly does this work', 'что именно входит', 'что именно вы берете на себя',
+    'как это ляжет на finance', 'как это выглядит для finance', 'how this fits our finance process', 'how this fits finance',
+    'давайте разберем', 'worth checking', 'имеет смысл проверить'
+  ]);
+}
+
 function canMakeAsk(session) {
+  const persona = personaMeta(session) || {};
   const trust = session.meta?.trust || 1;
   const sellerTurnCount = sellerMessages(session).length;
   const missStreak = session.meta?.miss_streak || 0;
@@ -1276,10 +1287,23 @@ function canMakeAsk(session) {
   const buyerState = normalizeBuyerState(session.buyer_state || buildInitialBuyerState(session), session);
   const nextStepLikelihood = Number(buyerState.next_step_likelihood || 0);
   const acceptanceState = getBuyerAcceptanceState(session);
+  const requestedArtifactType = detectRequestedArtifactType(session);
 
   // Never ask on the first seller message or during an escalating miss streak
   if (sellerTurnCount < 2) return false;
   if (missStreak >= 3) return false;
+
+  // Finance personas, especially the rate-floor CFO, should not jump from artifact acceptance
+  // straight into a call-close unless the buyer explicitly signals readiness to pressure-test live.
+  if (persona.id === 'rate_floor_cfo') {
+    if (acceptanceState === 'artifact_then_call') return trust >= 1.1;
+    if (acceptanceState === 'artifact_only') {
+      return trust >= 1.18
+        && ['cost_breakdown', 'competitor_brief', 'generic_artifact'].includes(requestedArtifactType)
+        && buyerShowsFinanceCallReadiness(session);
+    }
+    if (acceptanceState === 'narrow_walkthrough') return trust >= 1.15 && buyerShowsFinanceCallReadiness(session);
+  }
 
   // Once the buyer has already accepted a bounded artifact or post-artifact call contour,
   // the next move should be conversion, not more proving.
@@ -1581,8 +1605,9 @@ function getPersonaAskType(session) {
     return nextStepLikelihood >= 0.64 ? 'narrow_walkthrough' : 'written_first';
   }
   if (persona?.id === 'rate_floor_cfo') {
-    if (clarity < 66 || nextStepLikelihood < 0.58) return 'written_first';
-    return nextStepLikelihood >= 0.72 ? 'narrow_walkthrough' : 'written_first';
+    if (['artifact_only', 'artifact_then_call'].includes(acceptanceState)) return 'written_first';
+    if (clarity < 72 || trust < 64 || nextStepLikelihood < 0.66) return 'written_first';
+    return nextStepLikelihood >= 0.78 ? 'narrow_walkthrough' : 'written_first';
   }
   // Trust was damaged (miss streak happened during follow-up) — offer a narrow scope walk
   if (missStreak >= 1) return 'narrow_walkthrough';
@@ -2299,7 +2324,7 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
       },
       bridge_step: {
         rate_floor_cfo: {
-          written_first: [`Могу сначала прислать короткий memo по defendable structure: зона Mellow, incident path и как это защищается внутри finance. Если логика выглядит приземлённо, следующим шагом возьмём короткий 15-минутный review call только по boundary и fit. Подходит?`],
+          written_first: [`Могу сначала прислать короткий memo по defendable structure: зона Mellow, incident path и как это защищается внутри finance, без общего sales-шума. Посмотрите, и если логика выглядит приземлённо, тогда уже отдельно решим, нужен ли короткий review call. Подходит?`],
         },
         fx_trust_shock_finance: {
           written_first: [`Следующий шаг без давления: пришлю короткий total-cost breakdown под ваш кейс, где отдельно видны rate, FX, payout chain и поведение при сбое. Если математика выглядит честно, следующим шагом возьмём короткий 15-минутный review call только по economics и fit. Ок?`],
