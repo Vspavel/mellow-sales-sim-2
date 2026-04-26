@@ -316,17 +316,6 @@ async function createPostgresStorage(config) {
     `);
     await query(`CREATE INDEX IF NOT EXISTS idx_prompt_memory_runs_generated_at ON prompt_memory_runs (generated_at DESC)`);
     await query(`CREATE INDEX IF NOT EXISTS idx_prompt_memory_runs_persona_id ON prompt_memory_runs (persona_id)`);
-    await query(`
-      CREATE TABLE IF NOT EXISTS evaluation_runs (
-        run_id text PRIMARY KEY,
-        status text NOT NULL DEFAULT 'pending',
-        created_at timestamptz NOT NULL DEFAULT now(),
-        updated_at timestamptz NOT NULL DEFAULT now(),
-        payload jsonb NOT NULL
-      )
-    `);
-    await query(`CREATE INDEX IF NOT EXISTS idx_evaluation_runs_updated_at ON evaluation_runs (updated_at DESC)`);
-    await query(`CREATE INDEX IF NOT EXISTS idx_evaluation_runs_status ON evaluation_runs (status)`);
   }
 
   async function getKv(key, fallback) {
@@ -598,33 +587,35 @@ async function createPostgresStorage(config) {
     },
 
     async saveEvaluationRun(run) {
-      await query(
-        `INSERT INTO evaluation_runs (run_id, status, payload, updated_at)
-         VALUES ($1, $2, $3::jsonb, now())
-         ON CONFLICT (run_id) DO UPDATE SET
-           status = EXCLUDED.status,
-           payload = EXCLUDED.payload,
-           updated_at = now()`,
-        [run.run_id, String(run.status || 'pending'), JSON.stringify(run)]
-      );
+      const current = await getKv('evaluation_runs', { runs: {} });
+      const runs = current && typeof current === 'object' && current.runs && typeof current.runs === 'object'
+        ? current.runs
+        : {};
+      runs[run.run_id] = clone(run);
+      await putKv('evaluation_runs', { runs });
       return run;
     },
 
     async loadEvaluationRun(runId) {
-      const result = await query('SELECT payload FROM evaluation_runs WHERE run_id = $1', [runId]);
-      if (result.rows[0]?.payload) return result.rows[0].payload;
+      const current = await getKv('evaluation_runs', { runs: {} });
+      const run = current?.runs?.[runId] ?? null;
+      if (run) return run;
       const fallback = await fileFallback.loadEvaluationRun(runId);
       if (fallback) await this.saveEvaluationRun(fallback);
       return fallback;
     },
 
     async listEvaluationRuns(limit = null) {
-      const sql = limit
-        ? 'SELECT payload FROM evaluation_runs ORDER BY updated_at DESC, created_at DESC LIMIT $1'
-        : 'SELECT payload FROM evaluation_runs ORDER BY updated_at DESC, created_at DESC';
-      const result = await query(sql, limit ? [limit] : []);
-      if (result.rows.length === 0) return fileFallback.listEvaluationRuns(limit);
-      return result.rows.map(({ payload }) => summarizeEvaluationRun(payload)).filter(Boolean);
+      const current = await getKv('evaluation_runs', { runs: {} });
+      const runs = current && typeof current === 'object' && current.runs && typeof current.runs === 'object'
+        ? Object.values(current.runs)
+        : [];
+      if (runs.length === 0) return fileFallback.listEvaluationRuns(limit);
+      const items = runs
+        .map((payload) => summarizeEvaluationRun(payload))
+        .filter(Boolean)
+        .sort((a, b) => String(b.updated_at || b.created_at || '').localeCompare(String(a.updated_at || a.created_at || '')));
+      return items.slice(0, limit || undefined);
     },
   };
 }
