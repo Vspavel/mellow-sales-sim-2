@@ -65,7 +65,25 @@ function summarizePromptMemoryRun(raw) {
   };
 }
 
-function createFileStorage({ dataDir, sessionsDir, personasFile, logsDir, hintMemoryFile, hintRecencyFile, sdrHintTuningFile, artifactsDir, promptMemoryRunsDir }) {
+function summarizeEvaluationRun(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const progress = raw.progress && typeof raw.progress === 'object' ? raw.progress : {};
+  return {
+    run_id: raw.run_id || raw.runId || null,
+    status: String(raw.status || 'pending'),
+    created_at: raw.created_at || raw.createdAt || null,
+    updated_at: raw.updated_at || raw.updatedAt || null,
+    started_at: raw.started_at || raw.startedAt || null,
+    finished_at: raw.finished_at || raw.finishedAt || null,
+    total_simulations: Number(progress.total_simulations || 0),
+    completed_simulations: Number(progress.completed_simulations || 0),
+    failed_simulations: Number(progress.failed_simulations || 0),
+    total_personas: Number(progress.total_personas || 0),
+    completed_personas: Number(progress.completed_personas || 0),
+  };
+}
+
+function createFileStorage({ dataDir, sessionsDir, personasFile, logsDir, hintMemoryFile, hintRecencyFile, sdrHintTuningFile, artifactsDir, promptMemoryRunsDir, evaluationRunsDir }) {
   return {
     driver: 'file',
     async init() {
@@ -73,6 +91,8 @@ function createFileStorage({ dataDir, sessionsDir, personasFile, logsDir, hintMe
       fs.mkdirSync(sessionsDir, { recursive: true });
       fs.mkdirSync(logsDir, { recursive: true });
       fs.mkdirSync(artifactsDir, { recursive: true });
+      fs.mkdirSync(promptMemoryRunsDir, { recursive: true });
+      fs.mkdirSync(evaluationRunsDir, { recursive: true });
     },
     async loadPersonas({ seedFactory }) {
       const parsed = readJson(personasFile);
@@ -197,6 +217,26 @@ function createFileStorage({ dataDir, sessionsDir, personasFile, logsDir, hintMe
         .sort((a, b) => String(b.generated_at || '').localeCompare(String(a.generated_at || '')));
       return items.slice(0, limit || undefined);
     },
+
+    async saveEvaluationRun(run) {
+      writeJson(path.join(evaluationRunsDir, `${run.run_id}.json`), run);
+      return run;
+    },
+
+    async loadEvaluationRun(runId) {
+      return readJson(path.join(evaluationRunsDir, `${runId}.json`));
+    },
+
+    async listEvaluationRuns(limit = null) {
+      if (!fs.existsSync(evaluationRunsDir)) return [];
+      const items = fs.readdirSync(evaluationRunsDir)
+        .filter((name) => name.endsWith('.json'))
+        .map((name) => readJson(path.join(evaluationRunsDir, name)))
+        .map(summarizeEvaluationRun)
+        .filter(Boolean)
+        .sort((a, b) => String(b.updated_at || b.created_at || '').localeCompare(String(a.updated_at || a.created_at || '')));
+      return items.slice(0, limit || undefined);
+    },
   };
 }
 
@@ -276,6 +316,17 @@ async function createPostgresStorage(config) {
     `);
     await query(`CREATE INDEX IF NOT EXISTS idx_prompt_memory_runs_generated_at ON prompt_memory_runs (generated_at DESC)`);
     await query(`CREATE INDEX IF NOT EXISTS idx_prompt_memory_runs_persona_id ON prompt_memory_runs (persona_id)`);
+    await query(`
+      CREATE TABLE IF NOT EXISTS evaluation_runs (
+        run_id text PRIMARY KEY,
+        status text NOT NULL DEFAULT 'pending',
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now(),
+        payload jsonb NOT NULL
+      )
+    `);
+    await query(`CREATE INDEX IF NOT EXISTS idx_evaluation_runs_updated_at ON evaluation_runs (updated_at DESC)`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_evaluation_runs_status ON evaluation_runs (status)`);
   }
 
   async function getKv(key, fallback) {
@@ -544,6 +595,36 @@ async function createPostgresStorage(config) {
       const result = await query(sql, limit ? [limit] : []);
       if (result.rows.length === 0) return fileFallback.listPromptMemoryRuns(limit);
       return result.rows.map(({ payload }) => summarizePromptMemoryRun(payload)).filter(Boolean);
+    },
+
+    async saveEvaluationRun(run) {
+      await query(
+        `INSERT INTO evaluation_runs (run_id, status, payload, updated_at)
+         VALUES ($1, $2, $3::jsonb, now())
+         ON CONFLICT (run_id) DO UPDATE SET
+           status = EXCLUDED.status,
+           payload = EXCLUDED.payload,
+           updated_at = now()`,
+        [run.run_id, String(run.status || 'pending'), JSON.stringify(run)]
+      );
+      return run;
+    },
+
+    async loadEvaluationRun(runId) {
+      const result = await query('SELECT payload FROM evaluation_runs WHERE run_id = $1', [runId]);
+      if (result.rows[0]?.payload) return result.rows[0].payload;
+      const fallback = await fileFallback.loadEvaluationRun(runId);
+      if (fallback) await this.saveEvaluationRun(fallback);
+      return fallback;
+    },
+
+    async listEvaluationRuns(limit = null) {
+      const sql = limit
+        ? 'SELECT payload FROM evaluation_runs ORDER BY updated_at DESC, created_at DESC LIMIT $1'
+        : 'SELECT payload FROM evaluation_runs ORDER BY updated_at DESC, created_at DESC';
+      const result = await query(sql, limit ? [limit] : []);
+      if (result.rows.length === 0) return fileFallback.listEvaluationRuns(limit);
+      return result.rows.map(({ payload }) => summarizeEvaluationRun(payload)).filter(Boolean);
     },
   };
 }

@@ -17,6 +17,7 @@ const sdrHintTuningFile = path.join(dataDir, 'sdr_hint_tuning.json');
 const hintMemoryFile = path.join(dataDir, 'hint_memory.json');
 const hintRecencyFile = path.join(dataDir, 'hint_recency.json');
 const promptMemoryRunsDir = path.join(dataDir, 'prompt_memory_runs');
+const evaluationRunsDir = path.join(dataDir, 'evaluation_runs');
 const artifactsDir = path.join(dataDir, 'artifacts');
 const personasFile = path.join(dataDir, 'personas.json');
 const promptArtifactsFile = path.join(__dirname, '..', 'mellow-sales-sim-v1-artifacts.md');
@@ -31,12 +32,14 @@ const storage = await createStorage({
   sdrHintTuningFile,
   artifactsDir,
   promptMemoryRunsDir,
+  evaluationRunsDir,
 });
 await storage.init();
 if (storage.driver === 'file') {
   fs.mkdirSync(logsDir, { recursive: true });
   fs.mkdirSync(artifactsDir, { recursive: true });
   fs.mkdirSync(promptMemoryRunsDir, { recursive: true });
+  fs.mkdirSync(evaluationRunsDir, { recursive: true });
 }
 
 let sdrHintTuningCache = { mtimeMs: -1, data: { openers: {}, concerns: {}, next_steps: {} } };
@@ -985,6 +988,286 @@ function sessionPath(sessionId) {
 
 async function saveSession(session) {
   await storage.saveSession(session);
+}
+
+function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'messenger', randomizerConfig = null, language = 'en', difficultyTier = 1 } = {}) {
+  if (!personaId || !personas[personaId]) {
+    throw new Error('Unknown personaId');
+  }
+  const lang = language === 'ru' || language === 'en' ? language : 'en';
+  const tier = Math.max(1, Math.min(3, parseInt(difficultyTier, 10) || 1));
+  const normalizedRandomizerConfig = normalizeRandomizerConfig(randomizerConfig);
+  const card = pickCard(personaId, normalizedRandomizerConfig);
+  const sessionSeed = buildPersonaSeed(personaId);
+  const persona = personas[personaId];
+  const resolvedDialogueType = normalizeDialogueType(dialogueType);
+  const session = {
+    session_id: randomId('session'),
+    seller_id: sellerId,
+    seller_username: sellerId,
+    bot_id: personaId,
+    bot_name: personas[personaId].name,
+    started_at: now(),
+    finished_at: null,
+    status: 'in_progress',
+    trigger: null,
+    language: lang,
+    dialogue_type: resolvedDialogueType,
+    difficulty_tier: tier,
+    scenario_type: 'first_contact_to_discovery',
+    sde_card_id: card.card_id,
+    sde_card: card,
+    transcript: [],
+    assessment_id: null,
+    assessment: null,
+    buyer_state: buildInitialBuyerState({
+      bot_id: personaId,
+      dialogue_type: resolvedDialogueType,
+      difficulty_tier: tier,
+    }),
+    meta: {
+      bot_turns: 0,
+      flags: {},
+      claims: {},
+      trust: 1,
+      irritation: 0,
+      miss_streak: 0,
+      persona_seed: sessionSeed,
+      concern_order: buildConcernOrder(personaId, sessionSeed),
+      resolved_concerns: {},
+      prompt_style: persona.prompt_style || [],
+      prompt_objections: persona.prompt_objections || [],
+      email_prompt: persona.email_prompt || '',
+      randomizer_config: normalizedRandomizerConfig,
+      buyer_state_version: 'v1',
+    }
+  };
+  syncLegacyBehaviorState(session);
+  return session;
+}
+
+async function commitAutoMessageTurn(session) {
+  const contrastiveSnapshot = buildHintMemorySnapshot(session);
+  const explorationStrategy = pickExplorationStrategy();
+  const sellerText = await generateSellerSuggestion(session, null, contrastiveSnapshot, explorationStrategy);
+  const hintAttempt = createHintMemoryAttempt(session, sellerText, null, 'auto', contrastiveSnapshot, explorationStrategy);
+  const sellerEntry = { role: 'seller', text: sellerText, ts: now() };
+  sellerEntry.hint_memory_id = hintAttempt.record.id;
+  sellerEntry.hint_memory_context = hintAttempt.retrieval;
+  session.transcript.push(sellerEntry);
+  trackSellerTurnMetadata(session, sellerEntry, sellerText);
+  const transition = evaluateBuyerStateDelta(session, sellerText);
+  session.buyer_state = normalizeBuyerState({
+    ...transition.state_after,
+  }, session);
+  sellerEntry.buyer_state_transition = transition;
+  updateBehaviorState(session, sellerText);
+  syncLegacyBehaviorState(session);
+  const reply = await generateBotReply(session, sellerText);
+  updateSessionClaims(session, sellerText);
+  session.meta.bot_turns += 1;
+  if (reply !== null) {
+    session.transcript.push({ role: 'bot', text: reply, ts: now() });
+    sellerEntry.buyer_reply_outcome = 'replied';
+    applyBuyerAcceptanceOutcome(session, sellerEntry, reply);
+  } else {
+    session.transcript.push({ role: 'system', text: '[No reply — the prospect went silent. Try a follow-up.]', ts: now() });
+    session.meta.ghost_turns = (session.meta.ghost_turns || 0) + 1;
+    sellerEntry.buyer_reply_outcome = 'silent';
+  }
+  if (reply && !session.meta.meeting_booked && detectBuyerMeetingAcceptance(reply, session.language)) {
+    session.meta.meeting_booked = true;
+    session.meta.meeting_booked_turn = sellerMessages(session).length;
+  }
+  updateHintMemoryAttempt(session, sellerEntry, hintAttempt.record.id);
+  if (visibleDialogueMessageCount(session) >= MAX_DIALOGUE_MESSAGES) {
+    await finalizeSession(session, 'max_dialogue_messages');
+  } else {
+    await saveSession(session);
+  }
+  return { seller_text: sellerText, reply, session };
+}
+
+function evaluationSummaryTemplate() {
+  return { personas: {}, overall: { total: 0, pass: 0, pass_with_notes: 0, fail: 0, blocker: 0 } };
+}
+
+function summarizeEvaluationResults(results = []) {
+  const summary = evaluationSummaryTemplate();
+  for (const item of results) {
+    const personaId = item.persona_id || 'unknown';
+    if (!summary.personas[personaId]) {
+      summary.personas[personaId] = { total: 0, pass: 0, pass_with_notes: 0, fail: 0, blocker: 0, sessions: [] };
+    }
+    const verdict = String(item.verdict || 'FAIL').toUpperCase();
+    const bucket = summary.personas[personaId];
+    bucket.total += 1;
+    bucket.sessions.push(item.session_id);
+    summary.overall.total += 1;
+    if (verdict === 'PASS') {
+      bucket.pass += 1;
+      summary.overall.pass += 1;
+    } else if (verdict === 'PASS_WITH_NOTES') {
+      bucket.pass_with_notes += 1;
+      summary.overall.pass_with_notes += 1;
+    } else if (verdict === 'BLOCKER') {
+      bucket.blocker += 1;
+      summary.overall.blocker += 1;
+    } else {
+      bucket.fail += 1;
+      summary.overall.fail += 1;
+    }
+  }
+  return summary;
+}
+
+function normalizeEvaluationConfig(raw = {}) {
+  const personaIds = Array.isArray(raw.personaIds) && raw.personaIds.length
+    ? raw.personaIds.map(String).filter((id) => personas[id])
+    : Object.keys(personas);
+  const uniquePersonaIds = [...new Set(personaIds)];
+  if (!uniquePersonaIds.length) {
+    throw new Error('No valid personaIds provided');
+  }
+  return {
+    persona_ids: uniquePersonaIds,
+    sims_per_persona: Math.max(1, Math.min(100, parseInt(raw.simsPerPersona, 10) || 1)),
+    turns_per_simulation: Math.max(1, Math.min(12, parseInt(raw.turnsPerSimulation, 10) || 4)),
+    seller_id: String(raw.sellerId || 'eval_runner'),
+    dialogue_type: normalizeDialogueType(raw.dialogueType || 'messenger'),
+    language: raw.language === 'ru' ? 'ru' : 'en',
+    difficulty_tier: Math.max(1, Math.min(3, parseInt(raw.difficultyTier, 10) || 1)),
+    max_runtime_ms: Math.max(500, Math.min(25000, parseInt(raw.maxRuntimeMs, 10) || 8000)),
+    max_simulations_per_chunk: Math.max(1, Math.min(50, parseInt(raw.maxSimulationsPerChunk, 10) || 3)),
+    stop_on_error: raw.stopOnError === true,
+    randomizer_config: normalizeRandomizerConfig(raw.randomizerConfig),
+  };
+}
+
+function createEvaluationRun(rawConfig = {}) {
+  const config = normalizeEvaluationConfig(rawConfig);
+  return {
+    run_id: randomId('evalrun'),
+    status: 'pending',
+    created_at: now(),
+    updated_at: now(),
+    started_at: null,
+    finished_at: null,
+    last_error: null,
+    config,
+    cursor: { persona_index: 0, simulation_index: 0 },
+    progress: {
+      total_personas: config.persona_ids.length,
+      completed_personas: 0,
+      total_simulations: config.persona_ids.length * config.sims_per_persona,
+      completed_simulations: 0,
+      failed_simulations: 0,
+    },
+    results: [],
+    summary: evaluationSummaryTemplate(),
+  };
+}
+
+async function saveEvaluationRun(run) {
+  run.updated_at = now();
+  run.summary = summarizeEvaluationResults(run.results);
+  run.progress.completed_simulations = run.results.length;
+  run.progress.failed_simulations = run.results.filter((item) => item.error).length;
+  run.progress.completed_personas = run.config.persona_ids.reduce((count, personaId) => {
+    const done = run.results.filter((item) => item.persona_id === personaId).length;
+    return count + (done >= run.config.sims_per_persona ? 1 : 0);
+  }, 0);
+  await storage.saveEvaluationRun(run);
+  return run;
+}
+
+async function executeEvaluationSimulation(run, personaId, simulationOrdinal) {
+  const session = createSalesSession({
+    personaId,
+    sellerId: `${run.config.seller_id}_${run.run_id}`,
+    dialogueType: run.config.dialogue_type,
+    randomizerConfig: run.config.randomizer_config,
+    language: run.config.language,
+    difficultyTier: run.config.difficulty_tier,
+  });
+  await saveSession(session);
+  let currentSession = session;
+  while (currentSession.status === 'in_progress' && sellerMessages(currentSession).length < run.config.turns_per_simulation) {
+    const step = await commitAutoMessageTurn(currentSession);
+    currentSession = step.session;
+  }
+  if (currentSession.status !== 'finished') {
+    await finalizeSession(currentSession, 'evaluation_run');
+  }
+  return {
+    session_id: currentSession.session_id,
+    persona_id: personaId,
+    simulation_ordinal: simulationOrdinal,
+    verdict: currentSession.assessment?.verdict || 'FAIL',
+    started_at: currentSession.started_at,
+    finished_at: currentSession.finished_at,
+    seller_turns: sellerMessages(currentSession).length,
+    visible_messages: visibleDialogueMessageCount(currentSession),
+    next_step_likelihood: Number(currentSession?.buyer_state?.next_step_likelihood || 0),
+    reply_likelihood: Number(currentSession?.buyer_state?.reply_likelihood || 0),
+    disengagement_risk: Number(currentSession?.buyer_state?.disengagement_risk || 0),
+  };
+}
+
+async function advanceEvaluationRun(run, rawOverrides = {}) {
+  const maxRuntimeMs = Math.max(500, Math.min(25000, parseInt(rawOverrides.maxRuntimeMs, 10) || run.config.max_runtime_ms || 8000));
+  const maxSimulationsPerChunk = Math.max(1, Math.min(50, parseInt(rawOverrides.maxSimulationsPerChunk, 10) || run.config.max_simulations_per_chunk || 3));
+  const started = Date.now();
+  let processed = 0;
+  if (!run.started_at) run.started_at = now();
+  run.status = 'running';
+  await saveEvaluationRun(run);
+
+  while (run.cursor.persona_index < run.config.persona_ids.length) {
+    if (processed >= maxSimulationsPerChunk) break;
+    if (Date.now() - started >= maxRuntimeMs && processed > 0) break;
+    const personaId = run.config.persona_ids[run.cursor.persona_index];
+    const simulationOrdinal = run.cursor.simulation_index + 1;
+    try {
+      const result = await executeEvaluationSimulation(run, personaId, simulationOrdinal);
+      run.results.push(result);
+      run.last_error = null;
+    } catch (error) {
+      run.results.push({
+        session_id: null,
+        persona_id: personaId,
+        simulation_ordinal: simulationOrdinal,
+        verdict: 'BLOCKER',
+        error: error?.message || String(error),
+        finished_at: now(),
+      });
+      run.last_error = { persona_id: personaId, simulation_ordinal: simulationOrdinal, message: error?.message || String(error), at: now() };
+      if (run.config.stop_on_error) {
+        run.status = 'failed';
+        await saveEvaluationRun(run);
+        return run;
+      }
+    }
+
+    processed += 1;
+    run.cursor.simulation_index += 1;
+    if (run.cursor.simulation_index >= run.config.sims_per_persona) {
+      run.cursor.persona_index += 1;
+      run.cursor.simulation_index = 0;
+    }
+    await saveEvaluationRun(run);
+  }
+
+  if (run.cursor.persona_index >= run.config.persona_ids.length) {
+    run.status = run.results.some((item) => item.error) ? 'completed_with_errors' : 'completed';
+    run.finished_at = now();
+  } else if (processed === 0) {
+    run.status = 'running';
+  } else {
+    run.status = 'paused';
+  }
+  await saveEvaluationRun(run);
+  return run;
 }
 
 const POSITIVE_OUTCOME_RE = /(созвон|звонок|встреч|meeting|short call|20-minute call|15-minute|walkthrough)/i;
@@ -8786,55 +9069,14 @@ app.post('/api/sessions', async (req, res) => {
   if (!personaId || !personas[personaId]) {
     return res.status(400).json({ error: 'Unknown personaId' });
   }
-  const lang = language === 'ru' || language === 'en' ? language : 'en';
-  const tier = Math.max(1, Math.min(3, parseInt(difficultyTier, 10) || 1));
-  const randomizerConfig = normalizeRandomizerConfig(rawConfig);
-  const card = pickCard(personaId, randomizerConfig);
-  const sessionSeed = buildPersonaSeed(personaId);
-  const persona = personas[personaId];
-  const resolvedDialogueType = normalizeDialogueType(dialogueType);
-  const session = {
-    session_id: randomId('session'),
-    seller_id: sellerId,
-    seller_username: sellerId,
-    bot_id: personaId,
-    bot_name: personas[personaId].name,
-    started_at: now(),
-    finished_at: null,
-    status: 'in_progress',
-    trigger: null,
-    language: lang,
-    dialogue_type: resolvedDialogueType,
-    difficulty_tier: tier,
-    scenario_type: 'first_contact_to_discovery',
-    sde_card_id: card.card_id,
-    sde_card: card,
-    transcript: [],
-    assessment_id: null,
-    assessment: null,
-    buyer_state: buildInitialBuyerState({
-      bot_id: personaId,
-      dialogue_type: resolvedDialogueType,
-      difficulty_tier: tier,
-    }),
-    meta: {
-      bot_turns: 0,
-      flags: {},
-      claims: {},
-      trust: 1,
-      irritation: 0,
-      miss_streak: 0,
-      persona_seed: sessionSeed,
-      concern_order: buildConcernOrder(personaId, sessionSeed),
-      resolved_concerns: {},
-      prompt_style: persona.prompt_style || [],
-      prompt_objections: persona.prompt_objections || [],
-      email_prompt: persona.email_prompt || '',
-      randomizer_config: randomizerConfig,
-      buyer_state_version: 'v1',
-    }
-  };
-  syncLegacyBehaviorState(session);
+  const session = createSalesSession({
+    personaId,
+    sellerId,
+    dialogueType,
+    randomizerConfig: rawConfig,
+    language,
+    difficultyTier,
+  });
   await saveSession(session);
   res.json(session);
 });
@@ -8963,45 +9205,40 @@ app.post('/api/sessions/:id/auto-message', async (req, res) => {
     return res.status(400).json({ error: `Dialogue reached ${MAX_DIALOGUE_MESSAGES} visible messages and was auto-finished`, session });
   }
 
-  const contrastiveSnapshot = buildHintMemorySnapshot(session);
-  const explorationStrategy = pickExplorationStrategy();
-  const sellerText = await generateSellerSuggestion(session, null, contrastiveSnapshot, explorationStrategy);
-  const hintAttempt = createHintMemoryAttempt(session, sellerText, null, 'auto', contrastiveSnapshot, explorationStrategy);
-  const sellerEntry = { role: 'seller', text: sellerText, ts: now() };
-  sellerEntry.hint_memory_id = hintAttempt.record.id;
-  sellerEntry.hint_memory_context = hintAttempt.retrieval;
-  session.transcript.push(sellerEntry);
-  trackSellerTurnMetadata(session, sellerEntry, sellerText);
-  const transition = evaluateBuyerStateDelta(session, sellerText);
-  session.buyer_state = normalizeBuyerState({
-    ...transition.state_after,
-  }, session);
-  sellerEntry.buyer_state_transition = transition;
-  updateBehaviorState(session, sellerText);
-  syncLegacyBehaviorState(session);
-  const reply = await generateBotReply(session, sellerText);
-  updateSessionClaims(session, sellerText);
-  session.meta.bot_turns += 1;
-  if (reply !== null) {
-    session.transcript.push({ role: 'bot', text: reply, ts: now() });
-    sellerEntry.buyer_reply_outcome = 'replied';
-    applyBuyerAcceptanceOutcome(session, sellerEntry, reply);
-  } else {
-    session.transcript.push({ role: 'system', text: '[No reply — the prospect went silent. Try a follow-up.]', ts: now() });
-    session.meta.ghost_turns = (session.meta.ghost_turns || 0) + 1;
-    sellerEntry.buyer_reply_outcome = 'silent';
+  const result = await commitAutoMessageTurn(session);
+  res.json(result);
+});
+
+app.post('/api/evals/runs', async (req, res) => {
+  try {
+    const run = createEvaluationRun(req.body || {});
+    await saveEvaluationRun(run);
+    const processed = await advanceEvaluationRun(run, req.body || {});
+    res.status(201).json(processed);
+  } catch (error) {
+    res.status(400).json({ error: error?.message || String(error) });
   }
-  if (reply && !session.meta.meeting_booked && detectBuyerMeetingAcceptance(reply, session.language)) {
-    session.meta.meeting_booked = true;
-    session.meta.meeting_booked_turn = sellerMessages(session).length;
+});
+
+app.get('/api/evals/runs', async (req, res) => {
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
+  res.json(await storage.listEvaluationRuns(limit));
+});
+
+app.get('/api/evals/runs/:id', async (req, res) => {
+  const run = await storage.loadEvaluationRun(req.params.id);
+  if (!run) return res.status(404).json({ error: 'Evaluation run not found' });
+  res.json(run);
+});
+
+app.post('/api/evals/runs/:id/advance', async (req, res) => {
+  const run = await storage.loadEvaluationRun(req.params.id);
+  if (!run) return res.status(404).json({ error: 'Evaluation run not found' });
+  if (['completed', 'completed_with_errors', 'failed'].includes(run.status)) {
+    return res.json(run);
   }
-  updateHintMemoryAttempt(session, sellerEntry, hintAttempt.record.id);
-  if (visibleDialogueMessageCount(session) >= MAX_DIALOGUE_MESSAGES) {
-    await finalizeSession(session, 'max_dialogue_messages');
-  } else {
-    await saveSession(session);
-  }
-  res.json({ seller_text: sellerText, reply, session });
+  const processed = await advanceEvaluationRun(run, req.body || {});
+  res.json(processed);
 });
 
 // POST /api/sessions/:id/send-result — email the finished run result.
