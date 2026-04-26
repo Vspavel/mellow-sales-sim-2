@@ -1636,7 +1636,9 @@ function buyerShowsFinanceCallReadiness(session) {
     'где заканчивается ваша ответственность', 'где ваша ответственность заканчивается', 'what exactly is included', 'where does your responsibility end',
     'как именно это выглядит', 'how exactly does this work', 'что именно входит', 'что именно вы берете на себя',
     'как это ляжет на finance', 'как это выглядит для finance', 'how this fits our finance process', 'how this fits finance',
-    'давайте разберем', 'worth checking', 'имеет смысл проверить'
+    'давайте разберем', 'worth checking', 'имеет смысл проверить',
+    'если реально созвонимся', 'если это выглядит реально созвонимся', 'if this looks real we can talk', 'if this looks real let\'s talk',
+    'тогда созвонимся', 'then we can do a call', 'можем созвониться', 'we can do a call', 'созвонимся'
   ]);
 }
 
@@ -1656,16 +1658,16 @@ function canMakeAsk(session) {
   if (sellerTurnCount < 2) return false;
   if (missStreak >= 3) return false;
 
-  // Finance personas, especially the rate-floor CFO, should not jump from artifact acceptance
-  // straight into a call-close unless the buyer explicitly signals readiness to pressure-test live.
-  if (['rate_floor_cfo', 'fx_trust_shock_finance'].includes(persona.id)) {
-    if (acceptanceState === 'artifact_then_call') return trust >= 1.1;
+  // Finance personas should earn the call, but once the buyer has explicitly tied the written step
+  // to a follow-up review, the system must convert instead of looping on more material.
+  if (['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(persona.id)) {
+    if (acceptanceState === 'artifact_then_call') return trust >= 1.02;
     if (acceptanceState === 'artifact_only') {
-      return trust >= 1.18
-        && ['cost_breakdown', 'competitor_brief', 'generic_artifact', 'implementation_memo'].includes(requestedArtifactType)
+      return trust >= 1.1
+        && ['cost_breakdown', 'competitor_brief', 'generic_artifact', 'implementation_memo', 'investor_readiness_memo', 'control_cost_memo'].includes(requestedArtifactType)
         && buyerShowsFinanceCallReadiness(session);
     }
-    if (acceptanceState === 'narrow_walkthrough') return trust >= 1.15 && buyerShowsFinanceCallReadiness(session);
+    if (acceptanceState === 'narrow_walkthrough') return trust >= 1.04;
   }
 
   // Once the buyer has already accepted a bounded artifact or post-artifact call contour,
@@ -2093,8 +2095,9 @@ function getHintPolicyContext(session) {
   //   the conversion move is to lock the review slot now, not keep re-offering the same memo.
   if ((buyerAskedForMaterial || buyerAskedForImplementation || requestedArtifactType || ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) && sellerMessages(session).length >= 2 && !repairState) {
     const personaId = personaMeta(session)?.id;
-    const forceDirectAfterArtifact = personaId === 'cfo_round' && acceptanceState === 'artifact_only';
-    const forceConversionDirectAsk = acceptanceState === 'artifact_only' && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(personaId);
+    const financeConversionPersona = ['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(personaId);
+    const forceDirectAfterArtifact = financeConversionPersona && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState);
+    const forceConversionDirectAsk = ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState) && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(personaId);
     hintStage = (acceptanceState === 'artifact_only' && !forceDirectAfterArtifact && !forceConversionDirectAsk) ? 'bridge_step' : 'direct_ask';
   }
 
@@ -2283,7 +2286,7 @@ function getConstrainedHintStage(session, baseHintStage) {
   const acceptanceState = getBuyerAcceptanceState(session);
   const forceConversionPersistence = baseHintStage === 'direct_ask'
     && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)
-    && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(personaId);
+    && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition', 'rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(personaId);
 
   if (baseHintStage === 'direct_ask') {
     if (forceConversionPersistence) return 'direct_ask';
