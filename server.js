@@ -1360,7 +1360,11 @@ function buyerNeedsImplementationReview(session) {
 
 function detectRequestedArtifactType(session) {
   const lower = latestBuyerReplyText(session).toLowerCase();
+  const persona = personaMeta(session) || {};
   if (hasAny(lower, ['cost breakdown', 'total-cost', 'effective cost', 'pricing logic', 'math upfront', 'стоимост', 'цена', 'стоимость', 'effective cost', 'математ', 'экономик'])) {
+    if (['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(persona.id)) {
+      return null;
+    }
     return 'cost_breakdown';
   }
   if (hasAny(lower, ['competitor', 'compare', 'why you over cheaper', 'cheaper option', 'конкурент', 'дешевле', 'сравн', 'почему дороже'])) {
@@ -1382,11 +1386,18 @@ function getBuyerAcceptanceState(session) {
   if (session?.meta?.meeting_booked === true || sessionHasMeetingBooked(session)) return 'direct_call';
   const previousState = session?.meta?.acceptance_state || 'not_ready';
   const lower = latestBuyerReplyText(session).toLowerCase();
+  const persona = personaMeta(session) || {};
   if (!lower) return previousState;
 
   let currentState = 'not_ready';
   if (detectBuyerMeetingAcceptance(lower, session?.language || 'ru')) {
     currentState = 'direct_call';
+  } else if (
+    previousState === 'artifact_only'
+    && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(persona.id)
+    && hasAny(lower, ['cost', 'price', 'pricing', 'trial', 'pilot', 'setup', 'team time', 'implementation', 'стоим', 'цена', 'пилот', 'переход', 'время команды'])
+  ) {
+    currentState = 'narrow_walkthrough';
   } else if (/(созвон|встреч|call|meeting|walkthrough|review call)/i.test(lower) && /(потом|после|then|after|if|если)/i.test(lower)) {
     currentState = 'artifact_then_call';
   } else if (/(walkthrough|review|15 минут|15-минут|15 minute|20 minute|созвон)/i.test(lower) && !buyerRequestedWrittenFirst(session)) {
@@ -1610,6 +1621,22 @@ function getPersonaAskType(session) {
   if (buyerNeedsImplementationReview(session)) return clarity >= 58 ? 'narrow_walkthrough' : 'written_first';
   // Legal personas always want written review first — they need to assess before committing
   if (persona?.archetype === 'legal') return 'written_first';
+  if (persona?.id === 'panic_churn_ops') {
+    if (clarity < 68 || trust < 64 || nextStepLikelihood < 0.5) return 'written_first';
+    return nextStepLikelihood >= 0.62 ? 'narrow_walkthrough' : 'written_first';
+  }
+  if (persona?.id === 'grey_pain_switcher') {
+    if (clarity < 66 || trust < 62 || nextStepLikelihood < 0.48) return 'written_first';
+    return nextStepLikelihood >= 0.58 ? 'narrow_walkthrough' : 'written_first';
+  }
+  if (persona?.id === 'cm_winback') {
+    if (clarity < 64 || trust < 60 || nextStepLikelihood < 0.48) return 'written_first';
+    return nextStepLikelihood >= 0.6 ? 'narrow_walkthrough' : 'written_first';
+  }
+  if (persona?.id === 'direct_contract_transition') {
+    if (clarity < 62 || trust < 58 || nextStepLikelihood < 0.46) return 'written_first';
+    return nextStepLikelihood >= 0.58 ? 'narrow_walkthrough' : 'written_first';
+  }
   if (persona?.id === 'fx_trust_shock_finance') {
     if (clarity < 72 || trust < 62) return 'written_first';
     return nextStepLikelihood >= 0.64 ? 'narrow_walkthrough' : 'written_first';
@@ -1697,12 +1724,15 @@ function getHintPolicyContext(session) {
 
   // When the buyer explicitly asks for written material or implementation shape,
   // move out of proof mode. But keep the pressure calibrated:
-  // - artifact_only => bounded bridge step (send artifact + light upfront contract)
+  // - most personas: artifact_only => bounded bridge step (send artifact + light upfront contract)
   // - artifact_then_call / narrow_walkthrough => direct ask is now earned
+  // - ops / transition / recovery cluster: once the buyer accepts the bounded written step,
+  //   the conversion move is to lock the review slot now, not keep re-offering the same memo.
   if ((buyerAskedForMaterial || buyerAskedForImplementation || requestedArtifactType || ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) && sellerMessages(session).length >= 2 && !repairState) {
     const personaId = personaMeta(session)?.id;
     const forceDirectAfterArtifact = personaId === 'cfo_round' && acceptanceState === 'artifact_only';
-    hintStage = (acceptanceState === 'artifact_only' && !forceDirectAfterArtifact) ? 'bridge_step' : 'direct_ask';
+    const forceConversionDirectAsk = acceptanceState === 'artifact_only' && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(personaId);
+    hintStage = (acceptanceState === 'artifact_only' && !forceDirectAfterArtifact && !forceConversionDirectAsk) ? 'bridge_step' : 'direct_ask';
   }
 
   // Constrained retry paths: prevent infinite looping at bridge_step or direct_ask
@@ -1886,7 +1916,14 @@ function hasBridgeStepInRecentHistory(session, lookback = 6) {
 //   - direct_ask with no progress on first retry → narrow to bridge_step
 //   - bridge_step with no progress after 2 retries → step back to proof or diagnosis
 function getConstrainedHintStage(session, baseHintStage) {
+  const personaId = personaMeta(session)?.id;
+  const acceptanceState = getBuyerAcceptanceState(session);
+  const forceConversionPersistence = baseHintStage === 'direct_ask'
+    && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)
+    && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(personaId);
+
   if (baseHintStage === 'direct_ask') {
+    if (forceConversionPersistence) return 'direct_ask';
     const variant = getHintVariant(session, 'direct_ask');
     const retryNum = parseInt(variant.replace('retry_', ''), 10) || 0;
     if (retryNum >= 1) return 'bridge_step';
@@ -2411,12 +2448,28 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
         head_finance: [
           `For a Head of Finance, the value is not the phrase “audit-ready.” It is control economics: how much manual reconciliation and reporting noise comes out, what becomes visible up front, and where a new grey layer does not appear. Which do you want to unpack first: manual-load reduction, audit trail, or boundary?`,
         ],
+        panic_churn_ops: [
+          `For an ops team coming out of a trust break, proof is not “better compliance.” It is a recovery path people can actually rely on: who owns the incident, who informs contractors first, and what changes before panic starts. Which piece matters most to test first: owner, comms path, or escalation timing?`,
+        ],
+        grey_pain_switcher: [
+          `After a grey-provider burn, the proof is not a cleaner slogan. It is a bounded operating model: who owns documents and payout checks, how a bank or incident question is handled, and where Mellow's responsibility stops. Which part do you want to pressure-test first: boundary, incident path, or transition load?`,
+        ],
+        cm_winback: [
+          `For a win-back like this, the proof is not “we improved.” It is whether there is now a narrow slice where CM gives a safer operating model than the old setup: direct-contract visibility, cleaner docs, and less manual coordination for the non-RU/BY layer. Which point should we test first: slice fit, workflow, or owner model?`,
+        ],
+        direct_contract_transition: [
+          `For a direct-contract transition, the value is not a broad relaunch. It is a safe narrow move: which slice moves first, what workflow changes for that slice, and who owns documents, payouts, and exceptions during the switch. Which piece should we unpack first: slice choice, workflow, or transition risk?`,
+        ],
       },
       bridge_step: {
         rate_floor_cfo: { written_first: [`I can first send a short premium-logic breakdown for finance: where the higher rate pays back or does not, which cost layers are visible up front, and separately Mellow's boundary and incident path. Would that help?`] },
         fx_trust_shock_finance: { written_first: [`Low-pressure next step: I can send a short total-cost breakdown for your case showing rate, FX, payout chain, and the failure path up front. Would that help?`] },
         cfo_round: { written_first: [`I can first send a short investor-readiness breakdown for finance: where hidden diligence-prep cost still sits today, what becomes explainable up front, and separately Mellow's boundary and incident path. Would that help?`] },
         head_finance: { written_first: [`Low-pressure next step: I can send a short control-cost memo for your case showing what comes out of manual reconciliation, what audit trail becomes visible up front, and where the boundary sits without adding a grey layer. Would that help?`] },
+        panic_churn_ops: { written_first: [`Low-pressure next step: I can send a short recovery note for your case, covering who owns incidents, how contractor comms work before and during a disruption, and where Mellow's boundary sits. Would that help?`] },
+        grey_pain_switcher: { written_first: [`I can send a short incident-boundary note for your case: ownership, bank/question path, and exactly where Mellow's scope stops. Would that be the easiest way to test fit first?`] },
+        cm_winback: { written_first: [`I can send a short slice map first: which non-RU/BY or direct-contract layer looks relevant now, what changes operationally, and why this is not a return to the old CoR story. Would that help?`] },
+        direct_contract_transition: { written_first: [`I can send a short transition slice map first: who would move, what workflow changes for that slice, and where responsibility sits during the switch. Would that help?`] },
       },
       direct_ask: {
         rate_floor_cfo: {
@@ -2495,6 +2548,45 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
     const artifactOnly = acceptanceState === 'artifact_only';
     const artifactThenCall = acceptanceState === 'artifact_then_call';
     const callReady = artifactThenCall || acceptanceState === 'narrow_walkthrough';
+
+    if ((artifactOnly || artifactThenCall) && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(personaId)) {
+      if (personaId === 'panic_churn_ops') {
+        return ru
+          ? [
+              `Ок, короткий recovery note по вашему кейсу пришлю сегодня. Чтобы не оставлять это на переписке, давайте сразу зафиксируем 15 минут только на escalation path, owner model и fit. Какой слот вам удобен?`,
+            ]
+          : [
+              `Understood. I'll send the short recovery note for your case today. Rather than leave this in messages, let's lock 15 minutes just on escalation path, owner model, and fit. What slot works for you?`,
+            ];
+      }
+      if (personaId === 'grey_pain_switcher') {
+        return ru
+          ? [
+              `Ок, короткий incident-boundary note по вашему кейсу пришлю сегодня. И чтобы сразу проверить спорные места, давайте зафиксируем 15 минут только на boundary, incident path и fit. Какой слот вам удобен?`,
+            ]
+          : [
+              `Understood. I'll send the short incident-boundary note for your case today. To pressure-test the risky points right away, let's lock 15 minutes only on boundary, incident path, and fit. What slot works for you?`,
+            ];
+      }
+      if (personaId === 'cm_winback') {
+        return ru
+          ? [
+              `Ок, короткий slice map по вашему non-RU/BY contour пришлю сегодня. И чтобы не вернуться в общий CoR разговор, давайте сразу зафиксируем 15 минут только на slice fit, workflow и owner model. Когда вам удобно?`,
+            ]
+          : [
+              `Understood. I'll send the short slice map for your non-RU/BY contour today. To avoid drifting back into a broad CoR discussion, let's lock 15 minutes only on slice fit, workflow, and owner model. What time works?`,
+            ];
+      }
+      if (personaId === 'direct_contract_transition') {
+        return ru
+          ? [
+              `Ок, короткий transition slice map пришлю сегодня. И чтобы сразу проверить переход на живом кейсе, давайте зафиксируем 15 минут только на slice, workflow и boundary during switch. Какой слот вам удобен?`,
+            ]
+          : [
+              `Understood. I'll send the short transition slice map today. To test the switch on a real case right away, let's lock 15 minutes only on slice, workflow, and boundary during the switch. What slot works for you?`,
+            ];
+      }
+    }
 
     if (personaId === 'cfo_round' && (artifactOnly || artifactThenCall) && requestedArtifactType === 'generic_artifact') {
       return ru
@@ -4433,8 +4525,8 @@ function stateDrivenReplyOverride(session, sellerText) {
   const hasMechanism = hasAny(lower, hints.mechanism);
   const persona = personaMeta(session) || {};
   const antiSilenceThirdTurn = buyerState.conversation_capacity <= 0
-    && ['panic_churn_ops', 'cm_winback'].includes(persona.id)
-    && hasAny(lower, ['план', 'flow', 'incident', 'recovery', 'mapping', 'slice', 'созвон', 'call', 'pilot', 'пилот']);
+    && ['panic_churn_ops', 'cm_winback', 'grey_pain_switcher', 'direct_contract_transition'].includes(persona.id)
+    && hasAny(lower, ['план', 'flow', 'incident', 'recovery', 'mapping', 'slice', 'созвон', 'call', 'pilot', 'пилот', 'boundary', 'owner', 'transition']);
 
   if (antiSilenceThirdTurn && !session.meta._memo_requested) {
     if (persona.id === 'panic_churn_ops') {
@@ -4446,6 +4538,28 @@ function stateDrivenReplyOverride(session, sellerText) {
           ])
         : pick([
             'Send this in writing and keep it short: who informs people, what the incident path looks like, and what they know in advance. If that is clear, we can continue.',
+          ]);
+    }
+    if (persona.id === 'grey_pain_switcher') {
+      session.meta._memo_requested = true;
+      return lang === 'ru'
+        ? pick([
+            'Тогда пришлите очень коротко: кто owner при инциденте, как идёт bank/question path и где ваша граница заканчивается. Если это выглядит чисто, продолжим.',
+            'Ок. Нужна короткая incident-boundary note без лозунгов: owner, путь исключения, граница ответственности. Если это приземлённо, обсудим дальше.',
+          ])
+        : pick([
+            'Then send it very briefly: who owns the incident, how the bank/question path works, and where your scope stops. If that looks clean, we can continue.',
+          ]);
+    }
+    if (persona.id === 'direct_contract_transition') {
+      session.meta._memo_requested = true;
+      return lang === 'ru'
+        ? pick([
+            'Тогда пришлите очень короткий transition slice map: кто входит в пилот, что меняется в workflow и кто owner на исключениях. Если это узко и безопасно, обсудим дальше.',
+            'Ок. Нужен короткий mapping по узкому slice, без broad relaunch: состав, workflow, граница ответственности. Если логика чистая, продолжим.',
+          ])
+        : pick([
+            'Then send a very short transition slice map: who moves first, what changes in workflow, and who owns exceptions. If it looks narrow and safe, we can continue.',
           ]);
     }
     session.meta._memo_requested = true;
@@ -6793,6 +6907,22 @@ function generateSellerSuggestionEN(session) {
         `Elena, ClearHarbor is preparing for the annual audit and finance is getting contractor controls in order. Mellow takes on documents, KYC, and the payment chain — with an audit trail that's explainable to leadership. We don't remove your entire risk — we remove manual reconciliation and give you a structured scheme. What's the most painful point right now?`,
         `Elena, audit season always brings pressure on documentation. Mellow is a CoR with a full trail on each contractor: documents, KYC, payouts — all structured. We remove manual reconciliation and give you a scheme that's easier to explain to leadership and auditors. What's the weakest spot?`,
       ],
+      panic_churn_ops: [
+        `Olga, I can see the last bank/compliance episode created internal panic, so I won't pitch over that. The real question is whether there is now a safer recovery setup: clear incident owner, earlier contractor comms, and fewer surprises when something slips. Which part would you need to trust first: owner, comms path, or escalation timing?`,
+        `Olga, after a trust break the bar is simple: no one gets surprised, and there is a named path when a payout or bank issue hits. Mellow only makes sense here if we can show a calmer recovery model, not a prettier promise. What would you test first: incident ownership, warning flow, or visibility before escalation?`,
+      ],
+      cm_winback: [
+        `Irina, I know the old CoR story with Mellow lost trust, so this is not a comeback pitch. The only reason to reopen the conversation is if your workforce mix changed enough that a narrow CM slice is now operationally cleaner and safer. Which slice should we test first: non-RU/BY contractors, direct-contract visibility, or transition workload?`,
+        `Irina, I am not trying to drag you back into the old setup. I only want to test whether there is now a narrower CM use case that gives you more ownership clarity and less manual coordination for today's roster. Where do you feel the new fit might exist, if at all: non-RU/BY layer, direct-contract need, or pilot scope?`,
+      ],
+      grey_pain_switcher: [
+        `Anna, after a grey-provider experience, “compliance” is not proof. What matters is a clean owner model: who holds documents, who answers bank questions, who owns incident handling, and where Mellow's scope ends. Which of those would you want to pressure-test first?`,
+        `Anna, if the old problem was unsafe structure, the next check should stay mechanical: document owner, payout owner, incident trail, and boundary when something goes wrong. Which piece is the real make-or-break point for you?`,
+      ],
+      direct_contract_transition: [
+        `Ekaterina, I am not proposing a broad restart. The only useful question is whether there is now a narrow direct-contract slice where the switch would reduce coordination noise without destabilizing the rest of the roster. Which part should we test first: slice choice, transition workflow, or exception ownership?`,
+        `Ekaterina, if the roster mix changed, the safe move is usually a narrow transition, not a full relaunch. Mellow is only relevant if we can map one slice with clear ownership and low transition risk. Which part matters most first: who moves, what changes operationally, or how exceptions are handled?`,
+      ],
       internal_legal: [
         `Anna, I see SynthPort is rebuilding contractor documentation and wants to reduce grey zones between ops, finance, and intermediaries. Mellow takes a concrete zone: KYC, documents, payment chain — with an audit trail and a clear boundary on what's ours and what's the client's. No overclaiming. Does this speak to what you're working on?`,
         `Anna, you're updating contractor templates and want more traceability and fewer grey zones. Mellow gives you a structured zone: documents, KYC, payouts with a trail. We don't claim to remove legal risk entirely — we remove grey zones in the payment chain and documentation. What's the weakest point in your current setup?`,
@@ -7189,8 +7319,8 @@ function randomFactorReply(session, sellerText = '') {
   const persona = personaMeta(session) || {};
   const lower = String(sellerText || '').toLowerCase();
   const antiSilenceProtected = turn >= 2
-    && ['panic_churn_ops', 'cm_winback'].includes(persona.id)
-    && hasAny(lower, ['план', 'scheme', 'flow', 'incident', 'recovery', 'mapping', 'slice', 'call', 'созвон', 'пилот', 'pilot']);
+    && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(persona.id)
+    && hasAny(lower, ['план', 'scheme', 'flow', 'incident', 'boundary', 'recovery', 'mapping', 'slice', 'transition', 'call', 'созвон', 'пилот', 'pilot']);
   if (antiSilenceProtected) return null;
 
   const r = Math.random();
