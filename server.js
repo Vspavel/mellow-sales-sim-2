@@ -21,6 +21,7 @@ const evaluationRunsDir = path.join(dataDir, 'evaluation_runs');
 const artifactsDir = path.join(dataDir, 'artifacts');
 const personasFile = path.join(dataDir, 'personas.json');
 const promptArtifactsFile = path.join(__dirname, '..', 'mellow-sales-sim-v1-artifacts.md');
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
 
 const storage = await createStorage({
   dataDir,
@@ -983,6 +984,19 @@ async function savePersonaStore() {
 let personas = await loadPersonaStore();
 
 app.use(express.json());
+app.get('/version.json', (_req, res) => {
+  const commitSha = process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || null;
+  const shortSha = commitSha ? commitSha.slice(0, 7) : null;
+  res.json({
+    name: packageJson.name,
+    packageVersion: packageJson.version,
+    commitSha,
+    shortSha,
+    displayVersion: shortSha ? `${packageJson.version}+${shortSha}` : packageJson.version,
+    buildTimestamp: new Date().toISOString(),
+    runtime: 'express',
+  });
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 function now() {
