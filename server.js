@@ -53,6 +53,7 @@ const HINT_MEMORY_MAX_FAILURE = 2;
 const HINT_RECENCY_MAX = 8;
 const UCB_C = Number(process.env.HINT_UCB_C ?? 1.0);
 const MAX_DIALOGUE_MESSAGES = 30;
+const ANALYTICS_BASELINE_RESET_AT = Date.parse('2026-04-26T05:29:00.000Z');
 
 function visibleDialogueMessages(session) {
   return (session?.transcript || []).filter((entry) => entry.role !== 'system');
@@ -1377,9 +1378,14 @@ async function listStoredSessions() {
     .sort((a, b) => new Date(b.finished_at || b.started_at || 0) - new Date(a.finished_at || a.started_at || 0));
 }
 
+function isAfterAnalyticsBaseline(session) {
+  const ts = Date.parse(session?.finished_at || session?.started_at || 0);
+  return Number.isFinite(ts) && ts >= ANALYTICS_BASELINE_RESET_AT;
+}
+
 async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = null, outcomeFilter = null, verdictFilter = null } = {}) {
   const sessions = await listStoredSessions();
-  const finished = sessions.filter((session) => session.status === 'finished');
+  const finished = sessions.filter((session) => session.status === 'finished' && isAfterAnalyticsBaseline(session));
   const positive = finished.filter(sessionHasPositiveOutcome);
   const meetingBooked = finished.filter(sessionHasMeetingBooked);
   const hintRecords = loadHintMemoryStore().filter((record) => record.was_used);
@@ -1539,6 +1545,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
 
   return {
     generated_at: now(),
+    baseline_reset_at: new Date(ANALYTICS_BASELINE_RESET_AT).toISOString(),
     totals: {
       total_sessions: sessions.length,
       finished_sessions: finished.length,

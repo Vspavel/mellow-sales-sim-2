@@ -468,7 +468,8 @@ async function loadAnalytics(options = {}) {
   const data = await api(`api/analytics?${params}`);
   analyticsData = data;
 
-  analyticsGeneratedAt.textContent = `Updated ${new Date(data.generated_at).toLocaleString()}`;
+  const baselineNote = data.baseline_reset_at ? `, baseline ${new Date(data.baseline_reset_at).toLocaleString()}` : '';
+  analyticsGeneratedAt.textContent = `Updated ${new Date(data.generated_at).toLocaleString()}${baselineNote}`;
   analyticsSuccessRate.textContent = formatPercent(data.totals?.meeting_booked_rate);
   analyticsFinishedRuns.textContent = String(data.totals?.finished_sessions ?? 0);
   analyticsSuccessfulDialogs.textContent = String(data.totals?.meeting_booked_count ?? 0);
@@ -493,7 +494,6 @@ async function loadAnalytics(options = {}) {
       <div>${formatPercent(item.meeting_booked_rate)}</div>
       <div>${item.meeting_booked_count}</div>
       <div>${item.avg_turns}</div>
-      <div>${formatPercent(item.pass_rate)}</div>
     </div>
   `).join('');
 
@@ -505,7 +505,6 @@ async function loadAnalytics(options = {}) {
           <div>Booked %</div>
           <div>Meetings</div>
           <div>Avg turns</div>
-          <div>Pass rate</div>
         </div>
         ${personaRows}
       </div>`
