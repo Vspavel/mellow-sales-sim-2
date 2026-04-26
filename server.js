@@ -1097,6 +1097,8 @@ async function commitAutoMessageTurn(session) {
   return { seller_text: sellerText, reply, session };
 }
 
+const evaluationRunMemoryStore = new Map();
+
 function evaluationSummaryTemplate() {
   return { personas: {}, overall: { total: 0, pass: 0, pass_with_notes: 0, fail: 0, blocker: 0 } };
 }
@@ -1186,8 +1188,32 @@ async function saveEvaluationRun(run) {
     const done = run.results.filter((item) => item.persona_id === personaId).length;
     return count + (done >= run.config.sims_per_persona ? 1 : 0);
   }, 0);
-  await storage.saveEvaluationRun(run);
+  try {
+    await storage.saveEvaluationRun(run);
+  } catch (error) {
+    if (!/project size limit|could not extend file/i.test(String(error?.message || error))) throw error;
+    evaluationRunMemoryStore.set(run.run_id, clone(run));
+  }
   return run;
+}
+
+async function loadEvaluationRun(runId) {
+  const memoryRun = evaluationRunMemoryStore.get(runId);
+  if (memoryRun) return clone(memoryRun);
+  return storage.loadEvaluationRun(runId);
+}
+
+async function listEvaluationRuns(limit = 20) {
+  const persisted = await storage.listEvaluationRuns(limit).catch(() => []);
+  const memoryRuns = [...evaluationRunMemoryStore.values()].map((payload) => summarizeEvaluationRun(payload)).filter(Boolean);
+  const combined = [...memoryRuns, ...persisted]
+    .sort((a, b) => String(b.updated_at || b.created_at || '').localeCompare(String(a.updated_at || a.created_at || '')));
+  const seen = new Set();
+  return combined.filter((item) => {
+    if (!item?.run_id || seen.has(item.run_id)) return false;
+    seen.add(item.run_id);
+    return true;
+  }).slice(0, limit);
 }
 
 async function executeEvaluationSimulation(run, personaId, simulationOrdinal) {
@@ -9232,17 +9258,17 @@ app.post('/api/evals/runs', async (req, res) => {
 
 app.get('/api/evals/runs', async (req, res) => {
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
-  res.json(await storage.listEvaluationRuns(limit));
+  res.json(await listEvaluationRuns(limit));
 });
 
 app.get('/api/evals/runs/:id', async (req, res) => {
-  const run = await storage.loadEvaluationRun(req.params.id);
+  const run = await loadEvaluationRun(req.params.id);
   if (!run) return res.status(404).json({ error: 'Evaluation run not found' });
   res.json(run);
 });
 
 app.post('/api/evals/runs/:id/advance', async (req, res) => {
-  const run = await storage.loadEvaluationRun(req.params.id);
+  const run = await loadEvaluationRun(req.params.id);
   if (!run) return res.status(404).json({ error: 'Evaluation run not found' });
   if (['completed', 'completed_with_errors', 'failed'].includes(run.status)) {
     return res.json(run);
