@@ -1383,12 +1383,18 @@ function isAfterAnalyticsBaseline(session) {
   return Number.isFinite(ts) && ts >= ANALYTICS_BASELINE_RESET_AT;
 }
 
+function isHintRecordAfterAnalyticsBaseline(record) {
+  const ts = Date.parse(record?.used_at || record?.created_at || 0);
+  return Number.isFinite(ts) && ts >= ANALYTICS_BASELINE_RESET_AT;
+}
+
 async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = null, outcomeFilter = null, verdictFilter = null } = {}) {
   const sessions = await listStoredSessions();
-  const finished = sessions.filter((session) => session.status === 'finished' && isAfterAnalyticsBaseline(session));
+  const baselineSessions = sessions.filter(isAfterAnalyticsBaseline);
+  const finished = baselineSessions.filter((session) => session.status === 'finished');
   const positive = finished.filter(sessionHasPositiveOutcome);
   const meetingBooked = finished.filter(sessionHasMeetingBooked);
-  const hintRecords = loadHintMemoryStore().filter((record) => record.was_used);
+  const hintRecords = loadHintMemoryStore().filter((record) => record.was_used && isHintRecordAfterAnalyticsBaseline(record));
   const byPersona = {};
 
   const failureBreakdown = {};
@@ -1547,7 +1553,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     generated_at: now(),
     baseline_reset_at: new Date(ANALYTICS_BASELINE_RESET_AT).toISOString(),
     totals: {
-      total_sessions: sessions.length,
+      total_sessions: baselineSessions.length,
       finished_sessions: finished.length,
       successful_dialogues: positive.length,
       success_rate: finished.length ? Number((positive.length / finished.length).toFixed(3)) : 0,
