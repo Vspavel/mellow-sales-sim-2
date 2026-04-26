@@ -66,6 +66,10 @@ function dialogueMessageBudgetRemaining(session) {
   return Math.max(0, MAX_DIALOGUE_MESSAGES - visibleDialogueMessageCount(session));
 }
 
+function shouldPersistSession(session) {
+  return !(session?.meta?.skip_persistence);
+}
+
 async function finalizeSession(session, trigger = 'final_state') {
   session.status = 'finished';
   session.finished_at = now();
@@ -73,10 +77,12 @@ async function finalizeSession(session, trigger = 'final_state') {
   session.assessment = assess(session);
   session.assessment_id = session.assessment.assessment_id;
   session.dialogue_summary = buildDialogueSummary(session);
-  appendSessionHintMemory(session);
-  await saveSession(session);
-  saveArtifact(session);
-  logFinishedRun(session);
+  if (shouldPersistSession(session)) {
+    appendSessionHintMemory(session);
+    await saveSession(session);
+    saveArtifact(session);
+    logFinishedRun(session);
+  }
   return session;
 }
 
@@ -987,7 +993,9 @@ function sessionPath(sessionId) {
 }
 
 async function saveSession(session) {
+  if (!shouldPersistSession(session)) return session;
   await storage.saveSession(session);
+  return session;
 }
 
 function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'messenger', randomizerConfig = null, language = 'en', difficultyTier = 1 } = {}) {
@@ -1040,6 +1048,7 @@ function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'mes
       email_prompt: persona.email_prompt || '',
       randomizer_config: normalizedRandomizerConfig,
       buyer_state_version: 'v1',
+      skip_persistence: false,
     }
   };
   syncLegacyBehaviorState(session);
@@ -1190,6 +1199,7 @@ async function executeEvaluationSimulation(run, personaId, simulationOrdinal) {
     language: run.config.language,
     difficultyTier: run.config.difficulty_tier,
   });
+  session.meta.skip_persistence = true;
   await saveSession(session);
   let currentSession = session;
   while (currentSession.status === 'in_progress' && sellerMessages(currentSession).length < run.config.turns_per_simulation) {
