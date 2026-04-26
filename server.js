@@ -1396,6 +1396,21 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
   const meetingBooked = finished.filter(sessionHasMeetingBooked);
   const hintRecords = loadHintMemoryStore().filter((record) => record.was_used && isHintRecordAfterAnalyticsBaseline(record));
   const byPersona = {};
+  for (const [personaId, persona] of Object.entries(personas || {})) {
+    byPersona[personaId] = {
+      persona_id: personaId,
+      persona_name: persona?.name || personaId,
+      runs: 0,
+      successful_dialogues: 0,
+      success_rate: 0,
+      meeting_booked_count: 0,
+      meeting_booked_rate: 0,
+      avg_turns: 0,
+      failure_breakdown: {},
+      hint_stage_breakdown: {},
+      stage_ask_breakdown: {},
+    };
+  }
 
   const failureBreakdown = {};
 
@@ -1417,6 +1432,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       };
     }
     const bucket = byPersona[personaId];
+    if (!bucket.persona_name && session.bot_name) bucket.persona_name = session.bot_name;
     bucket.runs += 1;
     if (sessionHasPositiveOutcome(session)) bucket.successful_dialogues += 1;
     if (sessionHasMeetingBooked(session)) bucket.meeting_booked_count += 1;
@@ -1467,7 +1483,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
         repair_recovery_rate: pRepairHints.length ? Number((pRepairRecovered / pRepairHints.length).toFixed(3)) : 0,
       };
     })
-    .sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs);
+    .sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs || String(a.persona_name || a.persona_id).localeCompare(String(b.persona_name || b.persona_id)));
 
   // Sort all finished sessions newest-first for slicing
   const sortedFinished = [...finished].sort((a, b) => {
