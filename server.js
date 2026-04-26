@@ -1241,6 +1241,7 @@ async function executeEvaluationSimulation(run, personaId, simulationOrdinal) {
     persona_id: personaId,
     simulation_ordinal: simulationOrdinal,
     verdict: currentSession.assessment?.verdict || 'FAIL',
+    meeting_booked: sessionHasMeetingBooked(currentSession),
     started_at: currentSession.started_at,
     finished_at: currentSession.finished_at,
     seller_turns: sellerMessages(currentSession).length,
