@@ -1652,7 +1652,7 @@ function isFinancePersonaId(personaId = '') {
 
 function explicitWrittenRequest(text = '') {
   const lower = String(text || '').toLowerCase();
-  return hasAny(lower, ['send', 'share', 'brief', 'memo', 'one-pager', 'пришлите', 'отправьте', 'материал', 'summary', 'записку', 'схему']);
+  return hasAny(lower, ['send', 'share', 'brief', 'memo', 'one-pager', 'пришлите', 'отправьте', 'материал', 'summary', 'записку', 'схему', 'следующий шаг только такой', 'нужен один экран', 'прозрачная схема стоимости', 'cost breakdown model']);
 }
 
 function explicitReviewReference(text = '') {
@@ -1769,6 +1769,7 @@ function buyerAskedFinanceEconomicsMath(session) {
   const lower = latestBuyerReplyText(session).toLowerCase();
   return hasAny(lower, [
     'разница в economics', 'где разница', 'в чем разница', 'правильные слова не аргумент', 'покажите математику', 'покажите логику', 'почему дороже',
+    'разложите premium на язык денег', 'язык денег', 'за что конкретно я плачу', 'effective cost', 'total-cost', 'полная стоимость', 'прозрачная total-cost логика', 'до invoicing', 'до платежа', 'где buyer заранее видит', 'предсказуемая математика',
     'show me the math', 'show the logic', 'where exactly', 'what exactly is the difference'
   ]);
 }
@@ -5146,6 +5147,30 @@ function stateDrivenReplyOverride(session, sellerText) {
         ]);
   }
 
+  if (financePersona && acceptanceStage !== 'written_step_accepted' && buyerAskedFinanceEconomicsMath(session) && !session.meta._finance_math_answered) {
+    session.meta._finance_math_answered = true;
+    if (persona.id === 'fx_trust_shock_finance') {
+      return lang === 'ru'
+        ? pick([
+            'Заранее buyer видит не обещание, а короткую cost breakdown model: базовая ставка, FX по нужной валютной паре, payout route и что меняется, если банк или выплата дают сбой. То есть effective cost видна до первого платежа, а не объясняется задним числом.',
+            'Здесь математика должна быть видна до старта в одном экране: ставка, FX-слой, маршрут выплаты и failure path. Если этого нет заранее, доверие действительно не восстанавливается.',
+          ])
+        : pick([
+            'The buyer should see a real cost breakdown before launch: base rate, FX for the relevant currency pair, payout route, and what changes if a bank or payout failure occurs. Effective cost has to be visible before the first payment, not explained after it.',
+          ]);
+    }
+    if (persona.id === 'rate_floor_cfo') {
+      return lang === 'ru'
+        ? pick([
+            'Если перевести premium в язык денег, разница обычно в трёх строках: цена ручной координации внутри finance, цена платежного сбоя и цена непрозрачной полной стоимости до invoicing. Не “надёжность вообще”, а конкретная управляемость этих трёх слоёв.',
+            'Здесь premium оправдывается не словом “сервис”, а тремя экономическими слоями: меньше ручного хвоста у finance, меньше цена инцидента и заранее видимая полная стоимость до invoicing.',
+          ])
+        : pick([
+            'In money terms, the premium usually sits in three lines: finance-side manual coordination, incident cost when a payment goes wrong, and full cost visibility before invoicing. Not reliability as a slogan, but control over those three layers.',
+          ]);
+    }
+  }
+
   if (financePersona && ['economics_engaged', 'written_step_requested'].includes(acceptanceStage) && hasWrittenStep && !session.meta._memo_requested && buyerState.clarity >= 50) {
     session.meta._memo_requested = true;
     return lang === 'ru'
@@ -5155,6 +5180,27 @@ function stateDrivenReplyOverride(session, sellerText) {
         ])
       : pick([
           'Fine. Send this briefly in writing: economics, scope boundary, and failure path. If it is grounded, we can take 15 minutes for a review.',
+        ]);
+  }
+
+  if (financePersona && acceptanceStage === 'written_step_accepted') {
+    if (hasAny(lower, ['ставка', 'fx', 'маршрут', 'failure path', 'cost breakdown', 'total-cost', 'effective cost', 'scope boundary', 'incident path'])) {
+      return lang === 'ru'
+        ? pick([
+            'Ок. Если в записке это действительно видно без сюрпризов, тогда имеет смысл взять короткий 15-минутный review call только по economics и вашему кейсу.',
+            'Хорошо. Если breakdown реально показывает полную стоимость заранее и границу ответственности, можно брать короткий review call на 15 минут.',
+          ])
+        : pick([
+            'Ok. If the note really makes full cost and responsibility boundaries visible upfront, a short 15-minute review call makes sense.',
+          ]);
+    }
+    return lang === 'ru'
+      ? pick([
+          'Сейчас следующий нормальный шаг не новый objection, а короткий review этой записки. Если она конкретная, можно взять 15 минут и проверить fit на вашем кейсе.',
+          'После такой записки логичный следующий шаг, это короткий 15-минутный review call без широкого pitch. Если материал честный, этого достаточно.',
+        ])
+      : pick([
+          'At this point the natural next step is not a new objection, but a short review of that note. If it is concrete, 15 minutes should be enough.',
         ]);
   }
 
