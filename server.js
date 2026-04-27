@@ -1740,6 +1740,18 @@ function explicitReviewReference(text = '') {
   return hasAny(lower, ['review', 'walkthrough', 'созвон', 'встреч', 'call', 'meeting', '15 минут', '20 минут', '15 minute', '20 minute']);
 }
 
+function latestSellerReplyText(session) {
+  const messages = sellerMessages(session);
+  return String(messages[messages.length - 1]?.text || '').trim();
+}
+
+function sellerProposedBoundedReviewCall(session) {
+  const lower = latestSellerReplyText(session).toLowerCase();
+  return explicitReviewReference(lower)
+    && hasAny(lower, ['15 минут', '20 минут', '15 minute', '20 minute', 'только', 'only'])
+    && hasAny(lower, ['разбер', 'review', 'walkthrough', 'fit', 'boundary', 'economics', 'workflow', 'incident', 'slice', 'case']);
+}
+
 function canMakeAsk(session) {
   const persona = personaMeta(session) || {};
   const trust = session.meta?.trust || 1;
@@ -1895,6 +1907,12 @@ function getBuyerAcceptanceState(session) {
 
   let currentState = 'not_ready';
   if (detectBuyerMeetingAcceptance(lower, session?.language || 'ru')) {
+    currentState = 'direct_call';
+  } else if (
+    ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(previousState)
+    && sellerProposedBoundedReviewCall(session)
+    && hasAny(lower, ['договорились', 'хорошо', 'ок', 'ладно', 'согласен', 'согласна', 'присылайте', 'жду', 'посмотрю', 'давайте'])
+  ) {
     currentState = 'direct_call';
   } else if (
     previousState === 'artifact_only'
@@ -5311,6 +5329,17 @@ function stateDrivenReplyOverride(session, sellerText) {
         ])
       : pick([
           'Yes, that is a reasonable next step. After a note like that, we can do a short 15-minute review call focused only on the economics of your case.',
+        ]);
+  }
+
+  if (!financePersona && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(persona.id) && acceptanceStage === 'written_step_accepted' && hasCallStep) {
+    return lang === 'ru'
+      ? pick([
+          'Да, так нормально. Пришлите материал, и дальше логичный шаг, это короткий 15-минутный review только по спорным местам нашего кейса.',
+          'Ок, это разумно. Сначала материал, потом короткий 15-минутный review call только по fit, boundary и следующему шагу.',
+        ])
+      : pick([
+          'Yes, that works. Send the material first, then the natural next step is a short 15-minute review call only on fit, boundary, and the open points in our case.',
         ]);
   }
 
