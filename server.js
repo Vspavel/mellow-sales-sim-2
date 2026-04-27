@@ -1632,6 +1632,86 @@ function normalizeHintText(text = '') {
   return String(text || '').toLowerCase().replace(/[^a-z0-9\s-]+/gi, ' ').replace(/\s+/g, ' ').trim();
 }
 
+const SALES_ASSET_LIBRARY = {
+  finance: {
+    case_ru: [
+      'Похожий finance-кейс обычно ломался не на headline rate, а после первого invoice, когда всплывали FX-сюрпризы и ручная сверка. Рабочий сдвиг происходил тогда, когда buyer заранее видел полную cost logic и incident path.',
+      'В похожем кейсе buyer успокоился не после общих обещаний, а когда увидел один экран с economics, payout route и границей ответственности до первого платежа.'
+    ],
+    case_en: [
+      'In a similar finance case, the real problem was not the headline rate but post-invoice FX surprise and manual reconciliation. The shift happened once full cost logic and the incident path were visible upfront.',
+    ],
+    proof_ru: 'Короткая записка на один экран: economics, scope boundary, incident path, что buyer видит заранее.',
+    proof_en: 'A one-screen note: economics, scope boundary, incident path, and what the buyer sees upfront.',
+    calculator_ru: 'Calculator snapshot как total-cost asset: ставка, FX, admin overhead, цена сбоя или задержки, плюс сравнение с ручным контуром.',
+    calculator_en: 'A calculator snapshot as a total-cost asset: rate, FX, admin overhead, cost of delay or failure, and comparison with the manual setup.'
+  },
+  ops: {
+    case_ru: [
+      'В похожем ops-кейсе value появился не от новой платформы как таковой, а от того, что у команды исчезли chase-ups, ручные статусы и хаос на исключениях.',
+      'Похожая операционная команда согласилась идти дальше только когда увидела owner model, escalation path и что именно исчезает из ручной координации.'
+    ],
+    case_en: [
+      'In a similar ops case, the value was not a new platform as such, but fewer chase-ups, cleaner status handling, and less chaos around exceptions.',
+    ],
+    proof_ru: 'Короткая flow note: owner model, escalation path, scope boundary, что исчезает из ручной работы.',
+    proof_en: 'A short flow note: owner model, escalation path, scope boundary, and what manual work disappears.',
+    calculator_ru: 'Pilot-slice economics view: что меняется в admin overhead и сколько ручного времени возвращается команде.',
+    calculator_en: 'A pilot-slice economics view: what changes in admin overhead and how much manual time returns to the team.'
+  },
+  legal: {
+    case_ru: [
+      'В похожем legal-trigger кейсе разговор сдвинулся только после того, как граница ответственности и audit trail стали объяснимыми без серых обещаний.',
+    ],
+    case_en: [
+      'In a similar legal-trigger case, the discussion moved only once the responsibility boundary and audit trail became explainable without grey promises.',
+    ],
+    proof_ru: 'Короткий boundary memo: документы, trail, зона Mellow, что остаётся у клиента.',
+    proof_en: 'A short boundary memo: documents, trail, Mellow scope, and what remains with the client.',
+    calculator_ru: 'Calculator здесь вторичен, использовать только после того, как boundary и defensibility уже понятны.',
+    calculator_en: 'Calculator is secondary here, use it only after boundary and defensibility are already clear.'
+  }
+};
+
+function getAssetCluster(session) {
+  const persona = personaMeta(session) || {};
+  if (['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(persona.id)) return 'ops';
+  if (persona.archetype === 'legal') return 'legal';
+  return 'finance';
+}
+
+function getRelevantSalesAssets(session, lang = 'ru') {
+  const cluster = getAssetCluster(session);
+  const assets = SALES_ASSET_LIBRARY[cluster] || SALES_ASSET_LIBRARY.finance;
+  const buyerState = normalizeBuyerState(session?.buyer_state || buildInitialBuyerState(session), session);
+  const acceptanceStage = session?.meta?.acceptance_stage || getBuyerAcceptanceStage(session);
+  const sellerTurnCount = sellerMessages(session).length;
+  const latestBuyer = latestBuyerReplyText(session).toLowerCase();
+  const caseSnippet = pick(assets[lang === 'en' ? 'case_en' : 'case_ru']);
+  const writtenProof = assets[lang === 'en' ? 'proof_en' : 'proof_ru'];
+  const calculator = assets[lang === 'en' ? 'calculator_en' : 'calculator_ru'];
+  const useCaseSnippet = sellerTurnCount >= 1 && ['mechanics_engaged', 'economics_engaged', 'proof'].some((x) => acceptanceStage === x || latestBuyer.includes(x));
+  const useWrittenProof = sellerTurnCount >= 2 && ['economics_engaged', 'written_step_requested', 'written_step_accepted', 'review_call_ready'].includes(acceptanceStage);
+  const useCalculator = sellerTurnCount >= 2 && (
+    cluster !== 'legal' && (
+      acceptanceStage === 'written_step_accepted'
+      || acceptanceStage === 'review_call_ready'
+      || buyerAskedFinanceEconomicsMath(session)
+      || hasAny(latestBuyer, ['calculator', 'расч', 'экономик', 'стоимост', 'workload', 'admin overhead', 'нагрузк'])
+      || Number(buyerState.clarity || 0) >= 55
+    )
+  );
+  return {
+    cluster,
+    caseSnippet,
+    writtenProof,
+    calculator,
+    useCaseSnippet,
+    useWrittenProof,
+    useCalculator,
+  };
+}
+
 // Returns true when the seller has earned the right to propose a meeting or call.
 // Guards against premature asks that tank trust before value is established.
 function buyerShowsFinanceCallReadiness(session) {
@@ -1686,7 +1766,7 @@ function canMakeAsk(session) {
     if (acceptanceState === 'artifact_then_call') return trust >= 1.02;
     if (acceptanceState === 'artifact_only') {
       return trust >= 1.1
-        && ['cost_breakdown', 'competitor_brief', 'generic_artifact', 'implementation_memo', 'investor_readiness_memo', 'control_cost_memo'].includes(requestedArtifactType)
+        && ['cost_breakdown', 'calculator_snapshot', 'competitor_brief', 'generic_artifact', 'implementation_memo', 'investor_readiness_memo', 'control_cost_memo'].includes(requestedArtifactType)
         && buyerShowsFinanceCallReadiness(session);
     }
     if (acceptanceState === 'narrow_walkthrough') return trust >= 1.04;
@@ -1782,6 +1862,9 @@ function detectRequestedArtifactType(session) {
   const persona = personaMeta(session) || {};
   const explicitSendRequest = explicitWrittenRequest(lower);
   const explicitReviewRequest = explicitReviewReference(lower);
+  if (hasAny(lower, ['calculator', 'snapshot', 'cost model', 'hourly cost', 'admin overhead', 'workload', 'калькулятор', 'снимок расчета', 'снимок расчёта', 'нагрузк', 'расч']) && (explicitSendRequest || explicitReviewRequest)) {
+    return 'calculator_snapshot';
+  }
   if (hasAny(lower, ['cost breakdown', 'total-cost', 'effective cost', 'pricing logic', 'math upfront', 'стоимост', 'цена', 'стоимость', 'effective cost', 'математ', 'экономик']) && (explicitSendRequest || explicitReviewRequest)) {
     if (['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(persona.id)) {
       return null;
@@ -2420,6 +2503,7 @@ function validateMixedMode(hintText, hintStage) {
 function buildStageBoundSuggestion(session, lang = 'ru') {
   const persona = personaMeta(session);
   const policy = getHintPolicyContext(session);
+  const assets = getRelevantSalesAssets(session, lang);
   const concern = policy.activeConcern || 'scope';
   const askType = policy.askType;
   const winPattern = detectBuyerWinPattern(session);
@@ -2434,10 +2518,10 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
 
     if (sellerTurnCount >= 3 && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) {
       if (persona.id === 'rate_floor_cfo') {
-        return `Тогда так: я пришлю короткую записку по полной экономике и границе ответственности сегодня, а потом коротко созвонимся на 15 минут только на finance review вашего кейса. Какой слот удобен?`;
+        return `Тогда так: я пришлю короткую записку по полной экономике и границе ответственности сегодня, при необходимости добавлю calculator snapshot по полной стоимости, а потом коротко созвонимся на 15 минут только на finance review вашего кейса. Какой слот удобен?`;
       }
       if (persona.id === 'fx_trust_shock_finance') {
-        return `Тогда так: я пришлю короткий breakdown по ставке, FX, payout path и failure path, а потом коротко созвонимся на 15 минут только на economics review вашего кейса. Когда удобно?`;
+        return `Тогда так: я пришлю короткий breakdown по ставке, FX, payout path и failure path, при необходимости добавлю calculator snapshot по effective cost, а потом коротко созвонимся на 15 минут только на economics review вашего кейса. Когда удобно?`;
       }
       if (persona.id === 'cfo_round') {
         return `Тогда так: я пришлю короткую investor-readiness note по prep cost, boundary и incident path, а потом коротко созвонимся на 15 минут только на readiness review. Какой слот удобен?`;
@@ -2449,10 +2533,10 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
 
     if (sellerTurnCount >= 2 && asksEconomics) {
       if (persona.id === 'rate_floor_cfo') {
-        return `По экономике здесь обычно три строки: цена ручной координации, цена платежного сбоя и цена непрозрачной полной стоимости до invoicing. Если полезно, я сведу это в один короткий finance note по вашему кейсу.`;
+        return `По экономике здесь обычно три строки: цена ручной координации, цена платежного сбоя и цена непрозрачной полной стоимости до invoicing. ${assets.useCaseSnippet ? assets.caseSnippet + ' ' : ''}Если полезно, я сведу это в один короткий finance note по вашему кейсу.`;
       }
       if (persona.id === 'fx_trust_shock_finance') {
-        return `Если совсем по слоям, buyer должен видеть четыре вещи до старта: базовую ставку, FX-логику по нужной валютной паре, payout route и что происходит если платёж или банк даёт сбой. То есть не post-factum сюрприз, а прозрачную total-cost схему заранее. Если полезно, я сведу это в короткий breakdown по вашему кейсу.`;
+        return `Если совсем по слоям, buyer должен видеть четыре вещи до старта: базовую ставку, FX-логику по нужной валютной паре, payout route и что происходит если платёж или банк даёт сбой. ${assets.useCaseSnippet ? assets.caseSnippet + ' ' : ''}То есть не post-factum сюрприз, а прозрачную total-cost схему заранее. Если полезно, я сведу это в короткий breakdown по вашему кейсу.`;
       }
       if (persona.id === 'cfo_round') {
         return `Здесь economics of readiness обычно в трёх местах: ручная подготовка к diligence, explainability для инвестора и цена сбоя, если что-то всплывает поздно. Если полезно, я сведу это в одну короткую note.`;
@@ -5077,6 +5161,7 @@ function evaluateBuyerStateDelta(session, sellerText) {
 function stateDrivenReplyOverride(session, sellerText) {
   const buyerState = normalizeBuyerState(session?.buyer_state || buildInitialBuyerState(session), session);
   const lang = session.language === 'ru' ? 'ru' : 'en';
+  const assets = getRelevantSalesAssets(session, lang);
   const lower = sellerText.toLowerCase();
   const hints = buyerStateTextHints(lang);
   const hasNextStep = hasAny(lower, hints.nextStep);
@@ -5155,7 +5240,7 @@ function stateDrivenReplyOverride(session, sellerText) {
     if (persona.id === 'fx_trust_shock_finance') {
       return lang === 'ru'
         ? pick([
-            'Заранее buyer видит не обещание, а короткую cost breakdown model: базовая ставка, FX по нужной валютной паре, payout route и что меняется, если банк или выплата дают сбой. То есть effective cost видна до первого платежа, а не объясняется задним числом.',
+            `Заранее buyer видит не обещание, а короткую cost breakdown model: базовая ставка, FX по нужной валютной паре, payout route и что меняется, если банк или выплата дают сбой. ${assets.caseSnippet} То есть effective cost видна до первого платежа, а не объясняется задним числом.`,
             'Здесь математика должна быть видна до старта в одном экране: ставка, FX-слой, маршрут выплаты и failure path. Если этого нет заранее, доверие действительно не восстанавливается.',
           ])
         : pick([
@@ -5178,8 +5263,8 @@ function stateDrivenReplyOverride(session, sellerText) {
     session.meta._memo_requested = true;
     return lang === 'ru'
       ? pick([
-          'Хорошо. Пришлите это коротко письменно: математика, граница ответственности, incident path. Если там все приземлённо, тогда уже можно взять 15 минут на review.',
-          'Ок. Нужна короткая записка без общих слов: economics, scope boundary, failure path. Если это выглядит честно, найдём 15 минут на разбор.',
+          `Хорошо. Пришлите это коротко письменно: математика, граница ответственности, incident path. Можно в формате: ${assets.writtenProof} Если там все приземлённо, тогда уже можно взять 15 минут на review.`,
+          `Ок. Нужна короткая записка без общих слов: economics, scope boundary, failure path. При желании добавьте ${assets.calculator} Если это выглядит честно, найдём 15 минут на разбор.`,
         ])
       : pick([
           'Fine. Send this briefly in writing: economics, scope boundary, and failure path. If it is grounded, we can take 15 minutes for a review.',
@@ -5190,7 +5275,7 @@ function stateDrivenReplyOverride(session, sellerText) {
     if (hasAny(lower, ['ставка', 'fx', 'маршрут', 'failure path', 'cost breakdown', 'total-cost', 'effective cost', 'scope boundary', 'incident path'])) {
       return lang === 'ru'
         ? pick([
-            'Ок. Если в записке это действительно видно без сюрпризов, тогда имеет смысл взять короткий 15-минутный review call только по economics и вашему кейсу.',
+            `Ок. Если в записке это действительно видно без сюрпризов, а при необходимости есть ${assets.calculator}, тогда имеет смысл взять короткий 15-минутный review call только по economics и вашему кейсу.`,
             'Хорошо. Если breakdown реально показывает полную стоимость заранее и границу ответственности, можно брать короткий review call на 15 минут.',
           ])
         : pick([
@@ -8066,6 +8151,8 @@ function buildLlmSystemPrompt(session) {
   const persona = personaMeta(session);
   const systemPrompt = String(persona?.system_prompt || '').trim();
   if (!systemPrompt) return null;
+  const lang = session.language === 'en' ? 'en' : 'ru';
+  const assets = getRelevantSalesAssets(session, lang);
 
   const card = session.sde_card || {};
   const cardContext = [
@@ -8101,6 +8188,8 @@ function buildLlmSystemPrompt(session) {
   } else if (difficultyTier >= 3) {
     fullSystem += '\n\n--- DIFFICULTY TIER 3: RESISTANT ---\nYou are actively resistant from turn 1. Challenge assumptions, probe for gaps in the seller\'s logic, and disengage earlier than normal. Apply friction throughout: ask pointed questions that expose weaknesses, express skepticism by default, and do not reward any approach that lacks specificity or clear value framing.';
   }
+
+  fullSystem += `\n\n--- AVAILABLE SELLING ASSETS THE SELLER MAY USE ---\nCase snippet: ${assets.caseSnippet}\nStructured written proof asset: ${assets.writtenProof}\nCalculator asset: ${assets.calculator}\nUsage logic: case snippet works as narrow proof after a concrete concern appears; written proof works as a bounded next step; calculator is a review-stage or economics-stage asset, not an opening pitch. Do not reward asset-dumping. Reward precise use of one relevant asset at the right moment.`;
 
   return fullSystem;
 }
@@ -8159,6 +8248,7 @@ function buildFirstHintSystemPrompt(session, snapshot, strategy = 'exploit', rec
   const persona = personaMeta(session);
   const contrastive = snapshot?.contrastive || {};
   const lang = session.language === 'en' ? 'English' : 'Russian';
+  const assets = getRelevantSalesAssets(session, session.language === 'en' ? 'en' : 'ru');
 
   const lines = [
     `You are an expert B2B sales coach writing the first opening hint for an SDR at Mellow.io.`,
@@ -8209,6 +8299,12 @@ function buildFirstHintSystemPrompt(session, snapshot, strategy = 'exploit', rec
     `Company: ${company.name || 'Unknown'}${company.industry ? `, ${company.industry}` : ''}`,
     `Location: ${company.hq || 'Unknown'}`,
     `Language: ${lang} — the hint MUST be written in ${lang}`,
+    ``,
+    `## Available assets`,
+    `Case snippet: ${assets.caseSnippet}`,
+    `Structured written proof asset: ${assets.writtenProof}`,
+    `Calculator asset: ${assets.calculator}`,
+    `Use rule: opener should not dump assets. Mention an asset only if it helps anchor the signal in a concrete proof path, and never use calculator as first-touch pitch.`,
   ].filter((line) => line !== '');
 
   if (contrastive.copy_from?.length) {
@@ -8274,6 +8370,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
   const turnStage = snapshot?.context?.turn_stage || 'mid';
   const contrastive = snapshot?.contrastive || {};
   const lang = session.language === 'en' ? 'English' : 'Russian';
+  const assets = getRelevantSalesAssets(session, session.language === 'en' ? 'en' : 'ru');
 
   const resolvedCount = Object.keys(session.meta?.resolved_concerns || {}).length;
   const askReady = policy.askAllowed;
@@ -8354,6 +8451,10 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
     `Sandler instruction: ${sandlerInstruction}`,
     `Persona value priority: ${personaValueFrames}`,
     `Preferred bridge asset: ${personaSellingPolicy.bridge_label}`,
+    `Available case snippet: ${assets.caseSnippet}`,
+    `Available structured written proof asset: ${assets.writtenProof}`,
+    `Available calculator asset: ${assets.calculator}`,
+    `Asset use rule: use at most one main asset in this hint. Case snippet is for proof, written proof is for bounded next-step, calculator is mainly for economics/review stage, not for opener or generic pitch.`,
     ``,
     ...(hintVariant !== 'first_attempt' ? [
       `## ⚠️ Retry variant: ${hintVariant}`,
