@@ -1338,6 +1338,8 @@ function detectBuyerMeetingAcceptance(text, lang) {
     // "yes" or "ok" combined with call/meeting reference (word-bounded to avoid "specifically" matching "call")
     if (/\b(yes|ok|okay|sure|great|good|fine|alright|works)\b/i.test(lower) && /(15|20)[- ]minute|\bcall\b|\bmeeting\b|\bwalkthrough\b/i.test(lower)) return true;
     if (/\b(send|share)\b/i.test(lower) && /\b(brief|memo|one-pager|implementation plan|cost breakdown)\b/i.test(lower) && /\b(then|after that|right after|we can)\b/i.test(lower) && /\b(call|meeting|review)\b/i.test(lower)) return true;
+    if (/\b(find|book|hold|set)\b/i.test(lower) && /\b(slot|time)\b/i.test(lower) && /\b(call|meeting|review)\b/i.test(lower)) return true;
+    if (/\b(i'?ll|i will|can|could)\b/i.test(lower) && /\b(find|make|give)\b/i.test(lower) && /(15|20)[- ]minute|\bcall\b|\bmeeting\b|\breview\b/i.test(lower)) return true;
     return false;
   } else {
     // Explicit deferral / resistance — reject before checking positives.
@@ -1367,6 +1369,8 @@ function detectBuyerMeetingAcceptance(text, lang) {
     );
     if (standaloneAgree.test(lower) && /(созвон|встреч|звоним|call|meeting)/.test(lower)) return true;
     if (/(пришлите|отправьте)/.test(lower) && /(brief|memo|one-pager|материал|план внедрения|cost breakdown|summary)/.test(lower) && /(потом|после этого|и тогда|дальше)/.test(lower) && /(созвон|встреч|review call|call)/.test(lower)) return true;
+    if (/(найд[её]м|зафиксир|поставим|заброн|выделю|дам)/.test(lower) && /(слот|время|15 минут|20 минут)/.test(lower) && /(созвон|встреч|review|call)/.test(lower)) return true;
+    if (/(можно|готов|готова|ок|хорошо|ладно)/.test(lower) && /(коротк|15 минут|20 минут)/.test(lower) && /(созвон|встреч|review|call)/.test(lower)) return true;
 
     return false;
   }
@@ -1642,6 +1646,20 @@ function buyerShowsFinanceCallReadiness(session) {
   ]);
 }
 
+function isFinancePersonaId(personaId = '') {
+  return ['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(personaId);
+}
+
+function explicitWrittenRequest(text = '') {
+  const lower = String(text || '').toLowerCase();
+  return hasAny(lower, ['send', 'share', 'brief', 'memo', 'one-pager', 'пришлите', 'отправьте', 'материал', 'summary', 'записку', 'схему']);
+}
+
+function explicitReviewReference(text = '') {
+  const lower = String(text || '').toLowerCase();
+  return hasAny(lower, ['review', 'walkthrough', 'созвон', 'встреч', 'call', 'meeting', '15 минут', '20 минут', '15 minute', '20 minute']);
+}
+
 function canMakeAsk(session) {
   const persona = personaMeta(session) || {};
   const trust = session.meta?.trust || 1;
@@ -1653,6 +1671,9 @@ function canMakeAsk(session) {
   const nextStepLikelihood = Number(buyerState.next_step_likelihood || 0);
   const acceptanceState = getBuyerAcceptanceState(session);
   const requestedArtifactType = detectRequestedArtifactType(session);
+  const latestBuyerLower = latestBuyerReplyText(session).toLowerCase();
+  const buyerStillAsksMechanics = buyerAskedFinanceMechanicsFlow(session);
+  const buyerStillAsksEconomics = buyerAskedFinanceEconomicsMath(session);
 
   // Never ask on the first seller message or during an escalating miss streak
   if (sellerTurnCount < 2) return false;
@@ -1661,6 +1682,7 @@ function canMakeAsk(session) {
   // Finance personas should earn the call, but once the buyer has explicitly tied the written step
   // to a follow-up review, the system must convert instead of looping on more material.
   if (['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(persona.id)) {
+    if (buyerStillAsksMechanics || buyerStillAsksEconomics) return false;
     if (acceptanceState === 'artifact_then_call') return trust >= 1.02;
     if (acceptanceState === 'artifact_only') {
       return trust >= 1.1
@@ -1673,6 +1695,7 @@ function canMakeAsk(session) {
   // Once the buyer has already accepted a bounded artifact or post-artifact call contour,
   // the next move should be conversion, not more proving.
   if (['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) {
+    if (buyerStillAsksMechanics || buyerStillAsksEconomics) return false;
     return trust >= 1.05;
   }
 
@@ -1723,25 +1746,54 @@ function buyerNeedsImplementationReview(session) {
   ]);
 }
 
+function buyerNeedsConcreteFinanceProof(session) {
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  const personaId = personaMeta(session)?.id;
+  if (!['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(personaId)) return false;
+  return hasAny(lower, [
+    'что именно', 'по шагам', 'где именно', 'в чем именно', 'какая разница в economics', 'разница в economics', 'правильные слова не аргумент',
+    'разложите', 'разложи', 'покажите механику', 'покажите математику', 'покажите логику', 'что у вас входит', 'что остается на нашей стороне',
+    'manual load', 'hidden cost', 'effective cost', 'cost of delay', 'where exactly', 'what exactly', 'show me the math', 'show the logic'
+  ]);
+}
+
+function buyerAskedFinanceMechanicsFlow(session) {
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  return hasAny(lower, [
+    'по шагам', 'механик', 'что именно делает mellow', 'что именно делает', 'что остается на нашей стороне', 'что у вас входит', 'как это работает',
+    'документ', 'платежн', 'платёжн', 'payment flow', 'payout flow', 'инцидент', 'scope пока размыт', 'схема пока размыта', 'граница ответственности'
+  ]);
+}
+
+function buyerAskedFinanceEconomicsMath(session) {
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  return hasAny(lower, [
+    'разница в economics', 'где разница', 'в чем разница', 'правильные слова не аргумент', 'покажите математику', 'покажите логику', 'почему дороже',
+    'show me the math', 'show the logic', 'where exactly', 'what exactly is the difference'
+  ]);
+}
+
 function detectRequestedArtifactType(session) {
   const lower = latestBuyerReplyText(session).toLowerCase();
   const persona = personaMeta(session) || {};
-  if (hasAny(lower, ['cost breakdown', 'total-cost', 'effective cost', 'pricing logic', 'math upfront', 'стоимост', 'цена', 'стоимость', 'effective cost', 'математ', 'экономик'])) {
+  const explicitSendRequest = explicitWrittenRequest(lower);
+  const explicitReviewRequest = explicitReviewReference(lower);
+  if (hasAny(lower, ['cost breakdown', 'total-cost', 'effective cost', 'pricing logic', 'math upfront', 'стоимост', 'цена', 'стоимость', 'effective cost', 'математ', 'экономик']) && (explicitSendRequest || explicitReviewRequest)) {
     if (['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(persona.id)) {
       return null;
     }
     return 'cost_breakdown';
   }
-  if (hasAny(lower, ['competitor', 'compare', 'why you over cheaper', 'cheaper option', 'конкурент', 'дешевле', 'сравн', 'почему дороже'])) {
+  if (hasAny(lower, ['competitor', 'compare', 'why you over cheaper', 'cheaper option', 'конкурент', 'дешевле', 'сравн', 'почему дороже']) && (explicitSendRequest || explicitReviewRequest)) {
     return 'competitor_brief';
   }
-  if (hasAny(lower, ['implementation', 'integration', 'api', 'mcp', 'workflow', 'onboarding', 'pilot', 'внедрен', 'интеграц', 'api', 'mcp', 'воркфло', 'пилот'])) {
+  if (hasAny(lower, ['implementation', 'integration', 'api', 'mcp', 'workflow', 'onboarding', 'pilot', 'внедрен', 'интеграц', 'api', 'mcp', 'воркфло', 'пилот']) && (explicitSendRequest || explicitReviewRequest)) {
     return 'implementation_memo';
   }
-  if (hasAny(lower, ['slice', 'scope', 'who exactly', 'which use case', 'кого именно', 'какой срез', 'какой кейс', 'какой кусок'])) {
+  if (hasAny(lower, ['slice', 'scope', 'who exactly', 'which use case', 'кого именно', 'какой срез', 'какой кейс', 'какой кусок']) && (explicitSendRequest || explicitReviewRequest)) {
     return 'slice_map';
   }
-  if (hasAny(lower, ['send', 'share', 'brief', 'memo', 'one-pager', 'пришлите', 'отправьте', 'материал', 'brief', 'memo', 'summary'])) {
+  if (explicitSendRequest) {
     return 'generic_artifact';
   }
   return null;
@@ -1775,6 +1827,34 @@ function getBuyerAcceptanceState(session) {
     return previousState;
   }
   return currentState;
+}
+
+function getBuyerAcceptanceStage(session) {
+  if (session?.meta?.meeting_booked === true || sessionHasMeetingBooked(session)) return 'meeting_booked';
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  const acceptanceState = getBuyerAcceptanceState(session);
+  const buyerState = normalizeBuyerState(session?.buyer_state || buildInitialBuyerState(session), session);
+  const personaId = personaMeta(session)?.id || '';
+
+  if (acceptanceState === 'narrow_walkthrough' || buyerShowsFinanceCallReadiness(session)) return 'review_call_ready';
+  if (acceptanceState === 'artifact_then_call') return 'written_step_then_call';
+  if (acceptanceState === 'artifact_only') return 'written_step_accepted';
+  if (explicitWrittenRequest(lower)) return 'written_step_requested';
+  if (isFinancePersonaId(personaId) && (buyerAskedFinanceEconomicsMath(session) || Number(buyerState.clarity || 0) >= 55)) return 'economics_engaged';
+  if (buyerAskedFinanceMechanicsFlow(session) || Number(buyerState.clarity || 0) >= 40) return 'mechanics_engaged';
+  return 'not_ready';
+}
+
+function getBuyerAcceptanceStageReasons(session) {
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  const reasons = [];
+  if (buyerAskedFinanceMechanicsFlow(session)) reasons.push('buyer_asked_mechanics');
+  if (buyerAskedFinanceEconomicsMath(session)) reasons.push('buyer_asked_economics');
+  if (explicitWrittenRequest(lower)) reasons.push('buyer_requested_written_material');
+  if (explicitReviewReference(lower)) reasons.push('buyer_referenced_review_or_call');
+  if (buyerShowsFinanceCallReadiness(session)) reasons.push('buyer_signaled_call_readiness');
+  if (detectBuyerMeetingAcceptance(lower, session?.language || 'ru')) reasons.push('buyer_explicitly_accepted_meeting');
+  return reasons;
 }
 
 function getAcceptanceEventType(session) {
@@ -2065,6 +2145,8 @@ function getHintPolicyContext(session) {
   const trust = Number(buyerState.trust || 0);
   const clarity = Number(buyerState.clarity || 0);
   const resolvedCount = Object.keys(session.meta?.resolved_concerns || {}).length;
+  const buyerNeedsConcreteFinanceMechanics = buyerNeedsConcreteFinanceProof(session);
+  const buyerNeedsFinanceMath = buyerAskedFinanceEconomicsMath(session);
 
   let hintStage = 'proof';
   if (sellerMessages(session).length === 0 || progressionStage === 'opening' || progressionStage === 'diagnosis') {
@@ -2084,7 +2166,11 @@ function getHintPolicyContext(session) {
   } else if (progressionStage === 'pre_ask' && resolvedCount >= 1 && trust >= 50) {
     hintStage = 'bridge_step';
   } else {
-    hintStage = 'proof';
+    hintStage = buyerNeedsConcreteFinanceMechanics && sellerMessages(session).length >= 2 ? 'bridge_step' : 'proof';
+  }
+
+  if (buyerNeedsFinanceMath && sellerMessages(session).length >= 2 && !repairState) {
+    hintStage = 'bridge_step';
   }
 
   // When the buyer explicitly asks for written material or implementation shape,
@@ -2333,6 +2419,53 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
   const concern = policy.activeConcern || 'scope';
   const askType = policy.askType;
   const winPattern = detectBuyerWinPattern(session);
+  const sellerTurnCount = sellerMessages(session).length;
+  const latestBuyer = latestBuyerReplyText(session).toLowerCase();
+
+  const deterministicFinancePersona = ['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(persona?.id);
+  if (deterministicFinancePersona && lang !== 'en') {
+    const asksMechanics = buyerAskedFinanceMechanicsFlow(session);
+    const asksEconomics = buyerAskedFinanceEconomicsMath(session);
+    const acceptanceState = policy.acceptanceState;
+
+    if (sellerTurnCount >= 3 && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) {
+      if (persona.id === 'rate_floor_cfo') {
+        return `Тогда так: я пришлю короткую записку по полной экономике и границе ответственности сегодня, а потом возьмём 15 минут только на finance review вашего кейса. Какой слот удобен?`;
+      }
+      if (persona.id === 'fx_trust_shock_finance') {
+        return `Тогда так: я пришлю короткий breakdown по ставке, FX, payout path и failure path, а потом возьмём 15 минут только на economics review вашего кейса. Когда удобно?`;
+      }
+      if (persona.id === 'cfo_round') {
+        return `Тогда так: я пришлю короткую investor-readiness note по prep cost, boundary и incident path, а потом возьмём 15 минут только на readiness review. Какой слот удобен?`;
+      }
+      if (persona.id === 'head_finance') {
+        return `Тогда так: я пришлю короткую control-cost note по ручной сверке, audit trail и границе ответственности, а потом возьмём 15 минут только на control review. Когда удобно?`;
+      }
+    }
+
+    if (sellerTurnCount >= 2 && asksEconomics) {
+      if (persona.id === 'rate_floor_cfo') {
+        return `По экономике здесь обычно три строки: цена ручной координации, цена платежного сбоя и цена непрозрачной полной стоимости до invoicing. Если полезно, я сведу это в один короткий finance note по вашему кейсу.`;
+      }
+      if (persona.id === 'fx_trust_shock_finance') {
+        return `Если совсем по слоям, buyer должен видеть четыре вещи до старта: базовую ставку, FX-логику по нужной валютной паре, payout route и что происходит если платёж или банк даёт сбой. То есть не post-factum сюрприз, а прозрачную total-cost схему заранее. Если полезно, я сведу это в короткий breakdown по вашему кейсу.`;
+      }
+      if (persona.id === 'cfo_round') {
+        return `Здесь economics of readiness обычно в трёх местах: ручная подготовка к diligence, explainability для инвестора и цена сбоя, если что-то всплывает поздно. Если полезно, я сведу это в одну короткую note.`;
+      }
+      if (persona.id === 'head_finance') {
+        return `Здесь control economics обычно в трёх местах: ручная сверка, разбор исключений и видимость полной картины до invoicing. Если полезно, я сведу это в одну короткую note по вашему контуру.`;
+      }
+    }
+
+    if (sellerTurnCount >= 1 && asksMechanics) {
+      if (persona.id === 'fx_trust_shock_finance') {
+        return `Если совсем по шагам, Mellow берёт на себя contractor KYC и payout data, сам payment flow и статусную видимость по этой цепочке, а если выплата идёт не так, то incident path и contractor-facing support тоже у нас. На вашей стороне остаются approval, бюджет и policy decisions. То есть buyer заранее видит, где наша зона, где ваша, и где именно возникает или не возникает FX / bank-side эффект.`;
+      }
+      return `Если совсем по шагам, Mellow берёт на себя contractor KYC и payout data, сам payment flow, incident path если выплата идёт не так, и contractor-facing support / SLA на этой цепочке. На вашей стороне остаются approval, бюджет и внутренние policy decisions.`;
+    }
+  }
+
   const lines = {
     ru: {
       diagnosis: {
@@ -2739,52 +2872,52 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
     ru: {
       proof: {
         rate_floor_cfo: [
-          `Для CFO premium должен держаться на экономике, а не на слове “надёжнее”: где выше headline rate окупается через меньше hidden cost, чёткую границу ответственности и понятный incident path. Что для вас важнее проверить первым: effective cost, boundary или failure path?`,
+          `Если убрать общие слова, экономика разницы обычно в трёх местах: где не остаётся ручной разбор сбоя внутри finance, где заранее видна полная стоимость, и где не возникает новый хвост из согласований. Если хотите, разложу это коротко по вашему кейсу.`,
         ],
         fx_trust_shock_finance: [
-          `Здесь value не в обещании “всё прозрачно”, а в заранее видимой total-cost логике: rate, FX, цепочка и что происходит при сбое. Какой слой математики вам важнее увидеть первым?`,
+          `Здесь разница не в обещании “будет прозрачнее”, а в том, что заранее видны ставка, FX, маршрут выплаты и что происходит, если платёж уходит не идеально. Если полезно, разложу это коротко по вашему кейсу без общих слов.`,
         ],
         cfo_round: [
-          `Для CFO перед следующим diligence proof не в красивой структуре самой по себе, а в economics of readiness: сколько ручной investor-prep и surprise-risk остаётся без Mellow, и что становится предсказуемым заранее. Что для вас важнее проверить первым: hidden prep cost, control boundary или incident path?`,
+          `Перед diligence разница обычно не в самой структуре, а в цене готовности к проверке: сколько ручной подготовки остаётся внутри команды, где потом всплывают вопросы инвестора и что можно сделать объяснимым заранее. Если хотите, разложу это коротко по вашему кейсу.`,
         ],
         head_finance: [
-          `Для Head of Finance ценность не в слове “audit-ready”, а в экономике контроля: сколько ручной сверки и reporting-noise снимается, что становится видимым заранее, и где не рождается новый серый слой. Что вам важнее раскрыть первым: manual-load reduction, audit trail или boundary?`,
+          `Для Head of Finance разница обычно в трёх вещах: сколько ручной сверки и координации остаётся внутри команды, что видно заранее для контроля и где не появляется новый серый слой. Если полезно, разложу это коротко по вашему кейсу.`,
         ],
       },
       bridge_step: {
         rate_floor_cfo: {
-          written_first: [`Могу сначала прислать короткий premium-breakdown под finance lens: где higher rate окупается или не окупается, какие cost layers видны заранее, и отдельно где у Mellow boundary и incident path. Без общего sales-шума. Если логика выглядит приземлённо, тогда уже решим, нужен ли короткий review call. Подходит?`],
+          written_first: [`Если совсем коротко, higher rate обычно окупается не “надежностью вообще”, а там, где с finance снимается разбор сбоев, заранее видна полная математика и не растёт хвост ручной координации. Могу прислать это одной короткой запиской под ваш кейс, а потом за 15 минут проверить на созвоне, сходится ли логика. Подходит?`],
         },
         fx_trust_shock_finance: {
-          written_first: [`Следующий шаг без давления: пришлю короткий total-cost breakdown под ваш кейс, где отдельно видны rate, FX, payout chain и поведение при сбое. Если математика выглядит честно, следующим шагом возьмём короткий 15-минутный review call только по economics и fit. Ок?`],
+          written_first: [`Следующий шаг без давления: пришлю короткую записку по вашему кейсу, где отдельно разложены ставка, FX, маршрут выплаты и поведение при сбое. Если математика выглядит честно, потом возьмём 15 минут только на economics и fit. Ок?`],
         },
         cfo_round: {
-          written_first: [`Могу сначала прислать короткий investor-readiness breakdown под finance lens: где сейчас остаётся hidden prep cost перед diligence, что становится explainable заранее, и отдельно где у Mellow boundary и incident path. Если логика выглядит приземлённо, следующим шагом возьмём короткий review call только по readiness и fit. Подходит?`],
+          written_first: [`Могу сначала прислать короткую записку по investor-readiness: где у вас сейчас остаётся скрытая цена подготовки к diligence, что можно сделать объяснимым заранее и где проходит граница ответственности. Если логика выглядит приземлённо, потом возьмём 15 минут только на readiness и fit. Подходит?`],
         },
         head_finance: {
-          written_first: [`Следующий шаг без давления: пришлю короткий control-cost memo под ваш кейс, где отдельно видно что уходит из ручной сверки, какой audit trail появляется заранее и где проходит boundary без новых серых зон. Если логика выглядит честно, дальше возьмём короткий review call только по control economics и fit. Ок?`],
+          written_first: [`Следующий шаг без давления: пришлю короткую записку под ваш кейс, где видно, что уходит из ручной сверки, что становится заранее видно для контроля и где не появляется новый серый слой. Если логика выглядит честно, потом возьмём 15 минут только на control economics и fit. Ок?`],
         },
       },
       direct_ask: {
         rate_floor_cfo: {
           narrow_walkthrough: [`Раз структура уже выглядит разумно, давайте не растягивать. Предлагаю короткий 15-минутный finance review call, чтобы пройти boundary, incident path и решить, есть ли fit. Какой слот вам удобен?`],
           direct_call: [`Если логика сходится, следующий шаг простой: короткий finance review call на 15 минут, без общего pitch, только boundary, incident path и fit. Когда удобно?`],
-          written_first: [`Я пришлю короткий structure memo сегодня: зона ответственности, incident path и defendable logic для finance. Если всё выглядит приземлённо, давайте сразу поставим короткий review call. Какой слот удобен?`],
+          written_first: [`Я пришлю короткую записку сегодня: зона ответственности, платежная цепочка, SLA при сбое и полная логика стоимости. Если это выглядит приземлённо, потом возьмём короткий finance review на 15 минут. Какой слот удобен?`],
         },
         fx_trust_shock_finance: {
           narrow_walkthrough: [`Раз cost logic уже понятна, предлагаю короткий 15-минутный cost review call, чтобы быстро проверить FX, payout path и failure contour на вашем кейсе. Когда удобно?`],
           direct_call: [`Если математика выглядит честно, давайте сразу короткий cost review call на 15 минут, без широкого демо, только economics и fit. Какой слот удобен?`],
-          written_first: [`Я пришлю short total-cost breakdown сегодня: rate, FX, payout chain и что видно buyer до платежа. Если математика честная, давайте сразу поставим короткий review call. Когда удобно?`],
+          written_first: [`Я пришлю короткую записку сегодня: ставка, FX, платежная цепочка и что видно до платежа. Если математика честная, потом возьмём короткий review call на 15 минут. Когда удобно?`],
         },
         cfo_round: {
           narrow_walkthrough: [`Раз investor-readiness logic уже выглядит разумно, предлагаю короткий 15-минутный diligence review call, чтобы быстро пройти prep cost, boundary и incident path на вашем кейсе. Когда удобно?`],
           direct_call: [`Если readiness economics сходятся, давайте сразу короткий 15-минутный diligence review call, без широкого pitch, только investor-facing logic и fit. Какой слот удобен?`],
-          written_first: [`Я пришлю короткий investor-readiness memo сегодня: hidden prep cost, зона ответственности и incident path перед diligence. Если логика выглядит приземлённо, давайте сразу поставим короткий review call. Когда удобно?`],
+          written_first: [`Я пришлю короткую записку сегодня: hidden prep cost, зона ответственности, платежная цепочка и incident path перед diligence. Если логика выглядит приземлённо, потом возьмём короткий review call на 15 минут. Когда удобно?`],
         },
         head_finance: {
           narrow_walkthrough: [`Раз control logic уже выглядит приземлённо, предлагаю короткий 15-минутный finance control review call, чтобы пройти manual-load reduction, audit trail и boundary на вашем кейсе. Когда удобно?`],
           direct_call: [`Если control economics выглядят честно, давайте сразу короткий 15-минутный finance control review call, без широкого демо, только reconciliation load, audit trail и fit. Какой слот удобен?`],
-          written_first: [`Я пришлю короткий control-cost memo сегодня: что уходит из ручной сверки, где появляется audit trail и где проходит boundary. Если логика приземлённая, давайте сразу поставим короткий review call. Когда удобно?`],
+          written_first: [`Я пришлю короткую записку сегодня: что уходит из ручной сверки, где появляется audit trail, как выглядит платежная цепочка и где проходит boundary. Если логика приземлённая, потом возьмём короткий review call на 15 минут. Когда удобно?`],
         },
         cm_winback: {
           narrow_walkthrough: [`Раз slice уже понятен, следующий шаг лучше узкий: короткий 15-минутный structure-fit call только по вашему non-RU/BY contour, без возврата в старый общий CoR разговор. Когда удобно?`],
@@ -2879,6 +3012,37 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
   const personaStageBank = personaSpecificLines[lang === 'en' ? 'en' : 'ru']?.[policy.hintStage]?.[persona?.id] || null;
   const archetype = persona?.archetype || 'finance';
   const stagePatternBank = patternBank?.[policy.hintStage]?.[winPattern] || null;
+  const latestBuyerLower = latestBuyerReplyText(session).toLowerCase();
+  const financePersona = ['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(persona?.id);
+
+  if (financePersona && ['proof', 'bridge_step'].includes(policy.hintStage)) {
+    if (buyerAskedFinanceMechanicsFlow(session)) {
+      const mechanicsReply = lang === 'en'
+        ? `In simple terms, Mellow owns four concrete layers: contractor KYC and payout data handling, the payout route itself, the incident path when a payment goes wrong, and the contractor-facing support / SLA on that route. Your team keeps approval, budget, and internal policy decisions. If useful, I can send this as a one-page flow for your case.`
+        : `Если совсем по шагам, у Mellow четыре конкретных слоя: contractor KYC и payout данные, сама платёжная цепочка, incident path если выплата идёт не так, и contractor-facing support / SLA на этой цепочке. На вашей стороне остаются approval, бюджет и внутренние решения. Если полезно, могу прислать это одной страницей под ваш кейс.`;
+      return mechanicsReply;
+    }
+    if (buyerAskedFinanceEconomicsMath(session)) {
+      if (persona?.id === 'fx_trust_shock_finance') {
+        return lang === 'en'
+          ? `The economic difference is usually visible in four lines: headline rate, FX spread, payout-route reliability, and the cost of a failed or delayed payment. Cheap options often look better only in the first line. I can lay those four lines out for your case in one short note.`
+          : `Экономическая разница здесь обычно видна в четырёх строках: ставка, FX spread, надёжность payout route и цена ошибки или задержки. Дешёвый вариант часто выглядит лучше только в первой строке. Могу разложить эти четыре строки одной короткой запиской под ваш кейс.`;
+      }
+      if (persona?.id === 'head_finance') {
+        return lang === 'en'
+          ? `For finance control, the difference is usually not the headline rate alone. It is manual reconciliation load, exception handling time, visibility before invoicing, and whether a new grey layer appears. I can break that down in one short note for your setup.`
+          : `Для finance control разница обычно не только в ставке. Она в ручной сверке, времени на разбор исключений, видимости до invoicing и в том, появляется ли новый серый слой. Могу разложить это одной короткой запиской под ваш контур.`;
+      }
+      if (persona?.id === 'cfo_round') {
+        return lang === 'en'
+          ? `Ahead of diligence, the difference is usually in preparation cost: how much manual clean-up stays inside the team, how explainable the setup is to investors, and who owns failures when something slips. I can put that into a short readiness note for your case.`
+          : `Перед diligence разница обычно в цене подготовки: сколько ручной сборки остаётся внутри команды, насколько схему можно объяснить инвестору и кто держит сбой, если что-то идет не так. Могу собрать это в короткую readiness note под ваш кейс.`;
+      }
+      return lang === 'en'
+        ? `For a CFO, the difference usually sits in three lines: hidden coordination cost, who carries the cost of payment incidents under SLA, and how predictable the all-in economics are before invoicing. I can map those three lines for your case in one short note.`
+        : `Для CFO разница обычно сидит в трёх строках: скрытая цена координации, кто несёт стоимость платежного сбоя по SLA и насколько предсказуема полная экономика до invoicing. Могу разложить эти три строки одной короткой запиской под ваш кейс.`;
+    }
+  }
 
   if (personaStageBank) {
     if (policy.hintStage === 'proof') return pick(personaStageBank);
@@ -3085,16 +3249,36 @@ function applyBuyerAcceptanceOutcome(session, sellerEntry, reply) {
   if (!reply) return;
   const acceptanceState = getBuyerAcceptanceState(session);
   const acceptanceEvent = getAcceptanceEventType(session);
+  const acceptanceStage = getBuyerAcceptanceStage(session);
+  const stageReasons = getBuyerAcceptanceStageReasons(session);
   sellerEntry.acceptance_state_after = acceptanceState;
   sellerEntry.acceptance_event = acceptanceEvent;
+  sellerEntry.acceptance_stage_after = acceptanceStage;
+  sellerEntry.acceptance_stage_reasons = stageReasons;
   session.meta.acceptance_state = acceptanceState;
+  session.meta.acceptance_stage = acceptanceStage;
   if (!session.meta.acceptance_events) session.meta.acceptance_events = [];
+  if (!session.meta.acceptance_stage_history) session.meta.acceptance_stage_history = [];
   if (acceptanceEvent) {
     session.meta.acceptance_events.push({
       turn: sellerMessages(session).length,
       event: acceptanceEvent,
       acceptance_state: acceptanceState,
+      acceptance_stage: acceptanceStage,
+      reasons: stageReasons,
       ask_intent: sellerEntry.ask_intent || null,
+    });
+  }
+  const lastStage = session.meta.acceptance_stage_history.length
+    ? session.meta.acceptance_stage_history[session.meta.acceptance_stage_history.length - 1].stage
+    : null;
+  if (acceptanceStage && acceptanceStage !== lastStage) {
+    session.meta.acceptance_stage_history.push({
+      turn: sellerMessages(session).length,
+      stage: acceptanceStage,
+      reasons: stageReasons,
+      seller_text: sellerEntry.text,
+      buyer_text: reply,
     });
   }
 }
@@ -3124,12 +3308,14 @@ function classifyMeetingFailureReason(session) {
 function buildDialogueSummary(session) {
   const rawAskEvents = session.meta?.ask_events || [];
   const acceptanceEvents = session.meta?.acceptance_events || [];
+  const acceptanceStageHistory = session.meta?.acceptance_stage_history || [];
   const meetingBooked = sessionHasMeetingBooked(session);
   const failureReason = classifyMeetingFailureReason(session);
   const resolvedConcerns = Object.keys(session.meta?.resolved_concerns || {});
   const ghostTurns = session.meta?.ghost_turns || 0;
   const trust = Number((session.meta?.trust || 1).toFixed(2));
   const acceptanceState = session.meta?.acceptance_state || getBuyerAcceptanceState(session);
+  const acceptanceStage = session.meta?.acceptance_stage || getBuyerAcceptanceStage(session);
 
   // Derive ordered stages reached and hint_stage_breakdown from transcript
   const stagesSeen = new Set();
@@ -3169,6 +3355,8 @@ function buildDialogueSummary(session) {
     ask_events: askEvents,
     acceptance_events: acceptanceEvents,
     acceptance_state: acceptanceState,
+    acceptance_stage: acceptanceStage,
+    acceptance_stage_history: acceptanceStageHistory,
     hint_stage_breakdown: hintStageBreakdown,
     failure_reason: failureReason,
     meeting_booked: meetingBooked,
@@ -4890,6 +5078,10 @@ function stateDrivenReplyOverride(session, sellerText) {
   const hasNextStep = hasAny(lower, hints.nextStep);
   const hasMechanism = hasAny(lower, hints.mechanism);
   const persona = personaMeta(session) || {};
+  const acceptanceStage = session?.meta?.acceptance_stage || getBuyerAcceptanceStage(session);
+  const financePersona = isFinancePersonaId(persona.id);
+  const hasWrittenStep = explicitWrittenRequest(lower) || hasAny(lower, ['memo', 'brief', 'one-pager', 'summary', 'breakdown', 'записк', 'материал', 'схем', 'пришлю', 'отправлю']);
+  const hasCallStep = explicitReviewReference(lower);
   const antiSilenceThirdTurn = buyerState.conversation_capacity <= 0
     && ['panic_churn_ops', 'cm_winback', 'grey_pain_switcher', 'direct_contract_transition'].includes(persona.id)
     && hasAny(lower, ['план', 'flow', 'incident', 'recovery', 'mapping', 'slice', 'созвон', 'call', 'pilot', 'пилот', 'boundary', 'owner', 'transition']);
@@ -4941,6 +5133,40 @@ function stateDrivenReplyOverride(session, sellerText) {
 
   if ((buyerState.conversation_capacity <= 0 || buyerState.disengagement_risk >= 0.9) && !session.meta._memo_requested) {
     return null;
+  }
+
+  if (financePersona && acceptanceStage === 'mechanics_engaged' && hasMechanism && buyerState.clarity >= 42 && buyerState.interest >= 18) {
+    return lang === 'ru'
+      ? pick([
+          'Это уже понятнее. Теперь разложите economics до конца: где ставка, где FX, где цена ручной координации и что buyer видит заранее.',
+          'Ок, механизм уже понятнее. Теперь нужен language of money: где именно premium, где риск сбоя, где скрытая ручная цена.',
+        ])
+      : pick([
+          'This is clearer now. Next I need the economics all the way through: rate, FX, manual coordination cost, and what the buyer sees in advance.',
+        ]);
+  }
+
+  if (financePersona && ['economics_engaged', 'written_step_requested'].includes(acceptanceStage) && hasWrittenStep && !session.meta._memo_requested && buyerState.clarity >= 50) {
+    session.meta._memo_requested = true;
+    return lang === 'ru'
+      ? pick([
+          'Хорошо. Пришлите это коротко письменно: математика, граница ответственности, incident path. Если там все приземлённо, тогда уже можно взять 15 минут на review.',
+          'Ок. Нужна короткая записка без общих слов: economics, scope boundary, failure path. Если это выглядит честно, найдём 15 минут на разбор.',
+        ])
+      : pick([
+          'Fine. Send this briefly in writing: economics, scope boundary, and failure path. If it is grounded, we can take 15 minutes for a review.',
+        ]);
+  }
+
+  if (financePersona && session.meta._memo_requested && hasCallStep && buyerState.next_step_likelihood >= 0.45 && buyerState.trust >= 40) {
+    return lang === 'ru'
+      ? pick([
+          'Да, если записка будет конкретной, можно взять короткий 15-минутный review call по кейсу.',
+          'Ок, после нормальной записки давайте коротко созвонимся на 15 минут и проверим это на нашем кейсе.',
+        ])
+      : pick([
+          'Yes, if the note is concrete, we can do a short 15-minute review call on the case.',
+        ]);
   }
 
   if (buyerState.conversation_capacity <= 1 && buyerState.disengagement_risk >= 0.75 && !hasNextStep && !hasMechanism && !session.meta._memo_requested) {
@@ -5190,12 +5416,21 @@ function buildConcernOrder(personaId, seed = null) {
   const promptDriven = deriveConcernOrderFromPrompt(persona.system_prompt, []);
 
   if (archetype === 'finance') {
+    if (personaId === 'rate_floor_cfo' || personaId === 'fx_trust_shock_finance') {
+      return deriveConcernOrderFromPrompt(persona.system_prompt, ['cost', 'scope', 'sla']);
+    }
+    if (personaId === 'cfo_round') {
+      return deriveConcernOrderFromPrompt(persona.system_prompt, ['scope', 'cost', 'sla', 'geo_tax']);
+    }
+    if (personaId === 'head_finance') {
+      return deriveConcernOrderFromPrompt(persona.system_prompt, ['scope', 'cost', 'sla']);
+    }
     const r = Math.random();
     let middle;
-    if (r < 0.35)      middle = ['scope', 'why_change', 'sla'];
+    if (r < 0.35) middle = ['scope', 'why_change', 'sla'];
     else if (r < 0.60) middle = ['why_change', 'scope', 'sla'];
     else if (r < 0.80) middle = ['scope', 'sla', 'why_change'];
-    else               middle = ['sla', 'scope', 'why_change'];
+    else middle = ['sla', 'scope', 'why_change'];
     const order = [...middle];
     if (['andrey', 'cfo_round'].includes(personaId)) order.push('geo_tax');
     return deriveConcernOrderFromPrompt(persona.system_prompt, order);
@@ -5384,6 +5619,13 @@ function respondFinance(session, sellerText) {
       'Ок, идём не через лозунги. Где у вас разница в economics: риск инцидента, cost of delay, hidden ops load или что именно?',
     ]);
   }
+  if (turn === 2 && persona.id === 'rate_floor_cfo' && sellerAdvancesConcern('cost', lower)) {
+    return pick([
+      'Хорошо. Теперь второе, без чего это не продать внутри: что именно у вас в зоне Mellow, а что остаётся на нас? Платёжная цепочка, KYC, разбор сбоя?',
+      'Ок, экономику вы очертили. Теперь нужна clean boundary: что именно вы берёте на себя в payment flow, а что остаётся на finance команде?',
+      'Нормально. Следующий вопрос тогда про механику: где ваша зона в цепочке, а где остаётся наша ответственность?',
+    ]);
+  }
   if (turn === 1 && persona.id === 'fx_trust_shock_finance') {
     return pick([
       'Это уже ближе. Теперь разложите математику до конца: какой слой rate, какой слой FX, какой слой банковой цепочки, и где buyer видит это заранее?',
@@ -5396,6 +5638,13 @@ function respondFinance(session, sellerText) {
       'Хорошо. Пришлите короткую cost breakdown model: что видно до старта, где возможен FX effect, и как buyer заранее видит effective cost. Если там правда нет surprise, тогда можно идти дальше.',
       'Ок. Мне нужен один экран с честной total-cost логикой до первого платежа. Если это прозрачно, обсуждение можно продолжать.',
       'Тогда следующий шаг только такой: прозрачная схема стоимости до invoicing. Если она убирает surprise, у разговора есть шанс.',
+    ]);
+  }
+  if (turn === 3 && persona.id === 'fx_trust_shock_finance' && sellerAdvancesConcern('cost', lower)) {
+    return pick([
+      'Ок. Если пришлёте это в одном коротком breakdown без сюрпризов по FX и payment chain, дальше можно взять 15 минут только на economics и fit.',
+      'Хорошо. Если это реально один короткий breakdown по ставке, FX и payout route, я готова перейти к короткому review call.',
+      'Нормально. Дайте это в коротком виде, а потом можно 15 минут только на economics, без общего демо.',
     ]);
   }
   const seed = session.meta.persona_seed || 'analytical';
@@ -5429,6 +5678,21 @@ function respondFinance(session, sellerText) {
         'Мне важно понять failure mode до того, как двигаться дальше. Что происходит при инциденте?',
       ]);
     }
+  }
+
+  if (turn === 2 && persona.id === 'head_finance' && sellerAdvancesConcern('scope', lower)) {
+    return pick([
+      'Хорошо, зона стала понятнее. Теперь мне нужна экономическая часть: что именно уходит из ручной сверки и координации, а что остаётся внутри finance?',
+      'Ок, граница стала чище. Следующий вопрос про control economics: что реально снимается с команды в ручном режиме?',
+      'Нормально. Тогда добиваем картину: где здесь экономия ручного finance burden, а не просто более аккуратная схема?',
+    ]);
+  }
+  if (turn === 2 && persona.id === 'cfo_round' && sellerAdvancesConcern('scope', lower)) {
+    return pick([
+      'Хорошо. Теперь следующий слой: где именно здесь economics of readiness, то есть что уходит из ручной подготовки к diligence и внутренней координации?',
+      'Ок, по зоне стало понятнее. Теперь разложите investor-readiness на язык стоимости и подготовки, а не структуры.',
+      'Нормально. Следующий вопрос тогда не про scope, а про prep cost перед diligence: что именно становится дешевле и объяснимее?',
+    ]);
   }
 
   if (isMisclassificationBlocker(sellerText)) {
@@ -7763,6 +8027,8 @@ function buildLlmSystemPrompt(session) {
   const buyerState = normalizeBuyerState(session.buyer_state || buildInitialBuyerState(session), session);
   const activeConcern = getActiveConcern(session);
   fullSystem += `\n\n--- CURRENT BUYER STATE ---\nPatience: ${buyerState.patience}/100\nInterest: ${buyerState.interest}/100\nPerceived value: ${buyerState.perceived_value}/100\nConversation capacity: ${buyerState.conversation_capacity} remaining seller turns\nTrust: ${buyerState.trust}/100\nClarity: ${buyerState.clarity}/100\nReply likelihood: ${buyerState.reply_likelihood}\nDisengagement risk: ${buyerState.disengagement_risk}\n${activeConcern ? `Current concern: ${activeConcern}\n` : ''}Behavior rule: if trust is low, respond colder and more skeptical; if clarity is low but interest exists, ask for clarification; if conversation capacity is near zero, reply briefly or disengage.`;
+  fullSystem += `\nProgression rule: do not generate endless fresh objections just to keep the dialogue alive. If the seller has answered the current concern with concrete mechanism or economics, advance naturally to the next narrow step that fits the persona and context, for example asking for a short written note, accepting a bounded review call, or explicitly agreeing to a short meeting.`;
+  fullSystem += `\nObjection rule: objections must arise from the persona's actual role, current concern, and what is still missing in this dialogue. Do not jump to a random new objection if the previous one was addressed well enough.`;
 
   const difficultyTier = session?.difficulty_tier || 1;
   if (difficultyTier === 2) {
@@ -7853,9 +8119,13 @@ function buildFirstHintSystemPrompt(session, snapshot, strategy = 'exploit', rec
     `You are not a generic SDR. You are a mature product expert who understands Mellow deeply and therefore explains it simply, precisely, and convincingly.`,
     `Your authority comes from clarity, not jargon. If a term is not necessary, do not use it.`,
     `You genuinely care about the buyer's problem. Do not treat the buyer like an objection machine. Track both the factual issue and the emotional pressure around it.`,
+    `The seller must sound sincerely interested in helping the buyer, not just converting them. The buyer should feel the seller wants to reduce confusion, risk, and unnecessary work even before any meeting is booked.`,
     `Write like a thoughtful human expert: attentive, calm, specific, commercially sharp, but never plastic, needy, or over-eager.`,
     `Do not sound like AI-generated copy. Avoid symmetrical phrasing, stacked buzzwords, empty transitions, and over-produced wording.`,
     `The buyer should feel: this person understands the product, understands my situation, and is trying to help me think clearly.`,
+    `If there is a tradeoff, tension, or limitation, acknowledge it honestly instead of forcing optimism. Genuine help beats smooth persuasion.`,
+    `Mellow values must be visible in the hint: reliability (things work under pressure), streamlining (less manual chaos, cleaner flow), and ownership (we do not shrug when something breaks).`,
+    `Trust is often earned through a concrete micro-story, not a slogan. When useful, ground the point in a tiny operational vignette: what the buyer sees before payment, who owns the issue if something slips, or what manual burden disappears.`,
     ``,
     `## Selected signal`,
     `Signal type: ${card.signal_type || 'unknown'}`,
@@ -7949,6 +8219,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
   const hintSchema = computeHintSchema(session, policy);
   const personaSellingPolicy = getPersonaSellingPolicy(session);
   const personaValueFrames = getPersonaValueFrameSummary(session);
+  const latestBuyerReply = latestBuyerReplyText(session);
 
   const askTypeDescriptions = {
     written_first: 'written artifact first (1-pager, memo, or brief), then invite a short call',
@@ -7996,6 +8267,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
     `Progression stage: ${progressionStage} (opening → diagnosis → proof → trust_repair → pre_ask → closing)`,
     `Required hint mode for this turn: ${policy.hintStage}`,
     `Active concern: ${concern || 'none — concerns addressed'}`,
+    `Most recent buyer reply: ${latestBuyerReply || 'n/a'}`,
     `Resolved concerns: ${resolvedCount}`,
     `Buyer state:`,
     `  Trust: ${buyerState.trust}/100`,
@@ -8011,6 +8283,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
     `Missing condition: ${hintSchema.missing_condition}`,
     `Recommended action: ${hintSchema.recommended_action}`,
     `Forbidden action: ${hintSchema.forbidden_action}`,
+    `Exact concern discipline: answer the buyer's most recent question directly before doing anything else. If the buyer asked about mechanics / scope / payment flow / documents / incidents, answer those specifics directly. If the buyer asked about economics / premium / FX / total cost, answer that math directly. Do NOT switch to a neighboring concern just because it is relevant.`,
     `SPIN lane for this turn: ${spinLane}`,
     `SPIN instruction: ${spinInstruction}`,
     `Sandler instruction: ${sandlerInstruction}`,
@@ -8038,7 +8311,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
         : policy.hintStage === 'bridge_step'
           ? `🪜 BRIDGE-STEP MODE: Use SPIN Need-payoff. Use Sandler upfront contract. Do NOT jump to a broad call ask unless it matches the required ask type. Offer exactly one bounded next step that earns the later meeting: ${askTypeDescriptions[askType] || askTypeDescriptions.written_first}. State purpose, scope, and expected outcome clearly.`
           : policy.hintStage === 'proof'
-            ? `🧾 PROOF MODE: Use SPIN Implication. Use Sandler pain-first discipline. Do NOT ask for a meeting this turn. Resolve the active concern by sharpening consequence, mechanism, or downside, then ask one focused follow-up question if needed.`
+            ? `🧾 PROOF MODE: Use SPIN Implication. Use Sandler pain-first discipline. Do NOT ask for a meeting this turn. Resolve the active concern by sharpening consequence, mechanism, or downside, then ask one focused follow-up question if needed. If the latest buyer reply asks for a specific mechanism or cost explanation, the first sentence must answer that exact request directly. Prefer one concrete operational example over abstract assurance.`
             : `🔎 DIAGNOSIS MODE: Use SPIN ${spinLane === 'situation' ? 'Situation' : 'Problem'}. Use Sandler pain-first qualification. Do NOT pitch broadly and do NOT ask for a meeting. Ask one focused question that surfaces the next missing condition for progression.`,
   ];
 
@@ -8122,7 +8395,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
     `Use a human ToV: concise, grounded, commercially sharp, expert but easy to understand, and genuinely attentive to the buyer's pressure, with natural rhythm rather than generated symmetry.`,
     `Writing test: if the line sounds like polished AI sales copy, rewrite it mentally before answering. Prefer clear human phrasing over clever phrasing.`,
     `Voice test: the seller should sound like a deeply informed expert who genuinely cares and can explain difficult product reality simply, precisely, and with emotional attentiveness.`,
-    `Hard rules: do not mix diagnosis + proof + ask in one hint. Do not include more than one question mark. Do not include a meeting ask unless the required hint mode is direct_ask or the allowed bridge-step form explicitly includes it. If you propose a next step, frame it as a Sandler-style upfront contract with clear purpose, scope, and expected outcome. In Russian, keep the wording fully Russian unless a fixed term is unavoidable.`,
+    `Hard rules: do not mix diagnosis + proof + ask in one hint. Do not include more than one question mark. Do not include a meeting ask unless the required hint mode is direct_ask or the allowed bridge-step form explicitly includes it. If you propose a next step, frame it as a Sandler-style upfront contract with clear purpose, scope, and expected outcome. In Russian, keep the wording fully Russian unless a fixed term is unavoidable. Never use vague trust language like "we are reliable" without a mechanism, owner, or concrete flow example. The seller must come across as sincerely trying to help, not as pushing toward a meeting for its own sake.`,
   );
 
   return lines.join('\n');
