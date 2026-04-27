@@ -9698,7 +9698,15 @@ app.post('/api/sessions/:id/finish', async (req, res) => {
 app.get('/api/sessions/:id/seller-suggest', async (req, res) => {
   const session = ensureBuyerStateSessionFields(await loadSession(req.params.id));
   if (!session) return res.status(404).json({ error: 'Session not found' });
-  if (session.status !== 'in_progress') return res.status(400).json({ error: 'Session already finished' });
+  if (session.status !== 'in_progress') {
+    return res.json({
+      suggestion: null,
+      auto_finished: true,
+      terminal_reason: session.dialogue_summary?.failure_reason || 'session_already_finished',
+      error: 'Session already finished',
+      session,
+    });
+  }
   if (dialogueMessageBudgetRemaining(session) < 2) {
     await finalizeSession(session, 'max_dialogue_messages');
     return res.json({
@@ -9727,7 +9735,16 @@ app.get('/api/sessions/:id/seller-suggest', async (req, res) => {
 app.post('/api/sessions/:id/auto-message', async (req, res) => {
   const session = ensureBuyerStateSessionFields(await loadSession(req.params.id));
   if (!session) return res.status(404).json({ error: 'Session not found' });
-  if (session.status !== 'in_progress') return res.status(400).json({ error: 'Session already finished' });
+  if (session.status !== 'in_progress') {
+    return res.json({
+      seller_text: null,
+      reply: null,
+      auto_finished: true,
+      terminal_reason: session.dialogue_summary?.failure_reason || 'session_already_finished',
+      error: 'Session already finished',
+      session,
+    });
+  }
   if (dialogueMessageBudgetRemaining(session) < 2) {
     await finalizeSession(session, 'max_dialogue_messages');
     return res.json({
