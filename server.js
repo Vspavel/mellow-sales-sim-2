@@ -784,6 +784,8 @@ function normalizePersona(persona, fallbackId) {
     : [normalizeCard({}, id, 0)];
   const requiredFields = normalizeRequiredFields(persona?.required_fields || persona?.requiredFields);
   const archetype = String(persona?.archetype || builtin?.archetype || 'custom').trim() || 'custom';
+  const canonicalPersonaId = getCanonicalPersonaId(id);
+  const mergedInto = persona?.merged_into || builtin?.merged_into || (canonicalPersonaId !== id ? canonicalPersonaId : null);
   return {
     id,
     name: String(persona?.name || promptDraft.name || builtin?.name || id).trim() || id,
@@ -798,8 +800,8 @@ function normalizePersona(persona, fallbackId) {
     prompt_objections: promptDraft.objections,
     required_fields: requiredFields.length ? requiredFields : defaultRequiredFieldsTemplate(),
     cards: signals,
-    merged_into: persona?.merged_into || builtin?.merged_into || null,
-    deprecated: Boolean(persona?.deprecated || builtin?.deprecated || persona?.merged_into || builtin?.merged_into)
+    merged_into: mergedInto,
+    deprecated: Boolean(persona?.deprecated || builtin?.deprecated || mergedInto)
   };
 }
 
