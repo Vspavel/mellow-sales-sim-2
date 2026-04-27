@@ -9701,7 +9701,13 @@ app.get('/api/sessions/:id/seller-suggest', async (req, res) => {
   if (session.status !== 'in_progress') return res.status(400).json({ error: 'Session already finished' });
   if (dialogueMessageBudgetRemaining(session) < 2) {
     await finalizeSession(session, 'max_dialogue_messages');
-    return res.status(400).json({ error: `Dialogue reached ${MAX_DIALOGUE_MESSAGES} visible messages and was auto-finished`, session });
+    return res.json({
+      suggestion: null,
+      auto_finished: true,
+      terminal_reason: 'max_dialogue_messages',
+      error: `Dialogue reached ${MAX_DIALOGUE_MESSAGES} visible messages and was auto-finished`,
+      session,
+    });
   }
 
   const lang = req.query.lang === 'en' || req.query.lang === 'ru' ? req.query.lang : null;
@@ -9724,7 +9730,14 @@ app.post('/api/sessions/:id/auto-message', async (req, res) => {
   if (session.status !== 'in_progress') return res.status(400).json({ error: 'Session already finished' });
   if (dialogueMessageBudgetRemaining(session) < 2) {
     await finalizeSession(session, 'max_dialogue_messages');
-    return res.status(400).json({ error: `Dialogue reached ${MAX_DIALOGUE_MESSAGES} visible messages and was auto-finished`, session });
+    return res.json({
+      seller_text: null,
+      reply: null,
+      auto_finished: true,
+      terminal_reason: 'max_dialogue_messages',
+      error: `Dialogue reached ${MAX_DIALOGUE_MESSAGES} visible messages and was auto-finished`,
+      session,
+    });
   }
 
   const result = await commitAutoMessageTurn(session);
