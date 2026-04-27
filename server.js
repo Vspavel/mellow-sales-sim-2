@@ -1720,8 +1720,11 @@ function detectMeetingAskText(text = '') {
     /(^|[\s,;:!?()«»"'\-])созвон(?:иться|имся)?(?=$|[\s,;:!?()«»"'\-])/i,
     /(^|[\s,;:!?()«»"'\-])встреч[а-я]*(?=$|[\s,;:!?()«»"'\-])/i,
     /\b(?:15|20)\s*минут\b/i,
+    /(возьм[её]м|найд[её]м|зафиксируем|поставим)\s+(?:коротк[а-я]*\s+)?(?:созвон|встреч|review)/i,
+    /(когда\s+удобно|какой\s+слот|какой\s+слот\s+удобен|what\s+time\s+works|what\s+slot\s+works)/i,
   ];
-  return patterns.some((pattern) => pattern.test(lower));
+  return patterns.some((pattern) => pattern.test(lower))
+    || (/(?:15|20)\s*минут|(?:15|20)\s*[- ]?minute/i.test(lower) && /(когда\s+удобно|какой\s+слот|what\s+time\s+works|what\s+slot\s+works)/i.test(lower));
 }
 
 function latestBuyerReplyText(session) {
@@ -2431,16 +2434,16 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
 
     if (sellerTurnCount >= 3 && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) {
       if (persona.id === 'rate_floor_cfo') {
-        return `Тогда так: я пришлю короткую записку по полной экономике и границе ответственности сегодня, а потом возьмём 15 минут только на finance review вашего кейса. Какой слот удобен?`;
+        return `Тогда так: я пришлю короткую записку по полной экономике и границе ответственности сегодня, а потом коротко созвонимся на 15 минут только на finance review вашего кейса. Какой слот удобен?`;
       }
       if (persona.id === 'fx_trust_shock_finance') {
-        return `Тогда так: я пришлю короткий breakdown по ставке, FX, payout path и failure path, а потом возьмём 15 минут только на economics review вашего кейса. Когда удобно?`;
+        return `Тогда так: я пришлю короткий breakdown по ставке, FX, payout path и failure path, а потом коротко созвонимся на 15 минут только на economics review вашего кейса. Когда удобно?`;
       }
       if (persona.id === 'cfo_round') {
-        return `Тогда так: я пришлю короткую investor-readiness note по prep cost, boundary и incident path, а потом возьмём 15 минут только на readiness review. Какой слот удобен?`;
+        return `Тогда так: я пришлю короткую investor-readiness note по prep cost, boundary и incident path, а потом коротко созвонимся на 15 минут только на readiness review. Какой слот удобен?`;
       }
       if (persona.id === 'head_finance') {
-        return `Тогда так: я пришлю короткую control-cost note по ручной сверке, audit trail и границе ответственности, а потом возьмём 15 минут только на control review. Когда удобно?`;
+        return `Тогда так: я пришлю короткую control-cost note по ручной сверке, audit trail и границе ответственности, а потом коротко созвонимся на 15 минут только на control review. Когда удобно?`;
       }
     }
 
