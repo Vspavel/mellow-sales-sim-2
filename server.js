@@ -783,12 +783,14 @@ function normalizePersona(persona, fallbackId) {
     ? builtin.cards.map((card, index) => normalizeCard(card, id, index))
     : [normalizeCard({}, id, 0)];
   const requiredFields = normalizeRequiredFields(persona?.required_fields || persona?.requiredFields);
+  const archetype = String(persona?.archetype || builtin?.archetype || 'custom').trim() || 'custom';
   return {
     id,
     name: String(persona?.name || promptDraft.name || builtin?.name || id).trim() || id,
     role: String(persona?.role || promptDraft.role || builtin?.role || 'Persona').trim() || 'Persona',
     intro: String(persona?.intro || promptDraft.intro || builtin?.intro || '').trim() || 'New persona for sales training.',
-    archetype: String(persona?.archetype || builtin?.archetype || 'custom').trim() || 'custom',
+    archetype,
+    doctrine_family: String(persona?.doctrine_family || builtin?.doctrine_family || getDoctrineFamilyForPersonaId(id, archetype)).trim(),
     tone: String(persona?.tone || builtin?.tone || 'balanced').trim() || 'balanced',
     system_prompt: systemPrompt,
     email_prompt: String(persona?.email_prompt || builtin?.email_prompt || '').trim(),
@@ -801,6 +803,24 @@ function normalizePersona(persona, fallbackId) {
 
 function normalizeDialogueType(value) {
   return String(value || '').trim().toLowerCase() === 'email' ? 'email' : 'messenger';
+}
+
+function getDoctrineFamilyForPersonaId(personaId = '', archetype = '') {
+  if (['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(personaId) || archetype === 'finance') return 'finance';
+  if (['panic_churn_ops', 'grey_pain_switcher'].includes(personaId)) return 'ops_recovery';
+  if (['cm_winback', 'direct_contract_transition'].includes(personaId)) return 'transition_winback';
+  if (archetype === 'legal') return 'legal';
+  return 'custom';
+}
+
+function getDoctrineFamilyLabel(family = '') {
+  return {
+    finance: 'Finance',
+    ops_recovery: 'Ops / recovery',
+    transition_winback: 'Transition / winback',
+    legal: 'Legal',
+    custom: 'Custom',
+  }[family] || 'Custom';
 }
 
 function detectMessageLanguage(text, fallback = 'en') {
@@ -1063,6 +1083,8 @@ function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'mes
       email_prompt: persona.email_prompt || '',
       randomizer_config: normalizedRandomizerConfig,
       buyer_state_version: 'v1',
+      language_locked: false,
+      initial_seller_language: null,
       skip_persistence: false,
     }
   };
@@ -1415,10 +1437,15 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
   const meetingBooked = finished.filter(sessionHasMeetingBooked);
   const hintRecords = loadHintMemoryStore().filter((record) => record.was_used && isHintRecordAfterAnalyticsBaseline(record));
   const byPersona = {};
+  const byDoctrine = {};
+  const funnelStages = ['mechanics_engaged', 'economics_engaged', 'written_step_requested', 'written_step_accepted', 'written_step_then_call', 'review_call_ready', 'meeting_booked'];
   for (const [personaId, persona] of Object.entries(personas || {})) {
+    const doctrineFamily = getDoctrineFamilyForPersonaId(personaId, persona?.archetype || '');
     byPersona[personaId] = {
       persona_id: personaId,
       persona_name: persona?.name || personaId,
+      doctrine_family: doctrineFamily,
+      doctrine_family_label: getDoctrineFamilyLabel(doctrineFamily),
       runs: 0,
       successful_dialogues: 0,
       success_rate: 0,
@@ -1436,9 +1463,12 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
   for (const session of finished) {
     const personaId = session.bot_id || 'unknown';
     if (!byPersona[personaId]) {
+      const doctrineFamily = getDoctrineFamilyForPersonaId(personaId, session?.bot_archetype || '');
       byPersona[personaId] = {
         persona_id: personaId,
         persona_name: session.bot_name || personaId,
+        doctrine_family: doctrineFamily,
+        doctrine_family_label: getDoctrineFamilyLabel(doctrineFamily),
         runs: 0,
         successful_dialogues: 0,
         success_rate: 0,
@@ -1451,15 +1481,40 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       };
     }
     const bucket = byPersona[personaId];
+    const doctrineFamily = bucket.doctrine_family || getDoctrineFamilyForPersonaId(personaId, session?.bot_archetype || '');
+    if (!byDoctrine[doctrineFamily]) {
+      byDoctrine[doctrineFamily] = {
+        doctrine_family: doctrineFamily,
+        doctrine_family_label: getDoctrineFamilyLabel(doctrineFamily),
+        runs: 0,
+        meeting_booked_count: 0,
+        avg_turns: 0,
+        personas: new Set(),
+        funnel_counts: Object.fromEntries(funnelStages.map((stage) => [stage, 0])),
+      };
+    }
+    const doctrineBucket = byDoctrine[doctrineFamily];
     if (!bucket.persona_name && session.bot_name) bucket.persona_name = session.bot_name;
     bucket.runs += 1;
+    doctrineBucket.runs += 1;
+    doctrineBucket.personas.add(personaId);
     if (sessionHasPositiveOutcome(session)) bucket.successful_dialogues += 1;
-    if (sessionHasMeetingBooked(session)) bucket.meeting_booked_count += 1;
+    if (sessionHasMeetingBooked(session)) {
+      bucket.meeting_booked_count += 1;
+      doctrineBucket.meeting_booked_count += 1;
+    }
     const sellerTurns = sellerMessages(session).length;
     bucket.avg_turns += sellerTurns;
+    doctrineBucket.avg_turns += sellerTurns;
     const failReason = session.dialogue_summary?.failure_reason || classifyMeetingFailureReason(session);
     bucket.failure_breakdown[failReason] = (bucket.failure_breakdown[failReason] || 0) + 1;
     failureBreakdown[failReason] = (failureBreakdown[failReason] || 0) + 1;
+    const summary = session.dialogue_summary || buildDialogueSummary(session);
+    const reached = new Set(summary.acceptance_stage_history?.map((item) => item.stage).filter(Boolean) || []);
+    if (summary.acceptance_stage) reached.add(summary.acceptance_stage);
+    for (const stage of funnelStages) {
+      if (reached.has(stage)) doctrineBucket.funnel_counts[stage] += 1;
+    }
     // Hint stage distribution from transcript turns
     for (const entry of session.transcript || []) {
       if (entry.role === 'seller' && entry.hint_stage) {
@@ -1504,6 +1559,33 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     })
     .sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs || String(a.persona_name || a.persona_id).localeCompare(String(b.persona_name || b.persona_id)));
 
+  const doctrineStats = Object.values(byDoctrine)
+    .map((bucket) => {
+      const funnel = funnelStages.map((stage, index) => {
+        const entered = bucket.funnel_counts[stage] || 0;
+        const nextStage = funnelStages[index + 1] || null;
+        const nextCount = nextStage ? (bucket.funnel_counts[nextStage] || 0) : null;
+        return {
+          stage,
+          entered,
+          next_stage: nextStage,
+          next_count: nextCount,
+          conversion_to_next: nextStage && entered ? Number((nextCount / entered).toFixed(3)) : null,
+        };
+      });
+      return {
+        doctrine_family: bucket.doctrine_family,
+        doctrine_family_label: bucket.doctrine_family_label,
+        persona_count: bucket.personas.size,
+        runs: bucket.runs,
+        meeting_booked_count: bucket.meeting_booked_count,
+        meeting_booked_rate: bucket.runs ? Number((bucket.meeting_booked_count / bucket.runs).toFixed(3)) : 0,
+        avg_turns: bucket.runs ? Number((bucket.avg_turns / bucket.runs).toFixed(2)) : 0,
+        funnel,
+      };
+    })
+    .sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs || String(a.doctrine_family_label).localeCompare(String(b.doctrine_family_label)));
+
   // Sort all finished sessions newest-first for slicing
   const sortedFinished = [...finished].sort((a, b) => {
     const ta = a.finished_at ? new Date(a.finished_at).getTime() : 0;
@@ -1535,6 +1617,10 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       session_id: session.session_id,
       persona_id: session.bot_id,
       persona_name: session.bot_name,
+      doctrine_family: summary.doctrine_family,
+      doctrine_family_label: summary.doctrine_family_label,
+      language: summary.language,
+      language_locked: summary.language_locked,
       finished_at: session.finished_at,
       dialogue_type: session.dialogue_type || 'messenger',
       signal_type: session.sde_card?.signal_type || null,
@@ -1601,6 +1687,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       repair_recovery_rate: repairHints.length ? Number((repairRecovered / repairHints.length).toFixed(3)) : 0,
       direct_ask_hint_rate: hintRecords.length ? Number((directAskHints.length / hintRecords.length).toFixed(3)) : 0,
     },
+    doctrine_stats: doctrineStats,
     persona_stats: personaStats,
     recent_finished: recentFinished,
     recent_finished_total: recentFinishedTotal,
@@ -1659,6 +1746,19 @@ const SALES_ASSET_LIBRARY = {
     calculator_ru: 'Pilot-slice economics view: что меняется в admin overhead и сколько ручного времени возвращается команде.',
     calculator_en: 'A pilot-slice economics view: what changes in admin overhead and how much manual time returns to the team.'
   },
+  transition: {
+    case_ru: [
+      'В похожем transition-кейсе разговор сдвигался не от общего возврата к CoR, а когда buyer видел узкий безопасный срез: кого переводим, что меняется в процессе и где остаётся контроль.',
+      'В winback-кейсе следующий шаг появлялся только после того, как было ясно: это не большой replatforming, а ограниченный slice с понятной зоной ответственности и низким риском перехода.'
+    ],
+    case_en: [
+      'In a similar transition case, the discussion moved only once the buyer saw a narrow safe slice: who moves, what changes operationally, and where control stays.',
+    ],
+    proof_ru: 'Короткая transition note: какой slice подходит, что меняется в процессе, где граница ответственности и почему переход безопасен.',
+    proof_en: 'A short transition note: which slice fits, what changes operationally, where the responsibility boundary sits, and why the move is safe.',
+    calculator_ru: 'Calculator здесь вторичен, использовать после того, как slice-fit и transition safety уже понятны.',
+    calculator_en: 'Calculator is secondary here, use it only after slice fit and transition safety are already clear.'
+  },
   legal: {
     case_ru: [
       'В похожем legal-trigger кейсе разговор сдвинулся только после того, как граница ответственности и audit trail стали объяснимыми без серых обещаний.',
@@ -1675,7 +1775,8 @@ const SALES_ASSET_LIBRARY = {
 
 function getAssetCluster(session) {
   const persona = personaMeta(session) || {};
-  if (['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(persona.id)) return 'ops';
+  if (['panic_churn_ops', 'grey_pain_switcher'].includes(persona.id)) return 'ops';
+  if (['cm_winback', 'direct_contract_transition'].includes(persona.id)) return 'transition';
   if (persona.archetype === 'legal') return 'legal';
   return 'finance';
 }
@@ -1726,13 +1827,57 @@ function buyerShowsFinanceCallReadiness(session) {
   ]);
 }
 
+function buyerShowsPostArtifactReviewReadiness(session) {
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  const acceptanceState = getBuyerAcceptanceState(session);
+  const personaId = personaMeta(session)?.id || '';
+  if (!['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) return false;
+
+  if (hasAny(lower, [
+    'давайте разберем', 'давайте разберём', 'имеет смысл проверить', 'worth checking',
+    'похоже рабоче', 'выглядит рабоче', 'выглядит разумно', 'looks workable', 'looks grounded',
+    'если материал нормальный', 'если записка нормальная', 'если это приземленно', 'если это приземлённо',
+    'если это выглядит честно', 'if the note looks good', 'if this looks grounded',
+    'после этого можно созвон', 'после этого можно созвониться', 'then we can do a call',
+    'тогда можно созвон', 'можно коротко созвон', 'коротко созвон', 'short review works'
+  ])) return true;
+
+  if (sellerProposedBoundedReviewCall(session) && hasAny(lower, [
+    'хорошо', 'ок', 'ладно', 'согласен', 'согласна', 'договорились', 'давайте',
+    'присылайте', 'жду', 'посмотрю', 'works', 'fine', 'sounds good'
+  ])) return true;
+
+  if (isFinancePersonaId(personaId)) return buyerShowsFinanceCallReadiness(session);
+  return false;
+}
+
 function isFinancePersonaId(personaId = '') {
   return ['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(personaId);
 }
 
 function explicitWrittenRequest(text = '') {
   const lower = String(text || '').toLowerCase();
-  return hasAny(lower, ['send', 'share', 'brief', 'memo', 'one-pager', 'пришлите', 'отправьте', 'материал', 'summary', 'записку', 'схему', 'следующий шаг только такой', 'нужен один экран', 'прозрачная схема стоимости', 'cost breakdown model']);
+  return hasAny(lower, ['send', 'share', 'brief', 'memo', 'one-pager', 'пришлите', 'отправьте', 'материал', 'summary', 'записку', 'схему', 'следующий шаг только такой', 'нужен один экран', 'в одном экране', 'одним экраном', 'прозрачная схема стоимости', 'cost breakdown model', 'language of money', 'язык денег', 'занести цифры']);
+}
+
+function impliedStructuredArtifactRequest(session) {
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  const personaId = personaMeta(session)?.id || '';
+  if (isFinancePersonaId(personaId)) {
+    return hasAny(lower, [
+      'в одном экране', 'одним экраном', 'language of money', 'язык денег',
+      'занести цифры', 'разложите economics до конца', 'разложите по деньгам',
+      'где ставка, где fx', 'где premium', 'где риск сбоя', 'где скрытая ручная цена',
+      'где buyer видит заранее', 'видна до старта', 'прозрачная total-cost логика'
+    ]);
+  }
+  if (['grey_pain_switcher', 'cm_winback'].includes(personaId)) {
+    return hasAny(lower, [
+      'занести цифры', 'по деньгам как', 'сколько', 'trial или сразу контракт',
+      'без общих слов', 'конкретно'
+    ]);
+  }
+  return false;
 }
 
 function explicitReviewReference(text = '') {
@@ -1828,8 +1973,9 @@ function buyerRequestedWrittenFirst(session) {
   const lower = latestBuyerReplyText(session).toLowerCase();
   return hasAny(lower, [
     'send this in writing', 'send a brief', 'send a short summary', 'send a memo', 'send the flow', 'send it in writing',
-    'пришлите', 'отправьте', 'в письменном виде', 'сначала материал', 'сначала документ', 'пришли brief', 'пришли summary'
-  ]);
+    'пришлите', 'отправьте', 'в письменном виде', 'сначала материал', 'сначала документ', 'пришли brief', 'пришли summary',
+    'в одном экране', 'одним экраном', 'language of money', 'язык денег', 'занести цифры'
+  ]) || impliedStructuredArtifactRequest(session);
 }
 
 function buyerNeedsImplementationReview(session) {
@@ -1872,7 +2018,7 @@ function buyerAskedFinanceEconomicsMath(session) {
 function detectRequestedArtifactType(session) {
   const lower = latestBuyerReplyText(session).toLowerCase();
   const persona = personaMeta(session) || {};
-  const explicitSendRequest = explicitWrittenRequest(lower);
+  const explicitSendRequest = explicitWrittenRequest(lower) || impliedStructuredArtifactRequest(session);
   const explicitReviewRequest = explicitReviewReference(lower);
   if (hasAny(lower, ['calculator', 'snapshot', 'cost model', 'hourly cost', 'admin overhead', 'workload', 'калькулятор', 'снимок расчета', 'снимок расчёта', 'нагрузк', 'расч']) && (explicitSendRequest || explicitReviewRequest)) {
     return 'calculator_snapshot';
@@ -1986,6 +2132,8 @@ function getAcceptanceEventType(session) {
 function getPersonaAcceptanceBias(session) {
   const persona = personaMeta(session) || {};
   if (persona.archetype === 'finance') return 'cost_breakdown_first';
+  if (['panic_churn_ops', 'grey_pain_switcher'].includes(persona.id)) return 'workflow_review_first';
+  if (['cm_winback', 'direct_contract_transition'].includes(persona.id)) return 'transition_review_first';
   if (persona.archetype === 'ops') return 'workflow_review_first';
   if (persona.archetype === 'legal') return 'artifact_before_call';
   if (['panic_churn_ops', 'fx_trust_shock_finance', 'cm_winback'].includes(persona.id)) return 'trust_repair_before_direct_call';
@@ -3457,6 +3605,10 @@ function buildDialogueSummary(session) {
 
   return {
     seller_turns: sellerMessages(session).length,
+    doctrine_family: getDoctrineFamilyForPersonaId(session?.bot_id || '', personaMeta(session)?.archetype || ''),
+    doctrine_family_label: getDoctrineFamilyLabel(getDoctrineFamilyForPersonaId(session?.bot_id || '', personaMeta(session)?.archetype || '')),
+    language: session?.language || 'ru',
+    language_locked: Boolean(session?.meta?.language_locked),
     stages_reached: stagesReached,
     ask_events: askEvents,
     acceptance_events: acceptanceEvents,
@@ -5290,23 +5442,23 @@ function stateDrivenReplyOverride(session, sellerText) {
   }
 
   if (financePersona && acceptanceStage === 'written_step_accepted') {
-    if (hasAny(lower, ['ставка', 'fx', 'маршрут', 'failure path', 'cost breakdown', 'total-cost', 'effective cost', 'scope boundary', 'incident path'])) {
+    if (buyerShowsPostArtifactReviewReadiness(session)) {
       return lang === 'ru'
         ? pick([
-            `Ок. Если в записке это действительно видно без сюрпризов, а при необходимости есть ${assets.calculator}, тогда имеет смысл взять короткий 15-минутный review call только по economics и вашему кейсу.`,
-            'Хорошо. Если breakdown реально показывает полную стоимость заранее и границу ответственности, можно брать короткий review call на 15 минут.',
+            'Хорошо, тогда следующий шаг уже понятен: короткий 15-минутный review call только по economics вашего кейса, без широкого pitch. Какой слот удобен?',
+            'Ок, раз материал выглядит рабочим, давайте коротко созвонимся на 15 минут только по economics и fit на вашем кейсе. Когда удобно?',
           ])
         : pick([
-            'Ok. If the note really makes full cost and responsibility boundaries visible upfront, a short 15-minute review call makes sense.',
+            'Good, then the next step is clear: a short 15-minute review call only on the economics of your case. What time works?',
           ]);
     }
     return lang === 'ru'
       ? pick([
-          'Сейчас следующий нормальный шаг не новый objection, а короткий review этой записки. Если она конкретная, можно взять 15 минут и проверить fit на вашем кейсе.',
-          'После такой записки логичный следующий шаг, это короткий 15-минутный review call без широкого pitch. Если материал честный, этого достаточно.',
+          'Если записка выглядит приземлённо, следующим шагом логично взять короткий 15-минутный review только по economics вашего кейса, без широкого pitch. Если такой формат ок, я предложу слот.',
+          'После такой записки обычно не нужен новый длинный обмен сообщениями, а нужен короткий review по кейсу. Если формат ок, следующим сообщением зафиксирую 15 минут только на economics и fit.',
         ])
       : pick([
-          'At this point the natural next step is not a new objection, but a short review of that note. If it is concrete, 15 minutes should be enough.',
+          'If the note looks grounded, the natural next step is a short 15-minute review on the economics of your case. If that format works, I can suggest a slot next.',
         ]);
   }
 
@@ -5340,6 +5492,27 @@ function stateDrivenReplyOverride(session, sellerText) {
         ])
       : pick([
           'Yes, that works. Send the material first, then the natural next step is a short 15-minute review call only on fit, boundary, and the open points in our case.',
+        ]);
+  }
+
+  if (!financePersona && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(persona.id) && acceptanceStage === 'written_step_accepted') {
+    if (buyerShowsPostArtifactReviewReadiness(session)) {
+      return lang === 'ru'
+        ? pick([
+            'Ок, тогда следующий шаг уже узкий и понятный: короткий 15-минутный review call только по fit, boundary и спорным местам кейса. Какой слот удобен?',
+            'Хорошо, раз материал подходит, давайте коротко созвонимся на 15 минут только по fit, boundary и следующему шагу. Когда удобно?',
+          ])
+        : pick([
+            'Good, then the next step is a short 15-minute review call only on fit, boundary, and the open points in the case. What time works?',
+          ]);
+    }
+    return lang === 'ru'
+      ? pick([
+          'Если материал выглядит рабочим, следующим шагом логично взять короткий 15-минутный review только по спорным местам кейса, без широкого pitch. Если формат ок, я предложу слот следующим сообщением.',
+          'После такой записки не нужен новый длинный круг переписки. Нужен короткий review по fit и boundary. Если такой формат ок, следующим сообщением зафиксирую 15 минут.',
+        ])
+      : pick([
+          'If the material looks workable, the natural next step is a short 15-minute review only on the open points in the case. If that format works, I can suggest a slot next.',
         ]);
   }
 
@@ -8123,6 +8296,7 @@ function randomFactorReply(session, sellerText = '') {
   const persona = personaMeta(session) || {};
   const lower = String(sellerText || '').toLowerCase();
   const acceptanceStage = session?.meta?.acceptance_stage || getBuyerAcceptanceStage(session);
+  const acceptanceState = session?.meta?.acceptance_state || getBuyerAcceptanceState(session);
   const antiSilenceProtected = turn >= 2
     && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(persona.id)
     && hasAny(lower, ['план', 'scheme', 'flow', 'incident', 'boundary', 'recovery', 'mapping', 'slice', 'transition', 'call', 'созвон', 'пилот', 'pilot']);
@@ -8130,7 +8304,10 @@ function randomFactorReply(session, sellerText = '') {
     && isFinancePersonaId(persona.id)
     && ['written_step_accepted', 'written_step_then_call', 'review_call_ready', 'meeting_booked'].includes(acceptanceStage)
     && hasAny(lower, ['созвон', 'call', 'review', '15 минут', '15 minute', 'какой слот', 'когда удобно', 'when convenient', 'what slot works']);
-  if (antiSilenceProtected || financeAntiGhostProtected) return null;
+  const postArtifactAskProtected = turn >= 2
+    && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)
+    && sellerProposedBoundedReviewCall(session);
+  if (antiSilenceProtected || financeAntiGhostProtected || postArtifactAskProtected) return null;
 
   const r = Math.random();
   const ghostP = Number(config.ghost_probability ?? 0);
@@ -9537,7 +9714,11 @@ function assess(session) {
 // ==================== API ROUTES ====================
 
 app.get('/api/personas', (_req, res) => {
-  res.json(Object.values(personas));
+  res.json(Object.values(personas).map((persona) => ({
+    ...persona,
+    doctrine_family: persona.doctrine_family || getDoctrineFamilyForPersonaId(persona.id, persona.archetype || ''),
+    doctrine_family_label: getDoctrineFamilyLabel(persona.doctrine_family || getDoctrineFamilyForPersonaId(persona.id, persona.archetype || '')),
+  })));
 });
 
 app.post('/api/personas/extract-from-prompt', (req, res) => {
@@ -9665,7 +9846,11 @@ app.post('/api/sessions/:id/message', async (req, res) => {
   if (!text || !text.trim()) return res.status(400).json({ error: 'Text is required' });
 
   const normalizedSellerText = text.trim();
-  session.language = detectMessageLanguage(normalizedSellerText, session.language);
+  if (!session.meta?.language_locked) {
+    session.language = detectMessageLanguage(normalizedSellerText, session.language);
+    session.meta.language_locked = true;
+    session.meta.initial_seller_language = session.language;
+  }
   const sellerEntry = { role: 'seller', text: normalizedSellerText, ts: now() };
   const matchedHint = findHintMemoryAttempt(session, hintId, normalizedSellerText);
   if (matchedHint) {

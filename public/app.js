@@ -479,16 +479,32 @@ async function loadAnalytics(options = {}) {
     const currentPersonaVal = options.personaId || '';
     const personas = data.persona_stats || [];
     filterPersona.innerHTML = '<option value="">All personas</option>' +
-      personas.map((p) => `<option value="${escapeHtml(p.persona_id)}"${p.persona_id === currentPersonaVal ? ' selected' : ''}>${escapeHtml(p.persona_name || p.persona_id)}</option>`).join('');
+      personas.map((p) => `<option value="${escapeHtml(p.persona_id)}"${p.persona_id === currentPersonaVal ? ' selected' : ''}>${escapeHtml((p.doctrine_family_label ? `${p.doctrine_family_label} / ` : '') + (p.persona_name || p.persona_id))}</option>`).join('');
   }
   if (filterOutcome && options.outcome) filterOutcome.value = options.outcome;
   if (filterVerdict && options.verdict) filterVerdict.value = options.verdict;
+
+  const doctrineRows = (data.doctrine_stats || []).map((item) => {
+    const funnel = (item.funnel || []).map((stage) => `${stage.stage}: ${stage.entered}${stage.conversion_to_next !== null ? ` → ${formatPercent(stage.conversion_to_next)}` : ''}`).join('<br>');
+    return `
+      <div class="analytics-row">
+        <div>
+          <strong>${escapeHtml(item.doctrine_family_label || item.doctrine_family)}</strong>
+          <div class="muted">${item.persona_count} personas</div>
+        </div>
+        <div>${item.runs}</div>
+        <div>${formatPercent(item.meeting_booked_rate)}</div>
+        <div>${item.meeting_booked_count}</div>
+        <div class="muted">${funnel}</div>
+      </div>
+    `;
+  }).join('');
 
   const personaRows = (data.persona_stats || []).map((item) => `
     <div class="analytics-row">
       <div>
         <strong>${escapeHtml(item.persona_name || item.persona_id)}</strong>
-        <div class="muted">${escapeHtml(item.persona_id || '')}</div>
+        <div class="muted">${escapeHtml(item.persona_id || '')}${item.doctrine_family_label ? ` · ${escapeHtml(item.doctrine_family_label)}` : ''}</div>
       </div>
       <div>${item.runs}</div>
       <div>${formatPercent(item.meeting_booked_rate)}</div>
@@ -497,8 +513,18 @@ async function loadAnalytics(options = {}) {
     </div>
   `).join('');
 
-  analyticsPersonaTable.innerHTML = personaRows
-    ? `<div class="analytics-table analytics-table--personas">
+  analyticsPersonaTable.innerHTML = (doctrineRows || personaRows)
+    ? `${doctrineRows ? `<div class="analytics-table analytics-table--personas">
+        <div class="analytics-row analytics-row--head">
+          <div>Doctrine</div>
+          <div>Runs</div>
+          <div>Booked %</div>
+          <div>Meetings</div>
+          <div>Funnel</div>
+        </div>
+        ${doctrineRows}
+      </div>` : ''}
+      <div class="analytics-table analytics-table--personas">
         <div class="analytics-row analytics-row--head">
           <div>Persona</div>
           <div>Runs</div>
@@ -706,12 +732,23 @@ function roleEssence(persona) {
 function renderPersonaDropdown() {
   const current = personaSelect.value;
   personaSelect.innerHTML = '<option value="">Choose a role...</option>';
+  const groups = new Map();
   state.personas.forEach((persona) => {
-    const opt = document.createElement('option');
-    opt.value = persona.id;
-    opt.textContent = persona.role;
-    if (persona.id === state.selectedPersonaId) opt.selected = true;
-    personaSelect.appendChild(opt);
+    const family = persona.doctrine_family_label || persona.doctrine_family || 'Other';
+    if (!groups.has(family)) groups.set(family, []);
+    groups.get(family).push(persona);
+  });
+  groups.forEach((personas, family) => {
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = family;
+    personas.forEach((persona) => {
+      const opt = document.createElement('option');
+      opt.value = persona.id;
+      opt.textContent = persona.role;
+      if (persona.id === state.selectedPersonaId) opt.selected = true;
+      optgroup.appendChild(opt);
+    });
+    personaSelect.appendChild(optgroup);
   });
   if (!state.selectedPersonaId && current) personaSelect.value = current;
 }
@@ -733,7 +770,7 @@ function renderSetupPersona() {
     return;
   }
 
-  selectedPersonaMeta.textContent = roleEssence(persona);
+  selectedPersonaMeta.textContent = `${roleEssence(persona)} · ${persona.doctrine_family_label || persona.doctrine_family || 'Custom'}`;
   editPersonaBtn.classList.remove('hidden');
   if (selectedPersonaPrompt) {
     selectedPersonaPrompt.textContent = persona.system_prompt || 'No system prompt yet. Add one in the persona editor.';
