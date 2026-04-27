@@ -5218,6 +5218,17 @@ function stateDrivenReplyOverride(session, sellerText) {
         ]);
   }
 
+  if (financePersona && acceptanceStage === 'written_step_accepted' && hasCallStep && buyerState.clarity >= 55) {
+    return lang === 'ru'
+      ? pick([
+          'Да, это уже нормальный следующий шаг. После такой записки можно коротко созвониться на 15 минут и пройти только economics вашего кейса.',
+          'Согласен. Если breakdown действительно закрывает surprise risk, давайте возьмём короткий 15-минутный review call только по economics.',
+        ])
+      : pick([
+          'Yes, that is a reasonable next step. After a note like that, we can do a short 15-minute review call focused only on the economics of your case.',
+        ]);
+  }
+
   if (buyerState.conversation_capacity <= 1 && buyerState.disengagement_risk >= 0.75 && !hasNextStep && !hasMechanism && !session.meta._memo_requested) {
     return lang === 'ru'
       ? pick([
@@ -7997,10 +8008,15 @@ function randomFactorReply(session, sellerText = '') {
 
   const persona = personaMeta(session) || {};
   const lower = String(sellerText || '').toLowerCase();
+  const acceptanceStage = session?.meta?.acceptance_stage || getBuyerAcceptanceStage(session);
   const antiSilenceProtected = turn >= 2
     && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(persona.id)
     && hasAny(lower, ['план', 'scheme', 'flow', 'incident', 'boundary', 'recovery', 'mapping', 'slice', 'transition', 'call', 'созвон', 'пилот', 'pilot']);
-  if (antiSilenceProtected) return null;
+  const financeAntiGhostProtected = turn >= 2
+    && isFinancePersonaId(persona.id)
+    && ['written_step_accepted', 'written_step_then_call', 'review_call_ready', 'meeting_booked'].includes(acceptanceStage)
+    && hasAny(lower, ['созвон', 'call', 'review', '15 минут', '15 minute', 'какой слот', 'когда удобно', 'when convenient', 'what slot works']);
+  if (antiSilenceProtected || financeAntiGhostProtected) return null;
 
   const r = Math.random();
   const ghostP = Number(config.ghost_probability ?? 0);
