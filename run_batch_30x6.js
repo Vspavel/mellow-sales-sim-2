@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Batch runner: 30 sessions x 6 personas
+// Batch runner: 30 sessions x 5 canonical personas
 // Usage: node run_batch_30x6.js
 
 const BASE = 'http://localhost:3210';
@@ -9,7 +9,6 @@ const PERSONAS = [
   'fx_trust_shock_finance',
   'cm_winback',
   'grey_pain_switcher',
-  'direct_contract_transition',
 ];
 const SESSIONS_PER_PERSONA = 30;
 const MAX_AUTO_TURNS = 18;

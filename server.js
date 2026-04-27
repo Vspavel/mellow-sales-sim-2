@@ -797,7 +797,9 @@ function normalizePersona(persona, fallbackId) {
     prompt_style: promptDraft.styleLines,
     prompt_objections: promptDraft.objections,
     required_fields: requiredFields.length ? requiredFields : defaultRequiredFieldsTemplate(),
-    cards: signals
+    cards: signals,
+    merged_into: persona?.merged_into || builtin?.merged_into || null,
+    deprecated: Boolean(persona?.deprecated || builtin?.deprecated || persona?.merged_into || builtin?.merged_into)
   };
 }
 
@@ -821,6 +823,18 @@ function getDoctrineFamilyLabel(family = '') {
     legal: 'Legal',
     custom: 'Custom',
   }[family] || 'Custom';
+}
+
+const PERSONA_CANONICAL_MAP = {
+  direct_contract_transition: 'cm_winback',
+};
+
+function getCanonicalPersonaId(personaId = '') {
+  return PERSONA_CANONICAL_MAP[personaId] || personaId;
+}
+
+function isDeprecatedPersona(persona = null) {
+  return Boolean(persona?.deprecated || persona?.merged_into);
 }
 
 function detectMessageLanguage(text, fallback = 'en') {
@@ -1034,6 +1048,7 @@ async function saveSession(session) {
 }
 
 function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'messenger', randomizerConfig = null, language = 'en', difficultyTier = 1 } = {}) {
+  personaId = getCanonicalPersonaId(personaId);
   if (!personaId || !personas[personaId]) {
     throw new Error('Unknown personaId');
   }
@@ -1461,12 +1476,13 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
   const failureBreakdown = {};
 
   for (const session of finished) {
-    const personaId = session.bot_id || 'unknown';
+    const sourcePersonaId = session.bot_id || 'unknown';
+    const personaId = getCanonicalPersonaId(sourcePersonaId);
     if (!byPersona[personaId]) {
       const doctrineFamily = getDoctrineFamilyForPersonaId(personaId, session?.bot_archetype || '');
       byPersona[personaId] = {
         persona_id: personaId,
-        persona_name: session.bot_name || personaId,
+        persona_name: personas[personaId]?.name || session.bot_name || personaId,
         doctrine_family: doctrineFamily,
         doctrine_family_label: getDoctrineFamilyLabel(doctrineFamily),
         runs: 0,
@@ -1603,6 +1619,8 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
   const recentFinishedTotal = filteredFinished.length;
   const recentFinished = filteredFinished.slice(offset, offset + limit).map((session) => {
     const summary = session.dialogue_summary || buildDialogueSummary(session);
+    const sourcePersonaId = session.bot_id || 'unknown';
+    const canonicalPersonaId = getCanonicalPersonaId(sourcePersonaId);
     // hint_stage_breakdown may be absent on sessions stored before MEL-1044; derive it fresh from transcript
     const hintStageBreakdown = summary.hint_stage_breakdown || (() => {
       const breakdown = {};
@@ -1615,12 +1633,14 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     })();
     return {
       session_id: session.session_id,
-      persona_id: session.bot_id,
-      persona_name: session.bot_name,
-      doctrine_family: summary.doctrine_family,
-      doctrine_family_label: summary.doctrine_family_label,
-      language: summary.language,
-      language_locked: summary.language_locked,
+      persona_id: canonicalPersonaId,
+      persona_name: personas[canonicalPersonaId]?.name || session.bot_name,
+      source_persona_id: sourcePersonaId,
+      source_persona_name: session.bot_name,
+      doctrine_family: summary.doctrine_family || getDoctrineFamilyForPersonaId(canonicalPersonaId, personaMeta(session)?.archetype || ''),
+      doctrine_family_label: summary.doctrine_family_label || getDoctrineFamilyLabel(summary.doctrine_family || getDoctrineFamilyForPersonaId(canonicalPersonaId, personaMeta(session)?.archetype || '')),
+      language: summary.language || session.language || 'en',
+      language_locked: summary.language_locked ?? Boolean(session?.meta?.language_locked),
       finished_at: session.finished_at,
       dialogue_type: session.dialogue_type || 'messenger',
       signal_type: session.sde_card?.signal_type || null,
@@ -9714,7 +9734,7 @@ function assess(session) {
 // ==================== API ROUTES ====================
 
 app.get('/api/personas', (_req, res) => {
-  res.json(Object.values(personas).map((persona) => ({
+  res.json(Object.values(personas).filter((persona) => !isDeprecatedPersona(persona)).map((persona) => ({
     ...persona,
     doctrine_family: persona.doctrine_family || getDoctrineFamilyForPersonaId(persona.id, persona.archetype || ''),
     doctrine_family_label: getDoctrineFamilyLabel(persona.doctrine_family || getDoctrineFamilyForPersonaId(persona.id, persona.archetype || '')),
@@ -9822,7 +9842,7 @@ app.get('/api/sessions/:id', async (req, res) => {
 app.get('/api/analytics', async (req, res) => {
   const limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 100));
   const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
-  const personaFilter = req.query.personaId ? String(req.query.personaId) : null;
+  const personaFilter = req.query.personaId ? getCanonicalPersonaId(String(req.query.personaId)) : null;
   const outcomeFilter = req.query.outcome ? String(req.query.outcome) : null;
   const verdictFilter = req.query.verdict ? String(req.query.verdict) : null;
   res.json(await buildAnalyticsSummary({ limit, offset, personaFilter, outcomeFilter, verdictFilter }));
