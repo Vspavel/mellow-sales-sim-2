@@ -8034,13 +8034,13 @@ function fallbackSellerSuggestion(session, lang = null) {
   return `Какой платёжный или contractor-риск вам сейчас важнее всего снизить?`;
 }
 
-async function generateSellerSuggestion(session, lang = null, snapshot = null, strategy = null) {
+async function generateSellerSuggestion(session, lang = null, snapshot = null, strategy = null, uiStrategy = null) {
   const effectiveLang = lang === 'en' || lang === 'ru'
     ? lang
     : (session.language === 'en' ? 'en' : 'ru');
 
   // Step 6+7: LLM hint generation with exploration policy
-  const llmHint = await generateLlmHint(session, effectiveLang, snapshot, strategy);
+  const llmHint = await generateLlmHint(session, effectiveLang, snapshot, strategy, uiStrategy);
   if (llmHint) {
     // Hard ask gating: reject LLM output that violates the stage-mode contract.
     // If the hint contains a meeting ask but the stage is not direct_ask (or a valid bridge variant),
@@ -8140,6 +8140,16 @@ async function generateSellerSuggestion(session, lang = null, snapshot = null, s
   }
 
   return adaptTextToDialogue((typeof concLine === 'string' && concLine.trim()) ? concLine : fallbackSellerSuggestion(session, 'ru'), session, 'seller');
+}
+
+function normalizeUiStrategy(moveType = null, proofLayer = null) {
+  const normalizedMoveType = ['clarify', 'prove', 'ask'].includes(moveType) ? moveType : null;
+  const normalizedProofLayer = ['case', 'one_screen', 'calculator'].includes(proofLayer) ? proofLayer : null;
+  if (!normalizedMoveType && !normalizedProofLayer) return null;
+  return {
+    moveType: normalizedMoveType,
+    proofLayer: normalizedProofLayer,
+  };
 }
 
 // ==================== MEMORY / CONTRADICTION RESOLUTION ====================
@@ -8469,7 +8479,7 @@ function pickExplorationStrategy() {
 // The prompt instructs Claude to maximize trust/clarity, improve next-step probability,
 // avoid historically harmful patterns, and produce a concise stage-specific hint.
 // strategy: 'exploit' | 'adjacent' | 'explore' (Step 7 exploration policy)
-function buildFirstHintSystemPrompt(session, snapshot, strategy = 'exploit', recentOpeners = []) {
+function buildFirstHintSystemPrompt(session, snapshot, strategy = 'exploit', recentOpeners = [], uiStrategy = null) {
   const card = session.sde_card || {};
   const contact = card.contact || {};
   const company = card.company || {};
@@ -8584,7 +8594,7 @@ function buildFirstHintSystemPrompt(session, snapshot, strategy = 'exploit', rec
   return lines.join('\n');
 }
 
-function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit', recentOpeners = []) {
+function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit', recentOpeners = [], uiStrategy = null) {
   const persona = personaMeta(session);
   const concern = getActiveConcern(session);
   const policy = getHintPolicyContext(session);
@@ -8592,7 +8602,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
   const sellerTurnCount = session.transcript.filter((m) => m.role === 'seller').length;
 
   if (sellerTurnCount === 0) {
-    return buildFirstHintSystemPrompt(session, snapshot, strategy, recentOpeners);
+    return buildFirstHintSystemPrompt(session, snapshot, strategy, recentOpeners, uiStrategy);
   }
 
   const turnStage = snapshot?.context?.turn_stage || 'mid';
@@ -8709,6 +8719,34 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
             : `🔎 DIAGNOSIS MODE: Use SPIN ${spinLane === 'situation' ? 'Situation' : 'Problem'}. Use Sandler pain-first qualification. Do NOT pitch broadly and do NOT ask for a meeting. Ask one focused question that surfaces the next missing condition for progression.`,
   ];
 
+  if (uiStrategy?.moveType || uiStrategy?.proofLayer) {
+    const moveHint = {
+      clarify: 'Bias toward clarification: one sharp question or one direct answer that narrows the real issue. Do not widen scope.',
+      prove: 'Bias toward proof: use one concrete mechanism, example, or evidence layer instead of another abstract explanation.',
+      ask: 'Bias toward ask: if stage rules allow, make the next step explicit and bounded. If stage rules do not allow, earn the ask instead of forcing it.',
+    }[uiStrategy.moveType] || null;
+    const proofHint = {
+      case: 'Prefer case-snippet style proof when proof is warranted.',
+      one_screen: 'Prefer one-screen written proof framing when a proof or bridge step is warranted.',
+      calculator: 'Prefer calculator/economics framing only when the buyer is already in economics or review mode.',
+    }[uiStrategy.proofLayer] || null;
+    lines.push('', '## Operator framing preference', [moveHint, proofHint].filter(Boolean).join(' '));
+  }
+
+  if (uiStrategy?.moveType || uiStrategy?.proofLayer) {
+    const moveHint = {
+      clarify: 'operator wants a clarify move, so prefer sharper diagnosis and a narrower question',
+      prove: 'operator wants a proof move, so prefer concrete mechanism or evidence over extra discovery',
+      ask: 'operator wants an ask move, but opening-stage rules still win, so only lean toward a clearer direction of travel, not a meeting ask',
+    }[uiStrategy.moveType] || null;
+    const proofHint = {
+      case: 'if proof is appropriate, prefer a tiny case snippet rather than abstract claims',
+      one_screen: 'if proof is appropriate, orient toward a one-screen written proof as the likely next bounded asset',
+      calculator: 'if proof is appropriate, orient toward economics structure, but do not jump into calculator mode in the opener unless the signal itself clearly justifies it',
+    }[uiStrategy.proofLayer] || null;
+    lines.push('', '## Operator framing preference', [moveHint, proofHint].filter(Boolean).join('; '));
+  }
+
   if (contrastive.copy_from?.length) {
     lines.push(``, `## Successful hints to learn from (adapt structure and specificity, do not copy verbatim)`);
     for (const r of contrastive.copy_from) {
@@ -8798,13 +8836,13 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
 // Step 6: LLM-based hint generation conditioned on contrastive retrieval from Step 5.
 // strategy (Step 7): 'exploit' | 'adjacent' | 'explore' — controls exploration policy.
 // Returns a generated hint string, or null if LLM is unavailable or fails.
-async function generateLlmHint(session, lang = null, snapshot = null, strategy = null) {
+async function generateLlmHint(session, lang = null, snapshot = null, strategy = null, uiStrategy = null) {
   const client = getAnthropicClient();
   if (!client) return null;
 
   const recentOpeners = loadHintRecency();
   const snap = snapshot || buildHintMemorySnapshot(session, lang);
-  const systemPrompt = buildHintGenerationSystemPrompt(session, snap, strategy || 'exploit', recentOpeners);
+  const systemPrompt = buildHintGenerationSystemPrompt(session, snap, strategy || 'exploit', recentOpeners, uiStrategy);
 
   const recentBotMessages = (session.transcript || [])
     .filter((m) => m.role === 'bot')
@@ -9955,14 +9993,19 @@ app.get('/api/sessions/:id/seller-suggest', async (req, res) => {
   }
 
   const lang = req.query.lang === 'en' || req.query.lang === 'ru' ? req.query.lang : null;
+  const uiStrategy = normalizeUiStrategy(
+    typeof req.query.moveType === 'string' ? req.query.moveType : null,
+    typeof req.query.proofLayer === 'string' ? req.query.proofLayer : null,
+  );
   const contrastiveSnapshot = buildHintMemorySnapshot(session, lang);
   const explorationStrategy = pickExplorationStrategy();
-  const suggestion = await generateSellerSuggestion(session, lang, contrastiveSnapshot, explorationStrategy);
+  const suggestion = await generateSellerSuggestion(session, lang, contrastiveSnapshot, explorationStrategy, uiStrategy);
   const hintAttempt = createHintMemoryAttempt(session, suggestion, lang, 'hint', contrastiveSnapshot, explorationStrategy);
   res.json({
     suggestion,
     hint_id: hintAttempt.record.id,
-    memory_context: hintAttempt.retrieval
+    memory_context: hintAttempt.retrieval,
+    ui_strategy: uiStrategy,
   });
 });
 

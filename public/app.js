@@ -957,6 +957,9 @@ function bubble(message) {
   el.textContent = message.text;
   frag.appendChild(el);
 
+  const transcriptAnnotation = buildTranscriptAnnotation(message);
+  if (transcriptAnnotation) frag.appendChild(transcriptAnnotation);
+
   if (message.role === 'seller' && message.buyer_state_transition) {
     const t = message.buyer_state_transition;
     const notes = t.coaching_notes || [];
@@ -987,6 +990,99 @@ function bubble(message) {
   }
 
   return frag;
+}
+
+function stageLabel(stage) {
+  return {
+    opening: 'Opening',
+    diagnosis: 'Diagnosis',
+    proof: 'Proof',
+    trust_repair: 'Trust repair',
+    pre_ask: 'Pre-ask',
+    closing: 'Closing',
+  }[stage] || stage || 'Stage';
+}
+
+function transcriptHintStageLabel(stage) {
+  return {
+    diagnosis: 'Clarify',
+    proof: 'Prove',
+    bridge_step: 'Bounded next step',
+    direct_ask: 'Ask narrowly',
+    repair: 'Repair trust',
+  }[stage] || stageLabel(stage);
+}
+
+function acceptanceStageLabel(stage) {
+  return {
+    mechanics_engaged: 'Problem engaged',
+    economics_engaged: 'Economics engaged',
+    written_step_requested: 'Written step requested',
+    written_step_accepted: 'Written step accepted',
+    written_step_then_call: 'Written step, then call',
+    review_call_ready: 'Review call ready',
+    meeting_booked: 'Meeting booked',
+  }[stage] || null;
+}
+
+function inferProofLayer(message) {
+  const text = String(message?.text || '').toLowerCase();
+  if (!text) return null;
+  if (/(calculator|calc|калькулятор|расчет|расчёт|модель стоимости|cost breakdown|unit economics)/.test(text)) return 'Calculator snapshot';
+  if (/(one.?screen|одн(им|ом) экран|1.?pager|one.?pager|brief|memo|note|summary|схем|таблиц|written)/.test(text)) return 'One-screen proof';
+  if (/(case|example|пример|кейс|истор)/.test(text)) return 'Case snippet';
+  return null;
+}
+
+function formatDeltaChip(label, value) {
+  if (!Number.isFinite(Number(value)) || Number(value) === 0) return null;
+  const num = Number(value);
+  const klass = num > 0 ? 'is-up' : 'is-down';
+  return `<span class="annotation-chip ${klass}">${escapeHtml(label)} ${escapeHtml(formatSignedDelta(num))}</span>`;
+}
+
+function buildTranscriptAnnotation(message) {
+  if (message.role !== 'seller' && message.role !== 'bot') return null;
+  const wrap = document.createElement('div');
+  wrap.className = `transcript-annotation transcript-annotation--${message.role}`;
+
+  if (message.role === 'seller') {
+    const transition = message.buyer_state_transition || {};
+    const chips = [
+      message.hint_stage ? `<span class="annotation-chip">${escapeHtml(transcriptHintStageLabel(message.hint_stage))}</span>` : null,
+      message.turn_stage ? `<span class="annotation-chip">${escapeHtml(stageLabel(message.turn_stage))}</span>` : null,
+      message.ask_type && message.ask_type !== 'premature_ask' ? `<span class="annotation-chip">${escapeHtml(message.ask_type.replace(/_/g, ' '))}</span>` : null,
+      inferProofLayer(message) ? `<span class="annotation-chip">${escapeHtml(inferProofLayer(message))}</span>` : null,
+      formatDeltaChip('Trust', transition?.predicted_delta?.trust),
+      formatDeltaChip('Clarity', transition?.predicted_delta?.clarity),
+      formatDeltaChip('Next step', transition?.derived_metrics_delta?.next_step_likelihood),
+    ].filter(Boolean);
+
+    const notes = [];
+    if (message.premature_ask_bool) notes.push('This moved into ask mode before readiness was earned.');
+    if (message.acceptance_stage_after) notes.push(`Buyer moved to: ${acceptanceStageLabel(message.acceptance_stage_after) || message.acceptance_stage_after.replace(/_/g, ' ')}`);
+    if (message.buyer_reply_outcome === 'silent') notes.push('This turn produced silence, not a reply.');
+    if ((transition.coaching_notes || []).length) notes.push(...transition.coaching_notes.slice(0, 2));
+
+    if (!chips.length && !notes.length) return null;
+    wrap.innerHTML = `
+      ${chips.length ? `<div class="annotation-chip-row">${chips.join('')}</div>` : ''}
+      ${notes.length ? `<div class="annotation-notes">${notes.map((note) => `<p>${escapeHtml(note)}</p>`).join('')}</div>` : ''}
+    `;
+    return wrap;
+  }
+
+  const buyerSignals = [];
+  if (message.text && detectBuyerMeetingAcceptance(message.text, state.session?.language || 'ru')) {
+    buyerSignals.push('Buyer explicitly accepted the meeting.');
+  }
+  const lastStage = state.session?.meta?.acceptance_stage || state.session?.dialogue_summary?.acceptance_stage;
+  if (lastStage && ['written_step_accepted', 'review_call_ready', 'meeting_booked'].includes(lastStage)) {
+    buyerSignals.push(`Current acceptance stage: ${acceptanceStageLabel(lastStage) || lastStage.replace(/_/g, ' ')}`);
+  }
+  if (!buyerSignals.length) return null;
+  wrap.innerHTML = `<div class="annotation-notes">${buyerSignals.map((note) => `<p>${escapeHtml(note)}</p>`).join('')}</div>`;
+  return wrap;
 }
 
 function updateRunState() {
@@ -1487,7 +1583,8 @@ suggestBtn.addEventListener('click', async () => {
   suggestBtn.disabled = true;
   try {
     const lang = hintLangSelect ? hintLangSelect.value : 'ru';
-    const result = await api(`api/sessions/${state.session.session_id}/seller-suggest?lang=${lang}`);
+    const qs = new URLSearchParams({ lang, moveType: state.moveType, proofLayer: state.proofLayer });
+    const result = await api(`api/sessions/${state.session.session_id}/seller-suggest?${qs.toString()}`);
     state.lastHint = {
       id: result.hint_id || null,
       text: result.suggestion || '',

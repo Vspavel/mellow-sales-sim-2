@@ -241,6 +241,14 @@ button:disabled { opacity: 0.55; cursor: default; }
 .turn-coaching-flag { font-weight: 700; font-size: 0.77rem; }
 .turn-coaching-flag--warn { color: var(--warn-text); }
 .turn-coaching p { margin: 0; line-height: 1.4; }
+.transcript-annotation { align-self: flex-end; max-width: 85%; margin-top: 3px; display: grid; gap: 8px; }
+.transcript-annotation--bot { align-self: flex-start; }
+.annotation-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.annotation-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: var(--surface-subtle); border: 1px solid var(--border); font-size: 0.73rem; font-weight: 700; color: var(--muted); }
+.annotation-chip.is-up { color: var(--success-text); border-color: color-mix(in srgb, var(--success-text) 20%, var(--border)); }
+.annotation-chip.is-down { color: var(--fail-text); border-color: color-mix(in srgb, var(--fail-text) 20%, var(--border)); }
+.annotation-notes { display: grid; gap: 6px; padding: 10px 12px; border-radius: 12px; background: var(--surface-subtle); border: 1px solid var(--border); }
+.annotation-notes p { margin: 0; font-size: 0.82rem; line-height: 1.45; color: var(--muted); }
 .coaching-item--critical { border-color: var(--fail-text); background: var(--fail-bg); }
 .turn-delta { font-size: 0.77rem; font-weight: 700; border-radius: 6px; padding: 2px 6px; }
 .turn-delta--up { background: var(--success-bg); color: var(--success-text); }
