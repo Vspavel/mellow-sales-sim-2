@@ -8,12 +8,42 @@
   </head>
   <body>
     <div class="shell">
+      <aside class="sidebar">
+        <a class="app-brand-link sidebar-brand" href="/" aria-label="Go to Mellow Sales Simulator home">
+          <p class="phase-label">Mellow</p>
+          <h1>Sales Simulator</h1>
+          <p class="muted sidebar-tagline">Calm operating environment for signal-led selling.</p>
+        </a>
+
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+          <div class="sidebar-group">
+            <p class="sidebar-group-label">Primary</p>
+            <button id="navRunBtn" class="sidebar-nav-btn is-active" type="button">Run</button>
+            <button id="openHistoryBtn" class="sidebar-nav-btn" type="button">History</button>
+          </div>
+
+          <div class="sidebar-group">
+            <p class="sidebar-group-label">Insight</p>
+            <button id="openAnalyticsBtn" class="sidebar-nav-btn" type="button">Analytics</button>
+          </div>
+
+          <div class="sidebar-group">
+            <p class="sidebar-group-label">System</p>
+            <button id="createPersonaBtn" class="sidebar-nav-btn" type="button">Buyer scenarios</button>
+          </div>
+        </nav>
+
+        <div class="sidebar-footnote muted">
+          Primary workflow stays in the main workspace. Secondary flows live here.
+        </div>
+      </aside>
+
       <main class="content">
         <section class="phase-panel" id="setupPanel">
           <header class="panel-header">
             <a class="app-brand-link" href="/" aria-label="Go to Mellow Sales Simulator home">
-              <p class="phase-label">Mellow</p>
-              <h1>Sales Simulator</h1>
+              <p class="phase-label">Workspace</p>
+              <h1>Prepare run</h1>
             </a>
           </header>
 
@@ -117,11 +147,7 @@
                 </div>
               </div>
             </div>
-
             <div class="launch-secondary">
-              <button id="createPersonaBtn" class="ghost-btn" type="button">Manage personas</button>
-              <button id="openAnalyticsBtn" class="ghost-btn" type="button">Analytics</button>
-              <button id="openHistoryBtn" class="ghost-btn" type="button">История бесед</button>
               <button id="resetBtn" class="ghost-btn hidden" type="button">New run</button>
             </div>
           </div>
@@ -134,7 +160,7 @@
         <section class="phase-panel hidden" id="runPanel">
           <header class="panel-header">
             <a class="app-brand-link app-brand-link--compact" href="/" aria-label="Go to Mellow Sales Simulator home">
-              <p class="phase-label">Mellow Sales Simulator</p>
+              <p class="phase-label">Conversation cockpit</p>
             </a>
             <div class="run-meta">
               <div class="run-meta-top">
@@ -202,7 +228,7 @@
         <section class="phase-panel hidden" id="analyticsPanel">
           <header class="panel-header">
             <a class="app-brand-link" href="/" aria-label="Go to Mellow Sales Simulator home">
-              <p class="phase-label">Mellow</p>
+              <p class="phase-label">Insight</p>
               <h1>Sales Simulator analytics</h1>
             </a>
           </header>
@@ -276,7 +302,7 @@
         <section class="phase-panel hidden" id="historyPanel">
           <header class="panel-header">
             <a class="app-brand-link" href="/" aria-label="Go to Mellow Sales Simulator home">
-              <p class="phase-label">Mellow</p>
+              <p class="phase-label">History</p>
               <h1>Сохранённые беседы</h1>
             </a>
           </header>
@@ -303,7 +329,7 @@
         <section class="phase-panel hidden" id="reviewPanel">
           <header class="panel-header">
             <a class="app-brand-link" href="/" aria-label="Go to Mellow Sales Simulator home">
-              <p class="phase-label">Mellow</p>
+              <p class="phase-label">Run result</p>
               <h1 id="reviewTitle">Run result</h1>
             </a>
           </header>

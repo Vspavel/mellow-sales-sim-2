@@ -19,6 +19,7 @@ const state = {
 };
 
 const personaSelect = document.getElementById('personaSelect');
+const navRunBtn = document.getElementById('navRunBtn');
 const createPersonaBtn = document.getElementById('createPersonaBtn');
 const personaEditor = document.getElementById('personaEditor');
 const personaEditorTitle = document.getElementById('personaEditorTitle');
@@ -124,6 +125,12 @@ const downloadResultBtn = document.getElementById('downloadResultBtn');
 const copyShareLinkBtn = document.getElementById('copyShareLinkBtn');
 const appVersion = document.getElementById('appVersion');
 
+const navPhaseButtons = [
+  [navRunBtn, 'run'],
+  [openAnalyticsBtn, 'analytics'],
+  [openHistoryBtn, 'history'],
+].filter(([el]) => el);
+
 let historyData = [];
 let historySelectedIds = new Set();
 
@@ -197,7 +204,22 @@ function showPhase(phase, options = {}) {
   reviewPanel.classList.toggle('hidden', phase !== 'review');
   analyticsPanel.classList.toggle('hidden', phase !== 'analytics');
   historyPanel.classList.toggle('hidden', phase !== 'history');
+  updateSidebarNav();
   if (!skipRoute) syncRoute(replace);
+}
+
+function sidebarActivePhase() {
+  if (state.phase === 'analytics') return 'analytics';
+  if (state.phase === 'history') return 'history';
+  return 'run';
+}
+
+function updateSidebarNav() {
+  const active = sidebarActivePhase();
+  navPhaseButtons.forEach(([button, phase]) => {
+    button.classList.toggle('is-active', phase === active);
+    button.setAttribute('aria-current', phase === active ? 'page' : 'false');
+  });
 }
 
 async function loadVersionInfo() {
@@ -1270,6 +1292,9 @@ personaForm.addEventListener('submit', async (event) => {
 
 promptExtractBtn.addEventListener('click', extractFromPrompt);
 createPersonaBtn.addEventListener('click', () => openPersonaEditor('create'));
+navRunBtn?.addEventListener('click', () => {
+  showPhase(state.session ? 'run' : 'setup');
+});
 openAnalyticsBtn?.addEventListener('click', async () => {
   showPhase('analytics');
   try {
@@ -1285,7 +1310,7 @@ refreshAnalyticsBtn?.addEventListener('click', async () => {
     analyticsGeneratedAt.textContent = error.message || 'Failed to refresh analytics';
   }
 });
-backFromAnalyticsBtn?.addEventListener('click', () => showPhase('setup'));
+backFromAnalyticsBtn?.addEventListener('click', () => showPhase(state.session ? 'run' : 'setup'));
 filterPersona?.addEventListener('change', applyAnalyticsFilters);
 filterOutcome?.addEventListener('change', applyAnalyticsFilters);
 filterVerdict?.addEventListener('change', applyAnalyticsFilters);
@@ -1611,7 +1636,7 @@ openHistoryBtn?.addEventListener('click', async () => {
   showPhase('history');
   await loadHistory();
 });
-backFromHistoryBtn?.addEventListener('click', () => showPhase('setup'));
+backFromHistoryBtn?.addEventListener('click', () => showPhase(state.session ? 'run' : 'setup'));
 refreshHistoryBtn?.addEventListener('click', () => loadHistory());
 historySelectAllBtn?.addEventListener('click', () => {
   historyData.forEach((item) => historySelectedIds.add(item.session_id));
