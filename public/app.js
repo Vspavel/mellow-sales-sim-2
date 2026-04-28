@@ -6,6 +6,8 @@ const state = {
   appliedHintId: null,
   editorMode: 'create',
   dialogueType: 'messenger',
+  moveType: 'clarify',
+  proofLayer: 'one_screen',
   // Randomizer & random-factor settings (persisted to localStorage)
   phase: 'setup',
   randomizerConfig: {
@@ -91,12 +93,17 @@ const busyProbInput = document.getElementById('busyProbInput');
 const deferProbInput = document.getElementById('deferProbInput');
 const runSignalBadge = document.getElementById('runSignalBadge');
 const runSignalPanel = document.getElementById('runSignalPanel');
+const buyerBriefCard = document.getElementById('buyerBriefCard');
+const runSignalCard = document.getElementById('runSignalCard');
 const buyerStateTurnMeta = document.getElementById('buyerStateTurnMeta');
 const buyerStateLivePanel = document.getElementById('buyerStateLivePanel');
-const personaSummaryPanel = document.getElementById('personaSummaryPanel');
-const personaSummaryCard = document.getElementById('personaSummaryCard');
-const runSignalCard = document.getElementById('runSignalCard');
+const buyerBriefPanel = document.getElementById('buyerBriefPanel');
+const nextMovePanel = document.getElementById('nextMovePanel');
+const progressRail = document.getElementById('progressRail');
+const progressStageMeta = document.getElementById('progressStageMeta');
 const composerFocus = document.getElementById('composerFocus');
+const moveTypeButtons = () => [...document.querySelectorAll('[data-move-type]')];
+const proofLayerButtons = () => [...document.querySelectorAll('[data-proof-layer]')];
 
 let analyticsData = null;
 
@@ -219,6 +226,15 @@ function updateSidebarNav() {
   navPhaseButtons.forEach(([button, phase]) => {
     button.classList.toggle('is-active', phase === active);
     button.setAttribute('aria-current', phase === active ? 'page' : 'false');
+  });
+}
+
+function updateComposerStrategyChips() {
+  moveTypeButtons().forEach((button) => {
+    button.classList.toggle('is-active', button.dataset.moveType === state.moveType);
+  });
+  proofLayerButtons().forEach((button) => {
+    button.classList.toggle('is-active', button.dataset.proofLayer === state.proofLayer);
   });
 }
 
@@ -607,27 +623,62 @@ function actualBuyerStateDelta(transition, key) {
   return Math.round(after - before);
 }
 
-function renderPersonaSummaryPanel() {
-  if (!personaSummaryPanel) return;
+function currentDesiredStep() {
+  const stage = state.session?.dialogue_summary?.acceptance_stage || state.session?.meta?.acceptance_stage || 'not_started';
+  return {
+    not_started: 'Open with a specific signal and narrow the problem',
+    mechanics_engaged: 'Clarify the operating problem before proving value',
+    economics_engaged: 'Introduce one proof layer, not a broad pitch',
+    written_step_requested: 'Offer one-screen proof before asking for a call',
+    written_step_accepted: 'Convert accepted material into a bounded review call',
+    written_step_then_call: 'Land the short review call clearly and narrowly',
+    review_call_ready: 'Ask for the 15-minute review call, nothing broader',
+    meeting_booked: 'Meeting booked, preserve clarity and stop selling',
+  }[stage] || 'Move one disciplined step forward';
+}
+
+function currentAvoidPattern() {
+  const persona = selectedPersona();
+  if (!state.session) return 'Avoid generic pitching.';
+  const stage = state.session?.dialogue_summary?.acceptance_stage || state.session?.meta?.acceptance_stage || 'not_started';
+  if (stage === 'written_step_accepted' || stage === 'written_step_then_call') return 'Do not reopen the proof loop after material was accepted.';
+  if (persona?.archetype === 'finance') return 'Do not sell trust abstractly, stay on math, control, and payout path.';
+  if (persona?.doctrine_family === 'transition_winback') return 'Do not relaunch the whole old conversation, keep the slice narrow.';
+  return 'Do not widen scope before the buyer is ready.';
+}
+
+function currentMoveWhy() {
+  const count = sellerMessages().length;
+  const stage = state.session?.dialogue_summary?.acceptance_stage || state.session?.meta?.acceptance_stage || 'not_started';
+  if (count === 0) return 'First move should explain why this conversation exists at all.';
+  if (stage === 'written_step_accepted') return 'Buyer accepted proof, now the job is to land a bounded review call.';
+  if (stage === 'economics_engaged') return 'Buyer is in the logic, but still needs one concrete proof layer.';
+  return 'Advance the conversation by one disciplined step, not three.';
+}
+
+function renderBuyerBriefPanel() {
+  if (!buyerBriefPanel) return;
   const card = state.session?.sde_card;
   if (!card) {
-    personaSummaryPanel.innerHTML = '<p class="muted">Start a session to see the persona.</p>';
+    buyerBriefPanel.innerHTML = '<p class="muted">Start a session to see the buyer brief.</p>';
     return;
   }
   const contact = card.contact || {};
   const company = card.company || {};
   const persona = selectedPersona();
-  const rows = [
-    contact.name ? ['Name', contact.name] : null,
-    contact.title ? ['Profession', contact.title] : null,
-    persona?.role && persona.role !== contact.title ? ['Role', persona.role] : null,
-    company.name ? ['Company', company.name] : null,
-    company.hq ? ['Location', company.hq] : null,
-  ].filter(Boolean);
-  personaSummaryPanel.innerHTML = `
-    <div class="meta-grid">
-      ${rows.map(([label, value]) => `<div class="meta-item"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`).join('')}
+  buyerBriefPanel.innerHTML = `
+    <div class="meta-grid run-signal-meta">
+      ${[
+        contact.name ? ['Buyer', contact.name] : null,
+        contact.title ? ['Role', contact.title] : null,
+        company.name ? ['Company', company.name] : null,
+        company.hq ? ['Location', company.hq] : null,
+      ].filter(Boolean).map(([label, value]) => `<div class="meta-item"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`).join('')}
     </div>
+    <div class="detail-row"><strong>Doctrine</strong><span>${escapeHtml(persona?.doctrine_family_label || persona?.doctrine_family || 'Custom')}</span></div>
+    <div class="detail-row"><strong>Role essence</strong><span>${escapeHtml(roleEssence(persona))}</span></div>
+    <div class="detail-row"><strong>What matters now</strong><span>${escapeHtml(card.probable_pain || card.what_happened || 'Narrow the real problem before you pitch.')}</span></div>
+    <div class="detail-row"><strong>Desired next step</strong><span>${escapeHtml(currentDesiredStep())}</span></div>
   `;
 }
 
@@ -668,6 +719,11 @@ function renderBuyerStateLivePanel() {
 
   const latestTransition = latestBuyerStateTransition();
   const turnIndex = Number(latestTransition?.turn_index || 0);
+  const readinessLabel = buyerState.next_step_likelihood >= 0.66
+    ? 'Ready for a bounded next step'
+    : buyerState.next_step_likelihood >= 0.4
+    ? 'Interest is forming, still needs proof'
+    : 'Still early, keep narrowing and clarifying';
   if (buyerStateTurnMeta) {
     buyerStateTurnMeta.textContent = turnIndex
       ? `Synced to engine state after seller turn ${turnIndex}`
@@ -678,6 +734,7 @@ function renderBuyerStateLivePanel() {
 
   buyerStateLivePanel.innerHTML = `
     <div class="buyer-state-summary buyer-state-summary--live">
+      <p class="readiness-summary">${escapeHtml(readinessLabel)}</p>
       <div class="buyer-state-grid">
         ${LIVE_BUYER_METRIC_KEYS.map(([key, label]) => {
           const currentValue = buyerState[key];
@@ -723,10 +780,43 @@ function renderBuyerStateLivePanel() {
   `;
 }
 
+function renderNextMovePanel() {
+  if (!nextMovePanel) return;
+  nextMovePanel.innerHTML = `
+    <div class="detail-row"><strong>Why now</strong><span>${escapeHtml(currentMoveWhy())}</span></div>
+    <div class="detail-row"><strong>Current move type</strong><span>${escapeHtml({ clarify: 'Clarify', prove: 'Prove', ask: 'Ask narrowly' }[state.moveType] || 'Clarify')}</span></div>
+    <div class="detail-row"><strong>Proof layer</strong><span>${escapeHtml({ case: 'Case snippet', one_screen: 'One-screen proof', calculator: 'Calculator snapshot' }[state.proofLayer] || 'One-screen proof')}</span></div>
+    <div class="detail-row"><strong>Avoid</strong><span>${escapeHtml(currentAvoidPattern())}</span></div>
+  `;
+}
+
+function renderProgressRail() {
+  if (!progressRail) return;
+  const summary = state.session?.dialogue_summary || {};
+  const history = new Set((summary.acceptance_stage_history || []).map((item) => item.stage).filter(Boolean));
+  if (summary.acceptance_stage) history.add(summary.acceptance_stage);
+  const currentStage = summary.acceptance_stage || 'not_started';
+  const stages = [
+    ['not_started', 'Context'],
+    ['mechanics_engaged', 'Problem'],
+    ['economics_engaged', 'Proof logic'],
+    ['written_step_accepted', 'Written step'],
+    ['review_call_ready', 'Review call'],
+    ['meeting_booked', 'Meeting booked'],
+  ];
+  progressRail.innerHTML = stages.map(([id, label]) => {
+    const stateClass = currentStage === id ? 'is-current' : history.has(id) ? 'is-done' : '';
+    return `<div class="progress-step ${stateClass}"><span class="progress-step-dot"></span><span class="progress-step-label">${escapeHtml(label)}</span></div>`;
+  }).join('');
+  if (progressStageMeta) progressStageMeta.textContent = currentDesiredStep();
+}
+
 function renderRunOverview() {
-  renderPersonaSummaryPanel();
+  renderBuyerBriefPanel();
   renderRunSignalPanel();
   renderBuyerStateLivePanel();
+  renderNextMovePanel();
+  renderProgressRail();
 }
 
 function formatHintMemoryMeta(memoryContext) {
@@ -933,14 +1023,10 @@ function updateRunState() {
     channelBadge.className = `channel-badge channel-badge--${type}`;
   }
 
-  if (composerFocus) composerFocus.textContent = runFocus.textContent;
-
-  if (count === 0) {
-    personaSummaryCard?.classList.remove('is-collapsed');
-    runSignalCard?.classList.remove('is-collapsed');
-  } else if (count === 1 && !personaSummaryCard?.classList.contains('is-collapsed')) {
-    personaSummaryCard?.classList.add('is-collapsed');
-    runSignalCard?.classList.add('is-collapsed');
+  if (composerFocus) {
+    const move = { clarify: 'Clarify', prove: 'Prove', ask: 'Ask narrowly' }[state.moveType] || 'Clarify';
+    const proof = { case: 'case snippet', one_screen: 'one-screen proof', calculator: 'calculator snapshot' }[state.proofLayer] || 'one-screen proof';
+    composerFocus.textContent = `${runFocus.textContent} Current framing: ${move} via ${proof}.`;
   }
 
   renderRunOverview();
@@ -1295,6 +1381,16 @@ createPersonaBtn.addEventListener('click', () => openPersonaEditor('create'));
 navRunBtn?.addEventListener('click', () => {
   showPhase(state.session ? 'run' : 'setup');
 });
+moveTypeButtons().forEach((button) => button.addEventListener('click', () => {
+  state.moveType = button.dataset.moveType || 'clarify';
+  updateComposerStrategyChips();
+  updateRunState();
+}));
+proofLayerButtons().forEach((button) => button.addEventListener('click', () => {
+  state.proofLayer = button.dataset.proofLayer || 'one_screen';
+  updateComposerStrategyChips();
+  updateRunState();
+}));
 openAnalyticsBtn?.addEventListener('click', async () => {
   showPhase('analytics');
   try {
@@ -1398,7 +1494,7 @@ suggestBtn.addEventListener('click', async () => {
       memoryContext: result.memory_context || null
     };
     state.appliedHintId = null;
-    if (suggestionMeta) suggestionMeta.textContent = formatHintMemoryMeta(result.memory_context);
+    if (suggestionMeta) suggestionMeta.textContent = `${formatHintMemoryMeta(result.memory_context)} Current framing: ${state.moveType} / ${state.proofLayer}.`;
     suggestionText.textContent = result.suggestion;
     suggestionPanel.classList.remove('hidden');
   } catch {
@@ -1757,8 +1853,8 @@ randomFactorToggle?.addEventListener('change', () => {
 });
 
 // Collapsible context cards
-personaSummaryCard?.addEventListener('click', () => {
-  if (sellerMessages().length > 0) personaSummaryCard.classList.toggle('is-collapsed');
+buyerBriefCard?.addEventListener('click', () => {
+  if (sellerMessages().length > 0) buyerBriefCard.classList.toggle('is-collapsed');
 });
 runSignalCard?.addEventListener('click', () => {
   if (sellerMessages().length > 0) runSignalCard.classList.toggle('is-collapsed');
@@ -1772,6 +1868,7 @@ showPhase('setup', { replace: true });
 updateRunState();
 syncRandomizerUI();
 loadVersionInfo();
+updateComposerStrategyChips();
 loadPersonas().then(async () => {
   if (initialRoute.personaId) state.selectedPersonaId = initialRoute.personaId;
   if (initialRoute.shareSessionId) {

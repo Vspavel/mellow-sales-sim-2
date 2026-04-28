@@ -107,6 +107,22 @@ button:disabled { opacity: 0.55; cursor: default; }
 .run-meta-top { display: flex; align-items: center; gap: 10px; }
 .run-focus { font-size: 0.88rem; }
 .run-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.run-stage-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.progress-rail { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.progress-step { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.82rem; }
+.progress-step-dot { width: 10px; height: 10px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface-subtle); flex-shrink: 0; }
+.progress-step.is-done .progress-step-dot { background: var(--accent); border-color: var(--accent); }
+.progress-step.is-current .progress-step-dot { background: var(--text); border-color: var(--text); box-shadow: 0 0 0 4px var(--accent-num); }
+.progress-step.is-current .progress-step-label { color: var(--text); font-weight: 700; }
+.cockpit-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr) 280px; gap: 16px; align-items: start; }
+.cockpit-sidebar, .cockpit-main { display: flex; flex-direction: column; gap: 16px; }
+.transcript--cockpit { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px; min-height: 420px; }
+.composer-shell { display: flex; flex-direction: column; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px 18px; }
+.composer-strategy-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; justify-content: space-between; }
+.composer-chip-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.composer-chip-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-right: 4px; }
+.composer-chip { background: var(--surface-subtle); color: var(--text); border: 1px solid var(--border); padding: 7px 10px; font-size: 0.8rem; font-weight: 600; }
+.composer-chip.is-active { background: var(--accent-soft); border-color: var(--border-strong); }
 .run-insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
 .run-insight-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .run-insight-meta { font-size: 0.82rem; }
@@ -114,6 +130,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 .run-signal-text { font-size: 0.96rem; line-height: 1.6; padding: 14px 16px; border-radius: 12px; background: var(--surface-subtle); border: 1px solid var(--border); }
 .run-signal-details { display: grid; gap: 10px; }
 .buyer-state-summary--live { gap: 12px; }
+.readiness-summary { font-size: 0.9rem; line-height: 1.5; color: var(--text); }
 .buyer-metric-item { gap: 5px; }
 .buyer-metric-item span:last-child { align-self: flex-start; }
 .transcript { min-height: 320px; max-height: 52dvh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
@@ -292,7 +309,9 @@ button:disabled { opacity: 0.55; cursor: default; }
   .sidebar-group { gap: 6px; }
   .content { max-width: none; }
   .launch-card { padding: 20px 18px; }
-  .run-overview { grid-template-columns: 1fr; }
+  .run-overview, .cockpit-layout, .progress-rail { grid-template-columns: 1fr; }
+  .progress-step { padding: 6px 0; }
+  .composer-strategy-row { flex-direction: column; }
   .detail-cols, .split-grid { grid-template-columns: 1fr; }
   .run-insight-head { flex-direction: column; align-items: flex-start; }
   .composer-row, .run-footer { flex-direction: column; align-items: stretch; }

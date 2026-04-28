@@ -171,57 +171,97 @@
             </div>
           </header>
 
-          <div class="run-overview">
-            <section class="run-insight-card" id="personaSummaryCard">
-              <div class="run-insight-head">
-                <p class="phase-label">Persona</p>
-              </div>
-              <div id="personaSummaryPanel"></div>
-            </section>
-
-            <section class="run-insight-card" id="runSignalCard">
-              <div class="run-insight-head">
-                <p class="phase-label">Active signal</p>
-                <span id="runSignalBadge" class="channel-badge channel-badge--messenger">Selected by session</span>
-              </div>
-              <div id="runSignalPanel"></div>
-            </section>
-
-            <section class="run-insight-card">
-              <div class="run-insight-head">
-                <p class="phase-label">Live buyer state</p>
-                <span id="buyerStateTurnMeta" class="muted run-insight-meta">Baseline before first seller turn</span>
-              </div>
-              <div id="buyerStateLivePanel"></div>
-            </section>
-          </div>
-
-          <div id="transcript" class="transcript" aria-live="polite"></div>
-
-          <div id="suggestionPanel" class="suggestion-panel hidden">
-            <p class="suggestion-label">How a good seller might respond</p>
-            <p id="suggestionMeta" class="suggestion-meta muted"></p>
-            <p id="suggestionText" class="suggestion-text"></p>
-            <button id="useSuggestionBtn">Use</button>
-          </div>
-
-          <p class="composer-focus" id="composerFocus"></p>
-          <form id="messageForm" class="composer">
-            <textarea id="messageInput" rows="3" placeholder="Write your first touch or next message"></textarea>
-            <div class="composer-row">
-              <div class="hint-controls">
-                <select id="hintLangSelect" class="hint-lang-select">
-                  <option value="ru" selected>Русский</option>
-                  <option value="en">English</option>
-                </select>
-                <button type="button" id="suggestBtn" class="ghost-btn">Hint</button>
-              </div>
-              <button type="submit">Send</button>
+          <section class="run-stage-card">
+            <div class="run-insight-head">
+              <p class="phase-label">Deal progression</p>
+              <span id="progressStageMeta" class="muted run-insight-meta">Waiting for first seller move</span>
             </div>
-          </form>
+            <div id="progressRail" class="progress-rail"></div>
+          </section>
+
+          <div class="cockpit-layout">
+            <aside class="cockpit-sidebar cockpit-sidebar--left">
+              <section class="run-insight-card" id="buyerBriefCard">
+                <div class="run-insight-head">
+                  <p class="phase-label">Buyer brief</p>
+                </div>
+                <div id="buyerBriefPanel"></div>
+              </section>
+
+              <section class="run-insight-card" id="runSignalCard">
+                <div class="run-insight-head">
+                  <p class="phase-label">Why this conversation exists</p>
+                  <span id="runSignalBadge" class="channel-badge channel-badge--messenger">Selected by session</span>
+                </div>
+                <div id="runSignalPanel"></div>
+              </section>
+            </aside>
+
+            <section class="cockpit-main">
+              <div id="transcript" class="transcript transcript--cockpit" aria-live="polite"></div>
+
+              <div id="suggestionPanel" class="suggestion-panel hidden">
+                <div class="suggestion-panel-head">
+                  <p class="suggestion-label">Recommended next move</p>
+                  <select id="hintLangSelect" class="hint-lang-select">
+                    <option value="ru" selected>Русский</option>
+                    <option value="en">English</option>
+                  </select>
+                </div>
+                <p id="suggestionMeta" class="suggestion-meta muted"></p>
+                <p id="suggestionText" class="suggestion-text"></p>
+                <button id="useSuggestionBtn">Use</button>
+              </div>
+
+              <div class="composer-shell">
+                <div class="composer-strategy-row">
+                  <div class="composer-chip-group">
+                    <span class="composer-chip-label">Move type</span>
+                    <button type="button" class="composer-chip is-active" data-move-type="clarify">Clarify</button>
+                    <button type="button" class="composer-chip" data-move-type="prove">Prove</button>
+                    <button type="button" class="composer-chip" data-move-type="ask">Ask narrowly</button>
+                  </div>
+                  <div class="composer-chip-group">
+                    <span class="composer-chip-label">Proof layer</span>
+                    <button type="button" class="composer-chip" data-proof-layer="case">Case snippet</button>
+                    <button type="button" class="composer-chip is-active" data-proof-layer="one_screen">One-screen proof</button>
+                    <button type="button" class="composer-chip" data-proof-layer="calculator">Calculator snapshot</button>
+                  </div>
+                </div>
+
+                <p class="composer-focus" id="composerFocus"></p>
+                <form id="messageForm" class="composer">
+                  <textarea id="messageInput" rows="3" placeholder="Write your first touch or next message"></textarea>
+                  <div class="composer-row">
+                    <div class="hint-controls">
+                      <button type="button" id="suggestBtn" class="ghost-btn">Recommended move</button>
+                    </div>
+                    <button type="submit">Send</button>
+                  </div>
+                </form>
+              </div>
+            </section>
+
+            <aside class="cockpit-sidebar cockpit-sidebar--right">
+              <section class="run-insight-card" id="nextMoveCard">
+                <div class="run-insight-head">
+                  <p class="phase-label">Next move</p>
+                </div>
+                <div id="nextMovePanel"></div>
+              </section>
+
+              <section class="run-insight-card">
+                <div class="run-insight-head">
+                  <p class="phase-label">Buyer readiness</p>
+                  <span id="buyerStateTurnMeta" class="muted run-insight-meta">Baseline before first seller turn</span>
+                </div>
+                <div id="buyerStateLivePanel"></div>
+              </section>
+            </aside>
+          </div>
 
           <div class="run-footer">
-            <button id="finishBtn" class="secondary-btn" disabled>Finish run</button>
+            <button id="finishBtn" class="secondary-btn" disabled>Close run</button>
           </div>
         </section>
 
