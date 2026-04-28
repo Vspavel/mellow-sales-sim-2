@@ -1874,7 +1874,18 @@ function buyerShowsPostArtifactReviewReadiness(session) {
 }
 
 function isFinancePersonaId(personaId = '') {
-  return ['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(personaId);
+  if (!personaId) return false;
+  const persona = personas?.[personaId];
+  return persona?.archetype === 'finance'
+    || ['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance', 'andrey', 'cfo_price_pressure', 'fx_transparency_finance'].includes(personaId);
+}
+
+function buyerExplicitlyAcceptedWrittenStep(session) {
+  const lower = latestBuyerReplyText(session).toLowerCase();
+  return hasAny(lower, [
+    'договорились', 'хорошо', 'ок', 'ладно', 'согласен', 'согласна', 'присылайте', 'жду', 'посмотрю', 'скидывайте',
+    'send it', 'send it over', 'works', 'fine', 'sounds good', 'deal', 'i will review', 'i\'ll review'
+  ]);
 }
 
 function explicitWrittenRequest(text = '') {
@@ -1940,13 +1951,14 @@ function canMakeAsk(session) {
 
   // Finance personas should earn the call, but once the buyer has explicitly tied the written step
   // to a follow-up review, the system must convert instead of looping on more material.
-  if (['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(persona.id)) {
-    if (buyerStillAsksMechanics || buyerStillAsksEconomics) return false;
+  if (isFinancePersonaId(persona.id)) {
+    const artifactAccepted = buyerExplicitlyAcceptedWrittenStep(session);
+    if ((buyerStillAsksMechanics || buyerStillAsksEconomics) && !(artifactAccepted && ['artifact_only', 'artifact_then_call'].includes(acceptanceState))) return false;
     if (acceptanceState === 'artifact_then_call') return trust >= 1.02;
     if (acceptanceState === 'artifact_only') {
-      return trust >= 1.1
+      return trust >= 1.02
         && ['cost_breakdown', 'calculator_snapshot', 'competitor_brief', 'generic_artifact', 'implementation_memo', 'investor_readiness_memo', 'control_cost_memo'].includes(requestedArtifactType)
-        && buyerShowsFinanceCallReadiness(session);
+        && (buyerShowsFinanceCallReadiness(session) || artifactAccepted);
     }
     if (acceptanceState === 'narrow_walkthrough') return trust >= 1.04;
   }
@@ -2012,7 +2024,7 @@ function buyerNeedsImplementationReview(session) {
 function buyerNeedsConcreteFinanceProof(session) {
   const lower = latestBuyerReplyText(session).toLowerCase();
   const personaId = personaMeta(session)?.id;
-  if (!['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(personaId)) return false;
+  if (!isFinancePersonaId(personaId)) return false;
   return hasAny(lower, [
     'что именно', 'по шагам', 'где именно', 'в чем именно', 'какая разница в economics', 'разница в economics', 'правильные слова не аргумент',
     'разложите', 'разложи', 'покажите механику', 'покажите математику', 'покажите логику', 'что у вас входит', 'что остается на нашей стороне',
@@ -2456,7 +2468,7 @@ function getHintPolicyContext(session) {
   //   the conversion move is to lock the review slot now, not keep re-offering the same memo.
   if ((buyerAskedForMaterial || buyerAskedForImplementation || requestedArtifactType || ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) && sellerMessages(session).length >= 2 && !repairState) {
     const personaId = personaMeta(session)?.id;
-    const financeConversionPersona = ['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(personaId);
+    const financeConversionPersona = isFinancePersonaId(personaId);
     const forceDirectAfterArtifact = financeConversionPersona && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState);
     const forceConversionDirectAsk = ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState) && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(personaId);
     hintStage = (acceptanceState === 'artifact_only' && !forceDirectAfterArtifact && !forceConversionDirectAsk) ? 'bridge_step' : 'direct_ask';
@@ -8693,6 +8705,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
     `Available structured written proof asset: ${assets.writtenProof}`,
     `Available calculator asset: ${assets.calculator}`,
     `Asset use rule: use at most one main asset in this hint. Case snippet is for proof, written proof is for bounded next-step, calculator is mainly for economics/review stage, not for opener or generic pitch.`,
+    `Critical seam rule: if the buyer already accepted a written step or said they will review the material, do NOT repeat the material offer. Answer the remaining doubt directly, then convert to one bounded 15-minute review call tied to that material.`,
     ``,
     ...(hintVariant !== 'first_attempt' ? [
       `## ⚠️ Retry variant: ${hintVariant}`,
