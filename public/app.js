@@ -7,6 +7,7 @@ const state = {
   selectedSignalType: 'general',
   selectedScenarioDialogueType: 'outbound',
   selectedGroupId: '',
+  settingsMode: 'doctrine',
   settingsLayer: 'sides',
   settingsRecordId: '',
   session: null,
@@ -35,7 +36,9 @@ const signalTypeSelect = document.getElementById('signalTypeSelect');
 const scenarioDialogueTypeSelect = document.getElementById('scenarioDialogueTypeSelect');
 const groupSelect = document.getElementById('groupSelect');
 const navRunBtn = document.getElementById('navRunBtn');
-const openSettingsBtn = document.getElementById('openSettingsBtn');
+const openDoctrineSettingsBtn = document.getElementById('openDoctrineSettingsBtn');
+const openSignalSettingsBtn = document.getElementById('openSignalSettingsBtn');
+const openPersonaSettingsBtn = document.getElementById('openPersonaSettingsBtn');
 const createPersonaBtn = document.getElementById('createPersonaBtn');
 const personaEditor = document.getElementById('personaEditor');
 const personaEditorTitle = document.getElementById('personaEditorTitle');
@@ -161,6 +164,11 @@ const backToHistoryBtn = document.getElementById('backToHistoryBtn');
 const downloadResultBtn = document.getElementById('downloadResultBtn');
 const copyShareLinkBtn = document.getElementById('copyShareLinkBtn');
 const appVersion = document.getElementById('appVersion');
+const settingsPanelTitle = document.getElementById('settingsPanelTitle');
+const settingsModeDoctrineBtn = document.getElementById('settingsModeDoctrine');
+const settingsModeSignalBtn = document.getElementById('settingsModeSignal');
+const settingsModePersonaBtn = document.getElementById('settingsModePersona');
+const settingsLayerField = document.getElementById('settingsLayerField');
 const settingsLayerSelect = document.getElementById('settingsLayerSelect');
 const settingsRecordList = document.getElementById('settingsRecordList');
 const doctrineForm = document.getElementById('doctrineForm');
@@ -188,7 +196,9 @@ const navPhaseButtons = [
   [navRunBtn, 'run'],
   [openAnalyticsBtn, 'analytics'],
   [openHistoryBtn, 'history'],
-  [openSettingsBtn, 'settings'],
+  [openDoctrineSettingsBtn, 'settings'],
+  [openSignalSettingsBtn, 'settings'],
+  [openPersonaSettingsBtn, 'settings'],
 ].filter(([el]) => el);
 
 let historyData = [];
@@ -285,8 +295,15 @@ function sidebarActivePhase() {
 function updateSidebarNav() {
   const active = sidebarActivePhase();
   navPhaseButtons.forEach(([button, phase]) => {
-    button.classList.toggle('is-active', phase === active);
-    button.setAttribute('aria-current', phase === active ? 'page' : 'false');
+    const isSettingsButton = phase === 'settings';
+    const settingsMatch = active === 'settings' && (
+      (button === openDoctrineSettingsBtn && state.settingsMode === 'doctrine')
+      || (button === openSignalSettingsBtn && state.settingsMode === 'signal')
+      || (button === openPersonaSettingsBtn && state.settingsMode === 'persona')
+    );
+    const isActive = isSettingsButton ? settingsMatch : phase === active;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-current', isActive ? 'page' : 'false');
   });
 }
 
@@ -1076,10 +1093,10 @@ function ensureScenarioSelection() {
   if (!dialogueTypes.some((item) => item.id === state.selectedScenarioDialogueType)) state.selectedScenarioDialogueType = dialogueTypes[0]?.id || 'outbound';
 
   const groups = filteredGroups();
-  if (!groups.some((item) => item.id === state.selectedGroupId)) state.selectedGroupId = groups[0]?.id || '';
+  if (state.selectedGroupId && !groups.some((item) => item.id === state.selectedGroupId)) state.selectedGroupId = '';
 
   const personas = filteredPersonas();
-  if (!personas.some((item) => item.id === state.selectedPersonaId)) state.selectedPersonaId = personas[0]?.id || '';
+  if (state.selectedPersonaId && !personas.some((item) => item.id === state.selectedPersonaId)) state.selectedPersonaId = '';
 }
 
 function renderSelectOptions(selectEl, items, valueKey = 'id', labelKey = 'label', placeholder = '') {
@@ -1664,11 +1681,7 @@ async function selectPersona(personaId) {
     signalBrief.classList.remove('hidden');
     setupCta.classList.remove('hidden');
     resetBtn.classList.remove('hidden');
-    showPhase('run', { replace: true });
     updateRunState();
-    messageInput.placeholder = state.session?.dialogue_type === 'email'
-      ? 'Hi [Name],\n\n[Your message here]\n\nBest, [Your name]'
-      : 'Write your first touch or next message';
     syncRoute(true);
   } catch (error) {
     signalCard.innerHTML = `<p class="muted">${escapeHtml(error.message)}</p>`;
@@ -1764,12 +1777,39 @@ async function syncScenarioFlow(refreshSession = true) {
   }
 }
 
+function settingsModeMeta() {
+  if (state.settingsMode === 'persona') {
+    return { title: 'Persona settings', layer: 'profiles', showLayerSelect: false };
+  }
+  if (state.settingsMode === 'signal') {
+    return { title: 'Signal settings', layer: 'signal_types', showLayerSelect: false };
+  }
+  return { title: 'Doctrine settings', layer: state.settingsLayer || 'sides', showLayerSelect: true };
+}
+
+function setSettingsMode(mode) {
+  state.settingsMode = ['doctrine', 'signal', 'persona'].includes(mode) ? mode : 'doctrine';
+  const meta = settingsModeMeta();
+  if (!meta.showLayerSelect) state.settingsLayer = meta.layer;
+  state.settingsRecordId = '';
+  settingsPanelTitle.textContent = meta.title;
+  settingsModeDoctrineBtn?.classList.toggle('is-active', state.settingsMode === 'doctrine');
+  settingsModeSignalBtn?.classList.toggle('is-active', state.settingsMode === 'signal');
+  settingsModePersonaBtn?.classList.toggle('is-active', state.settingsMode === 'persona');
+  settingsLayerField?.classList.toggle('settings-layer-hidden', !meta.showLayerSelect);
+  if (meta.showLayerSelect && settingsLayerSelect) settingsLayerSelect.value = state.settingsLayer;
+  renderSettingsRecordList();
+  renderDoctrineEditor();
+}
+
 function currentDoctrineRecord() {
-  return state.doctrineConfig?.[state.settingsLayer]?.[state.settingsRecordId] || null;
+  const meta = settingsModeMeta();
+  return state.doctrineConfig?.[meta.layer]?.[state.settingsRecordId] || null;
 }
 
 function renderSettingsRecordList() {
-  const items = doctrineEntries(state.settingsLayer);
+  const meta = settingsModeMeta();
+  const items = doctrineEntries(meta.layer);
   if (!items.length) {
     settingsRecordList.innerHTML = '<p class="muted">No doctrine records on this layer yet.</p>';
     return;
@@ -1841,6 +1881,7 @@ function renderDoctrineEditor() {
 
 async function saveDoctrineRecord(event) {
   event.preventDefault();
+  const meta = settingsModeMeta();
   const record = currentDoctrineRecord();
   if (!record) return;
   saveDoctrineBtn.disabled = true;
@@ -1862,7 +1903,7 @@ async function saveDoctrineRecord(event) {
       forbidden_moves: textareaToList(doctrineForbiddenMovesInput.value),
       tone_rules: textareaToList(doctrineToneRulesInput.value),
     };
-    await api(`api/doctrine-config/${state.settingsLayer}/${state.settingsRecordId}`, { method: 'PATCH', body: JSON.stringify(payload) });
+    await api(`api/doctrine-config/${meta.layer}/${state.settingsRecordId}`, { method: 'PATCH', body: JSON.stringify(payload) });
     await loadDoctrineConfig();
     await loadPersonas();
     renderSettingsRecordList();
@@ -1879,29 +1920,42 @@ sideSelect?.addEventListener('change', async () => {
   state.selectedSide = sideSelect.value;
   state.selectedProduct = '';
   state.selectedGroupId = '';
-  await syncScenarioFlow(true);
+  state.selectedPersonaId = '';
+  state.session = null;
+  await syncScenarioFlow(false);
 });
 
 productSelect?.addEventListener('change', async () => {
   state.selectedProduct = productSelect.value;
   state.selectedGroupId = '';
-  await syncScenarioFlow(true);
+  state.selectedPersonaId = '';
+  state.session = null;
+  await syncScenarioFlow(false);
 });
 
 signalTypeSelect?.addEventListener('change', async () => {
   state.selectedSignalType = signalTypeSelect.value;
-  await syncScenarioFlow(true);
+  state.session = null;
+  if (state.selectedPersonaId) {
+    await selectPersona(state.selectedPersonaId);
+  } else {
+    await syncScenarioFlow(false);
+  }
 });
 
 scenarioDialogueTypeSelect?.addEventListener('change', async () => {
   state.selectedScenarioDialogueType = scenarioDialogueTypeSelect.value;
   state.selectedGroupId = '';
-  await syncScenarioFlow(true);
+  state.selectedPersonaId = '';
+  state.session = null;
+  await syncScenarioFlow(false);
 });
 
 groupSelect?.addEventListener('change', async () => {
   state.selectedGroupId = groupSelect.value;
-  await syncScenarioFlow(true);
+  state.selectedPersonaId = '';
+  state.session = null;
+  await syncScenarioFlow(false);
 });
 
 personaSelect.addEventListener('change', () => {
@@ -1967,11 +2021,16 @@ openAnalyticsBtn?.addEventListener('click', async () => {
     analyticsGeneratedAt.textContent = error.message || 'Failed to load analytics';
   }
 });
-openSettingsBtn?.addEventListener('click', async () => {
+function openSettingsSurface(mode) {
   showPhase('settings');
-  renderSettingsRecordList();
-  renderDoctrineEditor();
-});
+  setSettingsMode(mode);
+}
+openDoctrineSettingsBtn?.addEventListener('click', () => openSettingsSurface('doctrine'));
+openSignalSettingsBtn?.addEventListener('click', () => openSettingsSurface('signal'));
+openPersonaSettingsBtn?.addEventListener('click', () => openSettingsSurface('persona'));
+settingsModeDoctrineBtn?.addEventListener('click', () => setSettingsMode('doctrine'));
+settingsModeSignalBtn?.addEventListener('click', () => setSettingsMode('signal'));
+settingsModePersonaBtn?.addEventListener('click', () => setSettingsMode('persona'));
 settingsLayerSelect?.addEventListener('change', () => {
   state.settingsLayer = settingsLayerSelect.value;
   state.settingsRecordId = '';
@@ -2031,11 +2090,25 @@ deletePersonaBtn.addEventListener('click', async () => {
 });
 
 // Segmented control
-dialogueTypeMessengerBtn?.addEventListener('click', () => setDialogueType('messenger'));
-dialogueTypeEmailBtn?.addEventListener('click', () => setDialogueType('email'));
+dialogueTypeMessengerBtn?.addEventListener('click', async () => {
+  state.selectedPersonaId = '';
+  state.session = null;
+  setDialogueType('messenger', { skipSessionRefresh: true });
+  await syncScenarioFlow(false);
+});
+dialogueTypeEmailBtn?.addEventListener('click', async () => {
+  state.selectedPersonaId = '';
+  state.session = null;
+  setDialogueType('email', { skipSessionRefresh: true });
+  await syncScenarioFlow(false);
+});
 
 // Run phase
-startConvBtn.addEventListener('click', () => {
+startConvBtn.addEventListener('click', async () => {
+  if (!state.selectedPersonaId) return;
+  if (!state.session) {
+    await selectPersona(state.selectedPersonaId);
+  }
   showPhase('run');
   updateRunState();
   const isEmail = state.session?.dialogue_type === 'email';
@@ -2501,8 +2574,7 @@ Promise.all([loadDoctrineConfig(), loadPersonas()]).then(async () => {
   }
   if (initialRoute.phase === 'settings') {
     showPhase('settings', { replace: true });
-    renderSettingsRecordList();
-    renderDoctrineEditor();
+    setSettingsMode(state.settingsMode);
     return;
   }
   if (initialRoute.phase === 'run' && state.session) {
@@ -2549,8 +2621,7 @@ window.addEventListener('popstate', async () => {
   if (route.phase === 'settings') {
     renderScenarioSelectors();
     renderPersonaDropdown();
-    renderSettingsRecordList();
-    renderDoctrineEditor();
+    setSettingsMode(state.settingsMode);
     showPhase('settings', { skipRoute: true });
     return;
   }

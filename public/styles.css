@@ -42,6 +42,10 @@ button:disabled { opacity: 0.55; cursor: default; }
 .sidebar-nav-btn.is-active { background: var(--surface); border-color: var(--border-strong); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 .sidebar-footnote { margin-top: auto; font-size: 0.8rem; line-height: 1.45; }
 .content { width: 100%; max-width: 920px; }
+.settings-mode-switch { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.settings-mode-switch .sidebar-nav-btn { padding: 10px 12px; border-color: var(--border); background: var(--surface); }
+.settings-mode-switch .sidebar-nav-btn.is-active { background: var(--accent-soft); }
+.settings-layer-hidden { display: none !important; }
 
 .phase-panel { display: flex; flex-direction: column; gap: 24px; }
 .panel-header { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }

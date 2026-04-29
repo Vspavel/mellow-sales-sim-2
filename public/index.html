@@ -19,17 +19,19 @@
           <div class="sidebar-group">
             <p class="sidebar-group-label">Primary</p>
             <button id="navRunBtn" class="sidebar-nav-btn is-active" type="button">Run</button>
-            <button id="openHistoryBtn" class="sidebar-nav-btn" type="button">History</button>
           </div>
 
           <div class="sidebar-group">
             <p class="sidebar-group-label">Insight</p>
             <button id="openAnalyticsBtn" class="sidebar-nav-btn" type="button">Analytics</button>
+            <button id="openHistoryBtn" class="sidebar-nav-btn" type="button">History</button>
           </div>
 
           <div class="sidebar-group">
             <p class="sidebar-group-label">System</p>
-            <button id="openSettingsBtn" class="sidebar-nav-btn" type="button">Settings</button>
+            <button id="openDoctrineSettingsBtn" class="sidebar-nav-btn" type="button">Doctrine settings</button>
+            <button id="openSignalSettingsBtn" class="sidebar-nav-btn" type="button">Signal settings</button>
+            <button id="openPersonaSettingsBtn" class="sidebar-nav-btn" type="button">Persona settings</button>
             <button id="createPersonaBtn" class="sidebar-nav-btn" type="button">Buyer scenarios</button>
           </div>
         </nav>
@@ -189,22 +191,25 @@
           <header class="panel-header">
             <a class="app-brand-link" href="/" aria-label="Go to Mellow Sales Simulator home">
               <p class="phase-label">System</p>
-              <h1>Conversation doctrines</h1>
+              <h1 id="settingsPanelTitle">Conversation doctrines</h1>
             </a>
           </header>
 
           <div class="settings-layout">
             <aside class="settings-sidebar">
-              <label class="field-group">
+              <div class="settings-mode-switch" id="settingsModeSwitch">
+                <button id="settingsModeDoctrine" class="sidebar-nav-btn is-active" type="button">Doctrines</button>
+                <button id="settingsModeSignal" class="sidebar-nav-btn" type="button">Signals</button>
+                <button id="settingsModePersona" class="sidebar-nav-btn" type="button">Personas</button>
+              </div>
+              <label class="field-group" id="settingsLayerField">
                 <span class="field-label">Layer</span>
                 <select id="settingsLayerSelect" class="text-input">
                   <option value="sides">Side</option>
                   <option value="products">Product</option>
-                  <option value="signal_types">Signal type</option>
                   <option value="dialogue_types">Dialogue type</option>
                   <option value="environments">Environment</option>
                   <option value="groups">Group</option>
-                  <option value="profiles">Profile</option>
                 </select>
               </label>
               <div class="settings-record-list" id="settingsRecordList"></div>
