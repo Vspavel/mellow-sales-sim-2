@@ -56,22 +56,22 @@
           "founded_year": 2018,
           "latest_event": "Компания обсуждает стратегическое партнёрство и внешний legal review."
         },
-        "what_happened": "Финансовый менеджер пожаловался на ручную сверку выплат подрядчикам, а один платёж недавно завис на 23 дня.",
+        "what_happened": "Финансовая команда застряла в ручной сверке выплат подрядчикам, а один из платежей завис почти на три недели прямо перед внешней юридической проверкой.",
         "apollo_context": [
           "45 подрядчиков в UA/KZ/GE/AM и часть с паспортами РФ",
           "Текущая схема: Wise / Payoneer / посредник в Грузии",
           "Скоро внешний legal review contractor/payment structure"
         ],
         "target_profile": "A",
-        "probable_pain": "Санкционный и налоговый риск + ручная возня в финансах",
+        "probable_pain": "Сочетание санкционного и налогового риска с ручной перегрузкой внутри finance.",
         "recommended_product": "CoR",
         "recommended_channel": "LinkedIn",
-        "first_touch_hint": "Зайди через зависший платёж и предстоящий legal review, не обещай магических compliance-обещаний.",
+        "first_touch_hint": "Заходи через зависший платёж и предстоящую внешнюю проверку. Не обещай снять весь риск, покажи более управляемую схему и ясные границы ответственности.",
         "dont_do": [
           "Не обещай защиту от misclassification",
           "Не начинай с обезличенного захода"
         ],
-        "rendered_text": "Сигнал: у Northstar Games перед внешним legal review всплыл pain по contractor payments. Один платёж завис на 23 дня, а finance команда тратит 3-4 дня в месяц на ручную сверку. Контекст: 45 подрядчиков, hard geo, смесь Wise / Payoneer / посредника."
+        "rendered_text": "Сигнал: у Northstar Games прямо перед внешней юридической проверкой всплыл сбой в выплатах подрядчикам. Один платёж завис почти на три недели, а финансовая команда тратит по нескольку дней в месяц на ручную сверку по 45 подрядчикам в сложных юрисдикциях."
       },
       {
         "card_id": "andrey-card-2",
@@ -91,22 +91,22 @@
           "founded_year": 2017,
           "latest_event": "Совет директоров поставил задачу привести contractor arrangements в порядок до Series B."
         },
-        "what_happened": "Совет директоров попросил CFO аудировать текущую схему работы с подрядчиками перед переговорами о раунде. CFO видит риски в смешанной geo-структуре.",
+        "what_happened": "Совет директоров поручил CFO привести схему работы с подрядчиками в порядок до переговоров о новом раунде, потому что текущая география и платёжная логика выглядят слишком пёстро.",
         "apollo_context": [
           "60+ contractors in PL/UA/GE/KZ",
           "Часть выплат идёт через личные счета",
           "Board требует clean contractor documentation до раунда"
         ],
         "target_profile": "A",
-        "probable_pain": "Недостаточная управляемость схемы перед investor diligence",
+        "probable_pain": "Схема с подрядчиками выглядит недостаточно управляемой и объяснимой перед инвесторской проверкой.",
         "recommended_product": "CoR",
         "recommended_channel": "LinkedIn",
-        "first_touch_hint": "Заходи через diligence-readiness и управляемость схемы, не общий compliance-нарратив.",
+        "first_touch_hint": "Заходи через готовность к инвесторской проверке и управляемость схемы. Не уходи в общий комплаенс-нарратив.",
         "dont_do": [
           "Не обещай снять legal risk целиком",
           "Не говори как с операционным менеджером"
         ],
-        "rendered_text": "Сигнал: у Stellarpath совет директоров поставил задачу привести contractor arrangements в порядок до Series B. CFO видит риски в geo-структуре и частичных выплатах через личные счета."
+        "rendered_text": "Сигнал: у Stellarpath совет директоров потребовал привести контур работы с подрядчиками в порядок до Series B. CFO видит риск в смешанной географии и частичных выплатах через личные счета, что плохо выглядит перед инвесторами."
       }
     ],
     "merged_into": null,
@@ -282,22 +282,22 @@
           "founded_year": 2020,
           "latest_event": "Series A закрыта три недели назад, lead investor запросил cleaner contractor controls."
         },
-        "what_happened": "После закрытия раунда CFO поднимает тему contractor documentation и готовится к будущему diligence.",
+        "what_happened": "После закрытия раунда CFO поднимает вопрос по документам и выплатам подрядчикам, чтобы заранее подготовить схему к следующей инвесторской проверке.",
         "apollo_context": [
           "6 contractors в UA/KZ и новый legal counsel",
           "Нужно быстро собрать более чистую contractor/payment structure",
           "Есть чувствительность к audit trail и explainability перед инвесторами"
         ],
         "target_profile": "C",
-        "probable_pain": "Потеря управляемости перед инвесторами и future due diligence pressure",
+        "probable_pain": "Потеря управляемости перед инвесторами и давление будущей проверки.",
         "recommended_product": "CoR",
         "recommended_channel": "LinkedIn + email",
-        "first_touch_hint": "Зайди через readiness к diligence и управляемость схемы до следующего раунда.",
+        "first_touch_hint": "Заходи через готовность к следующей инвесторской проверке и способность быстро собрать объяснимую схему.",
         "dont_do": [
           "Не обещай, что Mellow решит legal risk за CFO",
           "Не сваливайся в общий fintech pitch"
         ],
-        "rendered_text": "Сигнал: CFO только что вошла в роль после раунда и уже собирает более чистую contractor/payment structure перед будущим diligence. Есть чувствительность к audit trail, contractor docs и explainability для инвесторов."
+        "rendered_text": "Сигнал: CFO после закрытия раунда уже собирает более чистую схему работы с подрядчиками и выплатами до следующего витка инвесторской проверки. Чувствительность высокая к прозрачности операций, документам и тому, насколько схему можно внятно объяснить."
       },
       {
         "card_id": "cfo-round-card-2",
@@ -317,22 +317,22 @@
           "founded_year": 2021,
           "latest_event": "Lead investor из Series A запросил cleaner contractor controls и документацию."
         },
-        "what_happened": "После закрытия раунда lead investor выразил обеспокоенность текущей contractor схемой и попросил CFO привести её в порядок до следующего quarterly review.",
+        "what_happened": "После закрытия раунда ведущий инвестор попросил CFO привести контур подрядчиков в порядок к ближайшему квартальному разбору.",
         "apollo_context": [
           "25 contractors in NL/UA/GE with mixed documentation",
           "Investor-level pressure, не внутренняя инициатива",
           "CFO работает в условиях сжатых сроков"
         ],
         "target_profile": "C",
-        "probable_pain": "Investor pressure без инструмента для быстрого наведения порядка",
+        "probable_pain": "Давление со стороны инвестора без удобного инструмента, чтобы быстро навести порядок.",
         "recommended_product": "CoR",
         "recommended_channel": "LinkedIn + email",
-        "first_touch_hint": "Зайди через давление инвестора и сжатые сроки — это не внутренняя уборка, это investor-level readiness.",
+        "first_touch_hint": "Заходи через давление сверху и короткий срок. Это не внутренняя уборка ради красоты, а подготовка к инвесторскому разбору.",
         "dont_do": [
           "Не затягивай вступление",
           "Не уходи в общий compliance pitch"
         ],
-        "rendered_text": "Сигнал: после Series A у Liftwave lead investor запросил cleaner contractor controls. CFO под давлением привести схему в порядок до следующего quarterly review."
+        "rendered_text": "Сигнал: после Series A у Liftwave ведущий инвестор потребовал более чистый контроль подрядчиков. CFO нужно быстро привести схему в порядок до ближайшего квартального разбора."
       }
     ],
     "merged_into": null,
@@ -471,22 +471,22 @@
           "founded_year": 2018,
           "latest_event": "Компания ускоряет hiring contractors и ops уже не успевает за payout coordination."
         },
-        "what_happened": "Ops manager тратит несколько часов в неделю на статусы, сверки и ручные follow-ups по выплатам подрядчикам.",
+        "what_happened": "Операционный менеджер тратит по нескольку часов в неделю на статусы, сверки и ручные напоминания по выплатам подрядчикам.",
         "apollo_context": [
           "30+ contractors in KZ/GE/RS/AM",
           "Статусы по выплатам размазаны по чатам и таблицам",
           "Главная боль не legal framing, а отсутствие предсказуемого процесса"
         ],
         "target_profile": "E",
-        "probable_pain": "Ручная координация съедает время ops и ломает predictability",
+        "probable_pain": "Ручная координация съедает время операционной команды и ломает предсказуемость процесса.",
         "recommended_product": "CM",
         "recommended_channel": "email",
-        "first_touch_hint": "Заходи через снятие хаоса, статусы и меньше ручных follow-ups.",
+        "first_touch_hint": "Заходи через снятие хаоса, ясные статусы и меньше ручных напоминаний.",
         "dont_do": [
           "Не говори слишком абстрактно",
           "Не продавай investor narrative тому, кто живёт процессом"
         ],
-        "rendered_text": "Сигнал: у BlueMesa ops manager уже держит payout coordination руками через таблицы и чаты. Боль в predictability, статусах и потере времени на ручные follow-ups."
+        "rendered_text": "Сигнал: у BlueMesa операционный менеджер до сих пор держит координацию выплат руками через таблицы и чаты. Боль в предсказуемости, статусах и потерянном времени на постоянные напоминания."
       },
       {
         "card_id": "ops-manager-card-2",
@@ -506,22 +506,22 @@
           "founded_year": 2019,
           "latest_event": "Finance запросил детализацию contractor payments за Q1 для внутреннего audit."
         },
-        "what_happened": "Finance team запросила у ops детализацию всех contractor payments за квартал. Ops manager потратила 3 дня на сборку данных из 5 разных источников.",
+        "what_happened": "Finance запросила детализацию всех выплат подрядчикам за квартал, и ops потратила три дня, чтобы собрать картину из пяти разных источников.",
         "apollo_context": [
           "25 contractors across LT/EE/LV/UA",
           "Данные о выплатах размазаны между Slack, Wise и таблицами",
           "Finance недовольна качеством reporting"
         ],
         "target_profile": "E",
-        "probable_pain": "Нет единого источника данных — любой запрос от finance превращается в ручную сборку",
+        "probable_pain": "Нет единого источника данных, поэтому любой запрос от finance превращается в ручную сборку.",
         "recommended_product": "CM",
         "recommended_channel": "email",
-        "first_touch_hint": "Заходи через боль ручного reporting: ops тратит дни на то, что должно занимать минуты.",
+        "first_touch_hint": "Заходи через боль ручной отчётности. Для ops это должно занимать минуты, а не дни.",
         "dont_do": [
           "Не усложняй compliance-нарративом",
           "Не пиши длинно"
         ],
-        "rendered_text": "Сигнал: у TalentHub finance запросила детализацию contractor payments за квартал — ops потратила 3 дня на сборку из 5 источников. Боль в отсутствии единого источника и ручном reporting."
+        "rendered_text": "Сигнал: у TalentHub запрос из finance на детализацию выплат подрядчикам за квартал превратил ops в ручной сборочный цех на три дня. Главная боль в том, что нет единого источника данных и нормального процесса отчётности."
       }
     ],
     "merged_into": null,
@@ -582,22 +582,22 @@
           "founded_year": 2017,
           "latest_event": "Finance наводит порядок перед annual audit и пересматривает contractor payout controls."
         },
-        "what_happened": "Команда finance устала жить между ручной сверкой, разбросанными документами и вопросами от leadership.",
+        "what_happened": "Команда finance устала жить между ручной сверкой, разбросанными документами и постоянными вопросами от руководства.",
         "apollo_context": [
           "Есть distributed contractors across EE/CIS",
           "Внутренний pressure на cleaner reporting and documentation",
           "Head of Finance нужно решение, которое легче объяснять вверх и вести руками вниз"
         ],
         "target_profile": "F",
-        "probable_pain": "Слабый контроль и ручная нагрузка внутри finance without clear audit story",
+        "probable_pain": "Слабый контроль и высокая ручная нагрузка внутри finance без внятной истории для аудита.",
         "recommended_product": "CoR",
         "recommended_channel": "email",
-        "first_touch_hint": "Держи линию control + explainability + less manual reconciliation.",
+        "first_touch_hint": "Держи линию на контроль, объяснимость и снижение ручной сверки. Говори спокойно и предметно.",
         "dont_do": [
           "Не продавай через founder-energy",
           "Не обещай тотальный legal shield"
         ],
-        "rendered_text": "Сигнал: у Head of Finance накопился разрыв между ручной сверкой contractor payouts и требованием leadership видеть контролируемую, объяснимую схему. Идёт подготовка к annual audit."
+        "rendered_text": "Сигнал: у Head of Finance накопился разрыв между ручной сверкой выплат подрядчикам и требованием руководства видеть контролируемую, объяснимую схему. Команда уже готовится к ежегодному аудиту."
       },
       {
         "card_id": "head-finance-card-2",
@@ -617,22 +617,22 @@
           "founded_year": 2018,
           "latest_event": "CFO поставил задачу привести contractor controls в порядок до Series B."
         },
-        "what_happened": "Готовясь к Series B, CFO поручил Head of Finance провести аудит contractor controls. Текущая схема не готова к investor-level scrutiny.",
+        "what_happened": "Готовясь к Series B, CFO поручил Head of Finance проверить контур подрядчиков. Текущая схема пока плохо выглядит для инвесторской проверки.",
         "apollo_context": [
           "35 contractors in FI/EE/UA/GE",
           "Investor-level pressure через CFO",
           "Head of Finance нужен инструмент, который можно показать вверх"
         ],
         "target_profile": "F",
-        "probable_pain": "Схема не готова к diligence — Head of Finance под двойным давлением",
+        "probable_pain": "Схема не готова к проверке, и Head of Finance одновременно отвечает и вверх, и за ручное исполнение вниз.",
         "recommended_product": "CoR",
         "recommended_channel": "email",
-        "first_touch_hint": "Говори про explainability вверх и управляемость вниз — у Head of Finance два фронта.",
+        "first_touch_hint": "Говори про объяснимость для руководства и управляемость для команды. У Head of Finance действительно два фронта.",
         "dont_do": [
           "Не уходи в founder-pitch",
           "Не обещай полного устранения риска"
         ],
-        "rendered_text": "Сигнал: у Greychain CFO поставил задачу привести contractor controls в порядок до Series B. Head of Finance нужно решение, которое можно показать вверх и которым можно управлять вниз."
+        "rendered_text": "Сигнал: у Greychain CFO поставил задачу привести контроль подрядчиков в порядок до Series B. Head of Finance нужен контур, который можно спокойно показать руководству и которым можно управлять в ежедневной работе."
       }
     ],
     "merged_into": null,
@@ -695,22 +695,22 @@
           "founded_year": 2021,
           "latest_event": "Internal legal обновляет шаблоны подрядчиков и ищет более чистую payout/document flow."
         },
-        "what_happened": "Юрист получила задачу пересобрать contractor documentation и хочет сократить серые зоны между ops, finance и current intermediaries.",
+        "what_happened": "Внутренний юрист получила задачу пересобрать документы по подрядчикам и убрать серые зоны между операционным контуром, финансами и текущими посредниками.",
         "apollo_context": [
           "Есть вопросы к consistency документов и traceability",
           "Нужно решение, которое legal может объяснить finance и leadership",
           "Фокус на границах ответственности, audit trail и process discipline"
         ],
         "target_profile": "G",
-        "probable_pain": "Слишком много серых зон и ручных исключений в contractor/document flow",
+        "probable_pain": "Слишком много серых зон и ручных исключений в документах и платёжном контуре подрядчиков.",
         "recommended_product": "CoR",
         "recommended_channel": "email",
-        "first_touch_hint": "Говори аккуратно: документация, audit trail, ограничения, без overclaiming.",
+        "first_touch_hint": "Говори аккуратно: документы, прозрачность операций, ограничения и границы ответственности, без завышенных обещаний.",
         "dont_do": [
           "Не обещай снять legal risk целиком",
           "Не уходи в founder-style speed pitch"
         ],
-        "rendered_text": "Сигнал: internal legal пересобирает contractor documentation и хочет более explainable payout/document flow. Главная чувствительность в границах ответственности, traceability и лишних серых зонах."
+        "rendered_text": "Сигнал: internal legal пересобирает документы по подрядчикам и ищет более понятный контур выплат и ответственности. Главная чувствительность в границах ответственности, прозрачности операций и лишних серых зонах."
       },
       {
         "card_id": "internal-legal-card-2",
@@ -730,22 +730,22 @@
           "founded_year": 2021,
           "latest_event": "Компания расширяется на новые EU-юрисдикции и Legal чистит contractor classification."
         },
-        "what_happened": "При расширении на новые EU-рынки legal обнаружила непоследовательную contractor классификацию между юрисдикциями. Нужно привести в порядок до выхода на новый рынок.",
+        "what_happened": "При выходе на новые рынки ЕС legal обнаружила, что подрядчики классифицируются по-разному в разных юрисдикциях, и это нужно выровнять до расширения.",
         "apollo_context": [
           "Expansion в DE и FR, contractor structure не унифицирована",
           "Legal отвечает за документацию перед новыми регуляторными средами",
           "Проблема в consistency, не в отдельных инцидентах"
         ],
         "target_profile": "G",
-        "probable_pain": "Несогласованная классификация между юрисдикциями создаёт regulatory exposure при expansion",
+        "probable_pain": "Несогласованная классификация между юрисдикциями создаёт регуляторный риск при расширении.",
         "recommended_product": "CoR",
         "recommended_channel": "email",
-        "first_touch_hint": "Говори про consistency across jurisdictions и audit trail — не про отдельный кейс.",
+        "first_touch_hint": "Говори про согласованность между юрисдикциями и прозрачный след операций, а не про один частный кейс.",
         "dont_do": [
           "Не обещай legal certainty",
           "Не заходи с ops-нарративом"
         ],
-        "rendered_text": "Сигнал: у Meridian Cloud при EU expansion internal legal нашла непоследовательную contractor classification между юрисдикциями. Нужно привести в порядок до выхода на DE и FR."
+        "rendered_text": "Сигнал: у Meridian Cloud при расширении в ЕС внутренний юрист увидел непоследовательную классификацию подрядчиков между юрисдикциями. Это нужно привести в порядок до выхода на DE и FR."
       }
     ],
     "merged_into": null,
@@ -806,22 +806,22 @@
           "founded_year": 2016,
           "latest_event": "External counsel asked to review contractor/payment setup before new market expansion."
         },
-        "what_happened": "Внешний юрист пришёл на короткий review текущей схемы подрядчиков и быстро увидел слишком много ручных слоёв и слабую explainability.",
+        "what_happened": "Внешний юрист пришёл на короткую проверку текущей схемы подрядчиков и сразу увидел слишком много ручных слоёв и слабую объяснимость.",
         "apollo_context": [
           "Counsel не будет champion, но может усилить или убить сделку",
           "Нужны точные формулировки по зоне контроля и process safeguards",
           "Любая маркетинговая вата сразу режет доверие"
         ],
         "target_profile": "H",
-        "probable_pain": "Недостаточно defensible contractor/payment flow перед внешним review",
+        "probable_pain": "Текущий контур подрядчиков и выплат выглядит недостаточно защищаемым перед внешней проверкой.",
         "recommended_product": "CoR",
         "recommended_channel": "email + short call",
-        "first_touch_hint": "Говори как со скептичным внешним советником: что контролируется, что нет, где audit trail.",
+        "first_touch_hint": "Говори как со скептичным внешним советником: что именно контролируется, что остаётся за пределами зоны ответственности и где сохраняется прозрачный след операций.",
         "dont_do": [
           "Не пытайся очаровывать вместо аргументов",
           "Не обещай юридической определённости вне своей зоны ответственности"
         ],
-        "rendered_text": "Сигнал: внешний counsel подключён на review contractor/payment setup и уже видит хрупкую смесь посредников и ручных исключений. Разговор держится на defensibility, traceability и границах ответственности."
+        "rendered_text": "Сигнал: внешний юридический советник подключён к проверке схемы подрядчиков и выплат и уже видит хрупкую смесь посредников и ручных исключений. Разговор держится на защищаемости, прослеживаемости и границах ответственности."
       }
     ],
     "merged_into": null,
@@ -1018,23 +1018,23 @@
           "founded_year": 2019,
           "latest_event": "После ухода части RU/BY contractor base в альтернативные схемы компания нарастила non-RU/BY workforce и ищет более управляемую direct-contract model."
         },
-        "what_happened": "Раньше компания пользовалась Mellow в CoR-контуре, но после turbulence вокруг bank/compliance restrictions доверие просело и часть людей перевели в другие каналы. Теперь появился новый non-RU/BY slice и запрос на более чистую relationship model.",
+        "what_happened": "Компания раньше пользовалась Mellow в CoR-контуре, но после турбулентности вокруг банковских и комплаенс-ограничений доверие просело, часть людей перевели в другие каналы. Теперь появился новый non-RU/BY слой и запрос на более чистую модель прямых контрактов.",
         "apollo_context": [
           "Исторически был негативный опыт с bank/compliance comms и internal panic",
           "Сейчас у компании растёт слой contractors outside RU/BY",
           "Есть интерес не к возврату в старую модель, а к более fit new setup"
         ],
         "target_profile": "B",
-        "probable_pain": "Нужно не восстановить прошлое, а найти новый operating model для changed workforce structure.",
+        "probable_pain": "Нужно не возвращать старую схему, а найти новый рабочий контур для изменившейся структуры команды.",
         "recommended_product": "CM",
         "recommended_channel": "email",
-        "first_touch_hint": "Признай прошлый контекст без защиты. Не продавай возврат в старый CoR. Диагностируй, изменился ли workforce mix настолько, что CM теперь стал релевантен.",
+        "first_touch_hint": "Признай прошлый контекст без защиты. Не продавай возврат в старый CoR. Сначала проверь, изменился ли состав команды настолько, что CM теперь действительно уместен.",
         "dont_do": [
           "Не спорь с прошлым негативным опытом",
           "Не обещай, что теперь все риски исчезли",
           "Не продавай CM как generic upsell"
         ],
-        "rendered_text": "Сигнал: BrightForge раньше использовал Mellow в contractor-контуре, но после turbulence вокруг bank/compliance restrictions доверие просело и часть base ушла в другие схемы. Сейчас у компании растёт non-RU/BY слой и появляется новый запрос на более управляемую direct-contract model, что делает CM возможным win-back angle."
+        "rendered_text": "Сигнал: BrightForge раньше использовал Mellow в CoR-контуре, но после турбулентности вокруг банковских и комплаенс-ограничений доверие просело и часть базы ушла в другие схемы. Сейчас у компании растёт non-RU/BY слой и появляется новый запрос на более управляемую модель прямых контрактов."
       },
       {
         "card_id": "cm-winback-card-2",
@@ -1054,22 +1054,22 @@
           "founded_year": 2020,
           "latest_event": "На профильном ивенте команда услышала про CM и вернулась к вопросу, может ли новый operating model решить не старую, а уже новую структуру workforce."
         },
-        "what_happened": "Компания раньше охладилась к Mellow после turbulence в CoR-контуре, но после внешнего анонса новой capability у buyer возник осторожный интерес: не стал ли теперь fit другим.",
+        "what_happened": "Компания раньше охладела к Mellow после турбулентности в CoR-контуре, но после внешнего анонса новой возможности у buyer появился осторожный вопрос: не стало ли решение теперь уместнее для их текущей структуры.",
         "apollo_context": [
           "История доверия к старому контуру повреждена",
           "Новый триггер это не nostalgia, а новая capability / новый use case",
           "Buyer не хочет длинный reactivation process, только scoped fit discussion"
         ],
         "target_profile": "B",
-        "probable_pain": "Нужно понять, появился ли новый fit без повторного входа в старую проблематику.",
+        "probable_pain": "Нужно понять, появился ли новый уместный сценарий без возвращения в старую проблематику.",
         "recommended_product": "CM",
         "recommended_channel": "email",
-        "first_touch_hint": "Зайди через новый use case и changed fit, а не через “давайте вернемся”.",
+        "first_touch_hint": "Заходи через новый сценарий использования и изменившуюся уместность решения, а не через попытку просто вернуть старый разговор.",
         "dont_do": [
           "Не романтизируй прошлые отношения",
           "Не продавай общий restart"
         ],
-        "rendered_text": "Сигнал: VectorLane раньше охладела к Mellow после CoR turbulence, но после внешнего анонса CM buyer вернулся к вопросу, не появился ли теперь более релевантный operating model для текущей структуры workforce."
+        "rendered_text": "Сигнал: VectorLane раньше охладела к Mellow после турбулентности в CoR-контуре, но после внешнего анонса CM buyer вернулся к вопросу, не появился ли теперь более уместный рабочий контур для текущей структуры команды."
       },
       {
         "card_id": "cm-winback-card-3",
@@ -1089,22 +1089,22 @@
           "founded_year": 2017,
           "latest_event": "После частичного churn компания столкнулась с growing non-RU/BY roster и запросом от части talent на direct company visibility in documents."
         },
-        "what_happened": "Buyer больше не ищет broad CoR restart, но видит новый friction: часть relocated/non-RU contractors хочет более прямую contract relationship и понятную структуру документов.",
+        "what_happened": "Компания больше не ищет широкий перезапуск CoR, но видит новый источник трения: часть relocated и non-RU подрядчиков хочет более прямую договорную модель и понятную структуру документов.",
         "apollo_context": [
           "Old CoR trust damage is still remembered",
           "Now there is a narrower structural need, not a full comeback story",
           "Direct-contract visibility becomes a real trigger for CM relevance"
         ],
         "target_profile": "B",
-        "probable_pain": "Нужен узкий и управляемый direct-contract layer для части roster без тяжелого relaunch.",
+        "probable_pain": "Нужен узкий и управляемый слой прямых контрактов для части команды без тяжёлого перезапуска всей схемы.",
         "recommended_product": "CM",
         "recommended_channel": "email",
-        "first_touch_hint": "Диагностируй direct-contract need и workforce split. Не предлагай full migration.",
+        "first_touch_hint": "Диагностируй потребность в прямых контрактах и разницу между сегментами команды. Не предлагай полную миграцию с порога.",
         "dont_do": [
           "Не игнорируй старую потерю доверия",
           "Не делай вид, что это просто тот же CoR под новым названием"
         ],
-        "rendered_text": "Сигнал: Northbeam Studio не хочет возвращаться в старый CoR-контур, но после изменения roster у части talent появился direct-contract need. Это создает новый, более узкий CM-fit."
+        "rendered_text": "Сигнал: Northbeam Studio не хочет возвращаться в старый CoR-контур, но после изменения состава команды у части специалистов появился запрос на прямые контракты. Это создаёт новый, более узкий и уместный сценарий для CM."
       }
     ],
     "merged_into": null,
@@ -1167,22 +1167,22 @@
           "founded_year": 2018,
           "latest_event": "Компания пересматривает contractor spend и сравнивает текущих/альтернативных провайдеров."
         },
-        "what_happened": "CFO собрала свежие предложения от 2-3 альтернатив и прямо сравнивает Mellow с рынком 2.5-3.5%.",
+        "what_happened": "CFO собрала свежие предложения от нескольких альтернатив и теперь в лоб сравнивает ставку Mellow с рынком 2.5–3.5%.",
         "apollo_context": [
           "Есть mixed geo contractor base",
           "Финансовая команда считает effective cost, а не только headline rate",
           "Цена не первая тема, но финальный decision filter"
         ],
         "target_profile": "A",
-        "probable_pain": "Нужно понять, когда premium действительно оправдан, а когда это просто дорогой посредник.",
+        "probable_pain": "Нужно понять, когда более высокая ставка действительно оправдана, а когда это просто дорогой посредник.",
         "recommended_product": "CoR",
         "recommended_channel": "email",
-        "first_touch_hint": "Не спорь с рынком. Сразу заходи через economic logic premium и hidden cost/risk trade-off.",
+        "first_touch_hint": "Не спорь с рынком. Сразу заходи через экономическую логику более высокой ставки и через скрытые издержки слабого контура.",
         "dont_do": [
           "Не говори общими словами про service quality",
           "Не отрицай существование рынка 2.5-3.5%"
         ],
-        "rendered_text": "Сигнал: CFO Altura Apps собирает конкурентные офферы и уже сравнивает Mellow с рыночным диапазоном 2.5-3.5%. Цена не единственная тема, но станет финальным фильтром решения."
+        "rendered_text": "Сигнал: CFO Altura Apps собирает конкурентные предложения и уже сравнивает Mellow с диапазоном 2.5–3.5%. Цена не единственная тема, но именно она станет финальным фильтром решения."
       }
     ],
     "merged_into": null,
@@ -1245,7 +1245,7 @@
           "founded_year": 2020,
           "latest_event": "После bank/compliance update подрядчики начали массово задавать вопросы и терять спокойствие."
         },
-        "what_happened": "Коммуникация о банковых ограничениях пришла поздно, часть contractors запаниковала, компания начала искать альтернативу.",
+        "what_happened": "Сообщение о банковых ограничениях пришло слишком поздно, подрядчики запаниковали, и компания начала искать альтернативу.",
         "apollo_context": [
           "People Ops команда разгребала панику вручную",
           "Внутренне это воспринимается как trust failure, а не только process issue",
@@ -1255,12 +1255,12 @@
         "probable_pain": "Нужно восстановить ощущение управляемости и предсказуемости после внутренней паники.",
         "recommended_product": "CoR",
         "recommended_channel": "email",
-        "first_touch_hint": "Не защищай прошлое. Сначала признай trust event и только потом переходи к mechanics.",
+        "first_touch_hint": "Не защищай прошлое. Сначала признай сам факт потери доверия и только потом переходи к механике.",
         "dont_do": [
           "Не своди проблему к цене",
           "Не говори, что это был просто технический апдейт"
         ],
-        "rendered_text": "Сигнал: после поздней bank/compliance коммуникации у NexaPlay внутри contractor base началась паника. Для People Ops это trust failure, а не просто operational glitch."
+        "rendered_text": "Сигнал: после поздней коммуникации о банковых и комплаенс-изменениях у NexaPlay внутри базы подрядчиков началась паника. Для People Ops это прежде всего провал доверия, а не просто операционный сбой."
       }
     ],
     "merged_into": null,
@@ -1323,22 +1323,22 @@
           "founded_year": 2021,
           "latest_event": "После первого invoice finance команда пересчитала total cost и увидела неприятный разрыв с ожиданием."
         },
-        "what_happened": "Ожидали около 3.5% total effect, но после invoicing и FX увидели заметно более тяжёлую effective cost картину.",
+        "what_happened": "На старте ожидали около 3.5% совокупной нагрузки, но после первого цикла инвойсов и FX увидели заметно более тяжёлую итоговую экономику.",
         "apollo_context": [
           "Buyer уже не в proposal stage",
           "Главный вопрос теперь trust и transparency",
           "Команда не хочет второй surprise cycle"
         ],
         "target_profile": "A",
-        "probable_pain": "Пост-фактум раскрытая экономика выглядит как hidden-cost story.",
+        "probable_pain": "Экономика, раскрывшаяся постфактум, выглядит как история про скрытые издержки.",
         "recommended_product": "CoR",
         "recommended_channel": "email",
-        "first_touch_hint": "Не спорь с ощущением surprise. Сначала разложи cost logic и покажи future transparency.",
+        "first_touch_hint": "Не спорь с ощущением неприятного сюрприза. Сначала разложи логику полной стоимости и покажи, как сделать её прозрачной дальше.",
         "dont_do": [
           "Не прячься за headline rate",
           "Не отвечай фразой вроде “я уточню и вернусь позже” без первичной ясности"
         ],
-        "rendered_text": "Сигнал: после первого invoice у Capinex Labs finance команда почувствовала FX/total-cost shock. Это уже trust problem, а не обычный price objection."
+        "rendered_text": "Сигнал: после первого инвойсного цикла у Capinex Labs finance-команда получила шок от FX и совокупной стоимости. Это уже вопрос доверия к экономике, а не обычное возражение по цене."
       }
     ],
     "merged_into": null,
@@ -1401,22 +1401,22 @@
           "founded_year": 2022,
           "latest_event": "Текущий провайдер использует методы, которые стали казаться команде небезопасными."
         },
-        "what_happened": "После опыта с серым/нестабильным провайдером руководство стало иначе смотреть на legal responsibility и устойчивость процесса.",
+        "what_happened": "После опыта с серым или нестабильным провайдером руководство стало иначе смотреть на юридическую ответственность и устойчивость процесса.",
         "apollo_context": [
           "Раньше buyer не покупал compliance narrative",
           "Теперь есть lived pain and urgency",
           "Важно не обещать магическую безопасность"
         ],
         "target_profile": "B",
-        "probable_pain": "Нужен безопасный operating model после реального ощущения небезопасности.",
+        "probable_pain": "Нужен безопасный рабочий контур после реального ощущения небезопасности.",
         "recommended_product": "CoR",
         "recommended_channel": "email",
-        "first_touch_hint": "Не продавай compliance как virtue. Привязывай к конкретному downside и ownership boundary.",
+        "first_touch_hint": "Не продавай соответствие требованиям как абстрактную добродетель. Привязывай разговор к конкретному риску, конкретной ответственности и границе контроля.",
         "dont_do": [
           "Не говори “мы просто compliant”",
           "Не обещай снять весь legal risk"
         ],
-        "rendered_text": "Сигнал: после болезненного опыта с серым или нестабильным провайдером GoNova впервые всерьёз готова обсуждать compliance как конкретную защиту от downside."
+        "rendered_text": "Сигнал: после болезненного опыта с серым или нестабильным провайдером GoNova впервые всерьёз готова обсуждать более чистый и устойчивый контур работы, а не просто низкую цену."
       }
     ],
     "merged_into": null,

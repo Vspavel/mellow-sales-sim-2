@@ -212,20 +212,20 @@ const BUILTIN_PERSONAS = {
         heat: 'hot',
         outreach_window: '48 часов',
         contact: { name: 'Андрей Волков', title: 'CFO', linkedin: 'linkedin.com/in/andrey-volkov' },
-        company: { name: 'Northstar Games', industry: 'GameDev', size: '280 сотрудников', hq: 'Amsterdam', founded_year: 2018, latest_event: 'Компания обсуждает стратегическое партнёрство и внешний legal review.' },
-        what_happened: 'Финансовый менеджер пожаловался на ручную сверку выплат подрядчикам, а один платёж недавно завис на 23 дня.',
+        company: { name: 'Northstar Games', industry: 'GameDev', size: '280 сотрудников', hq: 'Amsterdam', founded_year: 2018, latest_event: 'Компания обсуждает стратегическое партнёрство и готовится к внешней юридической проверке.' },
+        what_happened: 'Финансовая команда застряла в ручной сверке выплат подрядчикам, а один из платежей завис почти на три недели прямо перед внешней юридической проверкой.',
         apollo_context: [
           '45 подрядчиков в UA/KZ/GE/AM и часть с паспортами РФ',
           'Текущая схема: Wise / Payoneer / посредник в Грузии',
-          'Скоро внешний legal review contractor/payment structure'
+          'Скоро внешняя юридическая проверка схемы работы с подрядчиками и выплатами'
         ],
         target_profile: 'A',
-        probable_pain: 'Санкционный и налоговый риск + ручная возня в финансах',
+        probable_pain: 'Сочетание санкционного и налогового риска с ручной перегрузкой внутри finance.',
         recommended_product: 'CoR',
         recommended_channel: 'LinkedIn',
-        first_touch_hint: 'Зайди через зависший платёж и предстоящий legal review, не обещай магических compliance-обещаний.',
-        dont_do: ['Не обещай защиту от misclassification', 'Не начинай с обезличенного захода'],
-        rendered_text: 'Сигнал: у Northstar Games перед внешним legal review всплыл pain по contractor payments. Один платёж завис на 23 дня, а finance команда тратит 3-4 дня в месяц на ручную сверку. Контекст: 45 подрядчиков, hard geo, смесь Wise / Payoneer / посредника.'
+        first_touch_hint: 'Заходи через зависший платёж и предстоящую юридическую проверку, не обещай волшебного снятия комплаенс-рисков.',
+        dont_do: ['Не обещай защиту от неправильной классификации', 'Не начинай с обезличенного захода'],
+        rendered_text: 'Сигнал: у Northstar Games перед внешней юридической проверкой всплыла проблема с выплатами подрядчикам. Один платёж завис на 23 дня, а финансовая команда тратит 3-4 дня в месяц на ручную сверку. Контекст: 45 подрядчиков, сложные юрисдикции, смесь Wise, Payoneer и посредника.'
       },
       {
         card_id: 'andrey-card-2',
@@ -233,20 +233,20 @@ const BUILTIN_PERSONAS = {
         heat: 'warm',
         outreach_window: '3 недели',
         contact: { name: 'Андрей Волков', title: 'CFO', linkedin: 'linkedin.com/in/andrey-volkov' },
-        company: { name: 'Stellarpath', industry: 'B2B Software', size: '320 сотрудников', hq: 'Warsaw', founded_year: 2017, latest_event: 'Совет директоров поставил задачу привести contractor arrangements в порядок до Series B.' },
-        what_happened: 'Совет директоров попросил CFO аудировать текущую схему работы с подрядчиками перед переговорами о раунде. CFO видит риски в смешанной geo-структуре.',
+        company: { name: 'Stellarpath', industry: 'B2B Software', size: '320 сотрудников', hq: 'Warsaw', founded_year: 2017, latest_event: 'Совет директоров поставил задачу привести схему работы с подрядчиками в порядок до Series B.' },
+        what_happened: 'Совет директоров попросил CFO проверить текущую схему работы с подрядчиками перед переговорами о новом раунде. CFO видит риски в смешанной географической структуре.',
         apollo_context: [
-          '60+ contractors in PL/UA/GE/KZ',
+          '60+ подрядчиков в PL/UA/GE/KZ',
           'Часть выплат идёт через личные счета',
-          'Board требует clean contractor documentation до раунда'
+          'Совет директоров требует привести документы по подрядчикам в порядок до раунда'
         ],
         target_profile: 'A',
-        probable_pain: 'Недостаточная управляемость схемы перед investor diligence',
+        probable_pain: 'Схема выглядит недостаточно управляемой перед проверкой со стороны инвесторов',
         recommended_product: 'CoR',
         recommended_channel: 'LinkedIn',
-        first_touch_hint: 'Заходи через diligence-readiness и управляемость схемы, не общий compliance-нарратив.',
+        first_touch_hint: 'Заходи через готовность к проверке инвесторов и управляемость схемы, а не через общий комплаенс-нарратив.',
         dont_do: ['Не обещай снять legal risk целиком', 'Не говори как с операционным менеджером'],
-        rendered_text: 'Сигнал: у Stellarpath совет директоров поставил задачу привести contractor arrangements в порядок до Series B. CFO видит риски в geo-структуре и частичных выплатах через личные счета.'
+        rendered_text: 'Сигнал: у Stellarpath совет директоров поставил задачу привести схему работы с подрядчиками в порядок до Series B. CFO видит риски в географически смешанной структуре и частичных выплатах через личные счета.'
       }
     ]
   },
@@ -286,19 +286,19 @@ const BUILTIN_PERSONAS = {
         outreach_window: '48 часов',
         contact: { name: 'Алексей Громов', title: 'CEO / Founder', linkedin: 'linkedin.com/in/alexey-gromov' },
         company: { name: 'PatchStack', industry: 'DevSec', size: '85 сотрудников', hq: 'Tallinn', founded_year: 2022, latest_event: 'За последние 6 месяцев добавили 50+ contractors, ops процессы уже не справляются.' },
-        what_happened: 'После быстрого роста команды ops превратился в bottleneck: выплаты идут через 4 разных канала, задержки нарастают.',
+        what_happened: 'После быстрого роста команды операционный контур стал узким местом: выплаты идут через 4 разных канала, задержки нарастают.',
         apollo_context: [
-          'Aggressive growth mode, скорость важнее процессов',
-          'Contractors in AM/GE/KZ/UZ, часть через crypto',
+          'Компания агрессивно растёт, скорость важнее процессов',
+          'Подрядчики в AM/GE/KZ/UZ, часть выплат через криптовалюту',
           'Founder лично разруливает эскалации по выплатам — уже раздражён'
         ],
         target_profile: 'B',
-        probable_pain: 'Ops bottleneck тормозит рост, Founder тратит время не на продукт',
+        probable_pain: 'Операционный контур тормозит рост, а founder тратит время не на продукт, а на ручные разборы',
         recommended_product: 'CM',
         recommended_channel: 'email',
-        first_touch_hint: 'Говори про скорость, а не compliance. Конкретно: сколько каналов уберёт, сколько часов вернёт.',
+        first_touch_hint: 'Говори про скорость и снятие ручной нагрузки, а не про комплаенс. Конкретно: сколько каналов уберёт и сколько часов вернёт.',
         dont_do: ['Не начинай с legal framing', 'Не пиши длинно', 'Не обещай compliance-волшебства'],
-        rendered_text: 'Сигнал: у PatchStack быстрый рост привёл к ops-хаосу с выплатами — 4 разных канала, постоянные задержки. Founder лично занимается эскалациями и уже ищет способ убрать это из своего радара.'
+        rendered_text: 'Сигнал: у PatchStack быстрый рост привёл к операционному хаосу с выплатами, 4 разным каналам и постоянным задержкам. Founder лично занимается эскалациями и уже ищет способ убрать это из своего фокуса.'
       }
     ]
   },
@@ -306,7 +306,7 @@ const BUILTIN_PERSONAS = {
     id: 'cfo_round',
     name: 'София Бреннер',
     role: 'CFO — подготовка к новому раунду',
-    intro: 'Финансовый лидер перед due diligence. Слушает только то, что снижает риск раунда.',
+    intro: 'Финансовый лидер перед проверкой инвесторов. Слушает только то, что снижает риск раунда.',
     archetype: 'finance',
     tone: 'diligence',
     cards: [
@@ -316,20 +316,20 @@ const BUILTIN_PERSONAS = {
         heat: 'hot',
         outreach_window: '30 дней',
         contact: { name: 'Sofia Brenner', title: 'CFO', linkedin: 'linkedin.com/in/sofia-brenner-finance' },
-        company: { name: 'Vaultify', industry: 'B2B SaaS', size: '95 сотрудников', hq: 'Dublin', founded_year: 2020, latest_event: 'Series A закрыта три недели назад, lead investor запросил cleaner contractor controls.' },
-        what_happened: 'После закрытия раунда CFO поднимает тему contractor documentation и готовится к будущему diligence.',
+        company: { name: 'Vaultify', industry: 'B2B SaaS', size: '95 сотрудников', hq: 'Dublin', founded_year: 2020, latest_event: 'Series A закрыта три недели назад, ведущий инвестор запросил более чистый контроль подрядчиков.' },
+        what_happened: 'После закрытия раунда CFO поднимает тему документов по подрядчикам и готовится к будущей проверке со стороны инвесторов.',
         apollo_context: [
-          '6 contractors в UA/KZ и новый legal counsel',
-          'Нужно быстро собрать более чистую contractor/payment structure',
-          'Есть чувствительность к audit trail и explainability перед инвесторами'
+          '6 подрядчиков в UA/KZ и новый юридический советник',
+          'Нужно быстро собрать более чистую схему работы с подрядчиками и выплатами',
+          'Есть чувствительность к прозрачности следа операций и объяснимости перед инвесторами'
         ],
         target_profile: 'C',
-        probable_pain: 'Потеря управляемости перед инвесторами и future due diligence pressure',
+        probable_pain: 'Потеря управляемости перед инвесторами и давление будущей проверки',
         recommended_product: 'CoR',
         recommended_channel: 'LinkedIn + email',
-        first_touch_hint: 'Зайди через readiness к diligence и управляемость схемы до следующего раунда.',
-        dont_do: ['Не обещай, что Mellow решит legal risk за CFO', 'Не сваливайся в общий fintech pitch'],
-        rendered_text: 'Сигнал: CFO только что вошла в роль после раунда и уже собирает более чистую contractor/payment structure перед будущим diligence. Есть чувствительность к audit trail, contractor docs и explainability для инвесторов.'
+        first_touch_hint: 'Заходи через готовность к проверке инвесторов и управляемость схемы до следующего раунда.',
+        dont_do: ['Не обещай, что Mellow снимет юридический риск за CFO', 'Не сваливайся в общий финтех-питч'],
+        rendered_text: 'Сигнал: CFO только что вошла в роль после раунда и уже собирает более чистую схему работы с подрядчиками и выплатами перед будущей проверкой инвесторов. Есть чувствительность к прозрачному следу операций, документам по подрядчикам и объяснимости для инвесторов.'
       },
       {
         card_id: 'cfo-round-card-2',
@@ -337,20 +337,20 @@ const BUILTIN_PERSONAS = {
         heat: 'hot',
         outreach_window: '10 дней',
         contact: { name: 'Sofia Brenner', title: 'CFO', linkedin: 'linkedin.com/in/sofia-brenner-finance' },
-        company: { name: 'Liftwave', industry: 'PropTech', size: '130 сотрудников', hq: 'Amsterdam', founded_year: 2021, latest_event: 'Lead investor из Series A запросил cleaner contractor controls и документацию.' },
-        what_happened: 'После закрытия раунда lead investor выразил обеспокоенность текущей contractor схемой и попросил CFO привести её в порядок до следующего quarterly review.',
+        company: { name: 'Liftwave', industry: 'PropTech', size: '130 сотрудников', hq: 'Amsterdam', founded_year: 2021, latest_event: 'Ведущий инвестор после Series A запросил более чистый контроль подрядчиков и документов.' },
+        what_happened: 'После закрытия раунда ведущий инвестор выразил обеспокоенность текущей схемой работы с подрядчиками и попросил CFO привести её в порядок до следующего квартального разбора.',
         apollo_context: [
-          '25 contractors in NL/UA/GE with mixed documentation',
-          'Investor-level pressure, не внутренняя инициатива',
+          '25 подрядчиков в NL/UA/GE со смешанным качеством документов',
+          'Давление идёт со стороны инвестора, это не внутренняя инициатива',
           'CFO работает в условиях сжатых сроков'
         ],
         target_profile: 'C',
-        probable_pain: 'Investor pressure без инструмента для быстрого наведения порядка',
+        probable_pain: 'Давление со стороны инвестора без инструмента для быстрого наведения порядка',
         recommended_product: 'CoR',
         recommended_channel: 'LinkedIn + email',
-        first_touch_hint: 'Зайди через давление инвестора и сжатые сроки — это не внутренняя уборка, это investor-level readiness.',
+        first_touch_hint: 'Заходи через давление инвестора и сжатые сроки, это не внутренняя уборка, а подготовка к проверке сверху.',
         dont_do: ['Не затягивай вступление', 'Не уходи в общий compliance pitch'],
-        rendered_text: 'Сигнал: после Series A у Liftwave lead investor запросил cleaner contractor controls. CFO под давлением привести схему в порядок до следующего quarterly review.'
+        rendered_text: 'Сигнал: после Series A у Liftwave ведущий инвестор запросил более чистый контроль подрядчиков. CFO под давлением привести схему в порядок до следующего квартального разбора.'
       }
     ]
   },
@@ -399,20 +399,20 @@ const BUILTIN_PERSONAS = {
         heat: 'hot',
         outreach_window: '14 дней',
         contact: { name: 'Ирина Коваль', title: 'Operations Manager', linkedin: 'linkedin.com/in/irina-koval-ops' },
-        company: { name: 'BlueMesa', industry: 'Marketplace', size: '210 сотрудников', hq: 'Limassol', founded_year: 2018, latest_event: 'Компания ускоряет hiring contractors и ops уже не успевает за payout coordination.' },
-        what_happened: 'Ops manager тратит несколько часов в неделю на статусы, сверки и ручные follow-ups по выплатам подрядчикам.',
+        company: { name: 'BlueMesa', industry: 'Marketplace', size: '210 сотрудников', hq: 'Limassol', founded_year: 2018, latest_event: 'Компания ускоряет найм подрядчиков, а операционный контур уже не успевает за координацией выплат.' },
+        what_happened: 'Операционный менеджер тратит несколько часов в неделю на статусы, сверки и ручные напоминания по выплатам подрядчикам.',
         apollo_context: [
           '30+ contractors in KZ/GE/RS/AM',
           'Статусы по выплатам размазаны по чатам и таблицам',
           'Главная боль не legal framing, а отсутствие предсказуемого процесса'
         ],
         target_profile: 'E',
-        probable_pain: 'Ручная координация съедает время ops и ломает predictability',
+        probable_pain: 'Ручная координация съедает время операционного контура и ломает предсказуемость процесса',
         recommended_product: 'CM',
         recommended_channel: 'email',
-        first_touch_hint: 'Заходи через снятие хаоса, статусы и меньше ручных follow-ups.',
-        dont_do: ['Не говори слишком абстрактно', 'Не продавай investor narrative тому, кто живёт процессом'],
-        rendered_text: 'Сигнал: у BlueMesa ops manager уже держит payout coordination руками через таблицы и чаты. Боль в predictability, статусах и потере времени на ручные follow-ups.'
+        first_touch_hint: 'Заходи через снятие хаоса, статусы и меньше ручных напоминаний.',
+        dont_do: ['Не говори слишком абстрактно', 'Не продавай инвесторский нарратив тому, кто живёт процессом'],
+        rendered_text: 'Сигнал: у BlueMesa операционный менеджер уже держит координацию выплат руками через таблицы и чаты. Боль в предсказуемости, статусах и потере времени на ручные напоминания.'
       },
       {
         card_id: 'ops-manager-card-2',
@@ -421,7 +421,7 @@ const BUILTIN_PERSONAS = {
         outreach_window: '14 дней',
         contact: { name: 'Ирина Коваль', title: 'Operations Manager', linkedin: 'linkedin.com/in/irina-koval-ops' },
         company: { name: 'TalentHub', industry: 'HRTech', size: '155 сотрудников', hq: 'Vilnius', founded_year: 2019, latest_event: 'Finance запросил детализацию contractor payments за Q1 для внутреннего audit.' },
-        what_happened: 'Finance team запросила у ops детализацию всех contractor payments за квартал. Ops manager потратила 3 дня на сборку данных из 5 разных источников.',
+        what_happened: 'Finance запросила детализацию всех выплат подрядчикам за квартал, и ops потратила три дня, чтобы собрать картину из пяти разных источников.',
         apollo_context: [
           '25 contractors across LT/EE/LV/UA',
           'Данные о выплатах размазаны между Slack, Wise и таблицами',
@@ -431,9 +431,9 @@ const BUILTIN_PERSONAS = {
         probable_pain: 'Нет единого источника данных — любой запрос от finance превращается в ручную сборку',
         recommended_product: 'CM',
         recommended_channel: 'email',
-        first_touch_hint: 'Заходи через боль ручного reporting: ops тратит дни на то, что должно занимать минуты.',
+        first_touch_hint: 'Заходи через боль ручной отчётности. Для ops это должно занимать минуты, а не дни.',
         dont_do: ['Не усложняй compliance-нарративом', 'Не пиши длинно'],
-        rendered_text: 'Сигнал: у TalentHub finance запросила детализацию contractor payments за квартал — ops потратила 3 дня на сборку из 5 источников. Боль в отсутствии единого источника и ручном reporting.'
+        rendered_text: 'Сигнал: у TalentHub запрос из finance на детализацию выплат подрядчикам за квартал превратил ops в ручной сборочный цех на три дня. Главная боль в том, что нет единого источника данных и нормального процесса отчётности.'
       }
     ]
   },
@@ -459,12 +459,12 @@ const BUILTIN_PERSONAS = {
           'Head of Finance нужно решение, которое легче объяснять вверх и вести руками вниз'
         ],
         target_profile: 'F',
-        probable_pain: 'Слабый контроль и ручная нагрузка внутри finance without clear audit story',
+        probable_pain: 'Слабый контроль и высокая ручная нагрузка внутри finance без внятной истории для аудита.',
         recommended_product: 'CoR',
         recommended_channel: 'email',
-        first_touch_hint: 'Держи линию control + explainability + less manual reconciliation.',
+        first_touch_hint: 'Держи линию на контроль, объяснимость и снижение ручной сверки. Говори спокойно и предметно.',
         dont_do: ['Не продавай через founder-energy', 'Не обещай тотальный legal shield'],
-        rendered_text: 'Сигнал: у Head of Finance накопился разрыв между ручной сверкой contractor payouts и требованием leadership видеть контролируемую, объяснимую схему. Идёт подготовка к annual audit.'
+        rendered_text: 'Сигнал: у Head of Finance накопился разрыв между ручной сверкой выплат подрядчикам и требованием руководства видеть контролируемую, объяснимую схему. Команда уже готовится к ежегодному аудиту.'
       },
       {
         card_id: 'head-finance-card-2',
@@ -473,19 +473,19 @@ const BUILTIN_PERSONAS = {
         outreach_window: '14 дней',
         contact: { name: 'Elena Martin', title: 'Head of Finance', linkedin: 'linkedin.com/in/elena-martin-finance' },
         company: { name: 'Greychain', industry: 'InsurTech', size: '190 сотрудников', hq: 'Helsinki', founded_year: 2018, latest_event: 'CFO поставил задачу привести contractor controls в порядок до Series B.' },
-        what_happened: 'Готовясь к Series B, CFO поручил Head of Finance провести аудит contractor controls. Текущая схема не готова к investor-level scrutiny.',
+        what_happened: 'Готовясь к Series B, CFO поручил Head of Finance проверить контур подрядчиков. Текущая схема пока плохо выглядит для инвесторской проверки.',
         apollo_context: [
           '35 contractors in FI/EE/UA/GE',
           'Investor-level pressure через CFO',
           'Head of Finance нужен инструмент, который можно показать вверх'
         ],
         target_profile: 'F',
-        probable_pain: 'Схема не готова к diligence — Head of Finance под двойным давлением',
+        probable_pain: 'Схема не готова к проверке, и Head of Finance одновременно отвечает и вверх, и за ручное исполнение вниз.',
         recommended_product: 'CoR',
         recommended_channel: 'email',
-        first_touch_hint: 'Говори про explainability вверх и управляемость вниз — у Head of Finance два фронта.',
+        first_touch_hint: 'Говори про объяснимость для руководства и управляемость для команды. У Head of Finance действительно два фронта.',
         dont_do: ['Не уходи в founder-pitch', 'Не обещай полного устранения риска'],
-        rendered_text: 'Сигнал: у Greychain CFO поставил задачу привести contractor controls в порядок до Series B. Head of Finance нужно решение, которое можно показать вверх и которым можно управлять вниз.'
+        rendered_text: 'Сигнал: у Greychain CFO поставил задачу привести контроль подрядчиков в порядок до Series B. Head of Finance нужен контур, который можно спокойно показать руководству и которым можно управлять в ежедневной работе.'
       }
     ]
   },
@@ -503,20 +503,20 @@ const BUILTIN_PERSONAS = {
         heat: 'warm',
         outreach_window: '14 дней',
         contact: { name: 'Anna Richter', title: 'Legal Counsel', linkedin: 'linkedin.com/in/anna-richter-legal' },
-        company: { name: 'SynthPort', industry: 'Fintech', size: '120 сотрудников', hq: 'Berlin', founded_year: 2021, latest_event: 'Internal legal обновляет шаблоны подрядчиков и ищет более чистую payout/document flow.' },
-        what_happened: 'Юрист получила задачу пересобрать contractor documentation и хочет сократить серые зоны между ops, finance и current intermediaries.',
+        company: { name: 'SynthPort', industry: 'Fintech', size: '120 сотрудников', hq: 'Berlin', founded_year: 2021, latest_event: 'Внутренний юрист обновляет шаблоны подрядчиков и ищет более чистую схему документов и выплат.' },
+        what_happened: 'Юрист получила задачу пересобрать документы по подрядчикам и хочет сократить серые зоны между операционным контуром, финансами и текущими посредниками.',
         apollo_context: [
-          'Есть вопросы к consistency документов и traceability',
-          'Нужно решение, которое legal может объяснить finance и leadership',
-          'Фокус на границах ответственности, audit trail и process discipline'
+          'Есть вопросы к согласованности документов и прослеживаемости',
+          'Нужно решение, которое юрист может объяснить финансам и руководству',
+          'Фокус на границах ответственности, прозрачном следе операций и дисциплине процесса'
         ],
         target_profile: 'G',
-        probable_pain: 'Слишком много серых зон и ручных исключений в contractor/document flow',
+        probable_pain: 'Слишком много серых зон и ручных исключений в схеме документов и выплат подрядчикам',
         recommended_product: 'CoR',
         recommended_channel: 'email',
-        first_touch_hint: 'Говори аккуратно: документация, audit trail, ограничения, без overclaiming.',
-        dont_do: ['Не обещай снять legal risk целиком', 'Не уходи в founder-style speed pitch'],
-        rendered_text: 'Сигнал: internal legal пересобирает contractor documentation и хочет более explainable payout/document flow. Главная чувствительность в границах ответственности, traceability и лишних серых зонах.'
+        first_touch_hint: 'Говори аккуратно: документация, прозрачный след операций, ограничения, без завышенных обещаний.',
+        dont_do: ['Не обещай снять юридический риск целиком', 'Не уходи в напористый founder-style заход'],
+        rendered_text: 'Сигнал: внутренний юрист пересобирает документы по подрядчикам и хочет более объяснимую схему выплат и документов. Главная чувствительность в границах ответственности, прослеживаемости и лишних серых зонах.'
       },
       {
         card_id: 'internal-legal-card-2',
@@ -524,20 +524,20 @@ const BUILTIN_PERSONAS = {
         heat: 'warm',
         outreach_window: '14 дней',
         contact: { name: 'Anna Richter', title: 'Legal Counsel', linkedin: 'linkedin.com/in/anna-richter-legal' },
-        company: { name: 'Meridian Cloud', industry: 'SaaS', size: '100 сотрудников', hq: 'Riga', founded_year: 2021, latest_event: 'Компания расширяется на новые EU-юрисдикции и Legal чистит contractor classification.' },
-        what_happened: 'При расширении на новые EU-рынки legal обнаружила непоследовательную contractor классификацию между юрисдикциями. Нужно привести в порядок до выхода на новый рынок.',
+        company: { name: 'Meridian Cloud', industry: 'SaaS', size: '100 сотрудников', hq: 'Riga', founded_year: 2021, latest_event: 'Компания расширяется на новые юрисдикции ЕС, а юридическая функция приводит в порядок классификацию подрядчиков.' },
+        what_happened: 'При расширении на новые рынки ЕС юридическая функция обнаружила непоследовательную классификацию подрядчиков между юрисдикциями. Нужно привести всё в порядок до выхода на новый рынок.',
         apollo_context: [
-          'Expansion в DE и FR, contractor structure не унифицирована',
+          'Выход в DE и FR, структура подрядчиков не унифицирована',
           'Legal отвечает за документацию перед новыми регуляторными средами',
           'Проблема в consistency, не в отдельных инцидентах'
         ],
         target_profile: 'G',
-        probable_pain: 'Несогласованная классификация между юрисдикциями создаёт regulatory exposure при expansion',
+        probable_pain: 'Несогласованная классификация между юрисдикциями создаёт регуляторный риск при расширении',
         recommended_product: 'CoR',
         recommended_channel: 'email',
-        first_touch_hint: 'Говори про consistency across jurisdictions и audit trail — не про отдельный кейс.',
+        first_touch_hint: 'Говори про согласованность между юрисдикциями и прозрачный след операций, а не про отдельный кейс.',
         dont_do: ['Не обещай legal certainty', 'Не заходи с ops-нарративом'],
-        rendered_text: 'Сигнал: у Meridian Cloud при EU expansion internal legal нашла непоследовательную contractor classification между юрисдикциями. Нужно привести в порядок до выхода на DE и FR.'
+        rendered_text: 'Сигнал: у Meridian Cloud при расширении в ЕС юридическая функция нашла непоследовательную классификацию подрядчиков между юрисдикциями. Нужно привести всё в порядок до выхода на DE и FR.'
       }
     ]
   },
@@ -545,7 +545,7 @@ const BUILTIN_PERSONAS = {
     id: 'external_legal',
     name: 'Давид Шмидт',
     role: 'External Legal Advisor',
-    intro: 'Внешний советник. Скептичен к обещаниям, смотрит на defensibility и минимизацию серых зон.',
+    intro: 'Внешний советник. Скептичен к обещаниям, смотрит на защищаемость схемы и минимизацию серых зон.',
     archetype: 'legal',
     tone: 'external-legal',
     cards: [
@@ -554,42 +554,42 @@ const BUILTIN_PERSONAS = {
         signal_type: 'OUTSIDE_COUNSEL_CHECK',
         heat: 'hot',
         outreach_window: '7 дней',
-        contact: { name: 'David Schmidt', title: 'External Counsel', linkedin: 'linkedin.com/in/david-schmidt-law' },
-        company: { name: 'Westline Commerce', industry: 'eCommerce', size: '260 сотрудников', hq: 'Munich', founded_year: 2016, latest_event: 'External counsel asked to review contractor/payment setup before new market expansion.' },
-        what_happened: 'Внешний юрист пришёл на короткий review текущей схемы подрядчиков и быстро увидел слишком много ручных слоёв и слабую explainability.',
+        contact: { name: 'David Schmidt', title: 'Внешний юридический советник', linkedin: 'linkedin.com/in/david-schmidt-law' },
+        company: { name: 'Westline Commerce', industry: 'eCommerce', size: '260 сотрудников', hq: 'Munich', founded_year: 2016, latest_event: 'Внешнего юриста попросили проверить схему подрядчиков и выплат перед выходом на новый рынок.' },
+        what_happened: 'Внешний юрист пришёл на короткую проверку текущей схемы подрядчиков и быстро увидел слишком много ручных слоёв и слабую объяснимость.',
         apollo_context: [
-          'Counsel не будет champion, но может усилить или убить сделку',
-          'Нужны точные формулировки по зоне контроля и process safeguards',
+          'Внешний советник не станет внутренним сторонником, но может усилить или убить сделку',
+          'Нужны точные формулировки по зоне контроля и процессным safeguards',
           'Любая маркетинговая вата сразу режет доверие'
         ],
         target_profile: 'H',
-        probable_pain: 'Недостаточно defensible contractor/payment flow перед внешним review',
+        probable_pain: 'Схема работы с подрядчиками и выплатами выглядит недостаточно защищаемой перед внешней проверкой',
         recommended_product: 'CoR',
-        recommended_channel: 'email + short call',
-        first_touch_hint: 'Говори как со скептичным внешним советником: что контролируется, что нет, где audit trail.',
+        recommended_channel: 'email + короткий созвон',
+        first_touch_hint: 'Говори как со скептичным внешним советником: что контролируется, что нет, где остаётся прозрачный след операций.',
         dont_do: ['Не пытайся очаровывать вместо аргументов', 'Не обещай юридической определённости вне своей зоны ответственности'],
-        rendered_text: 'Сигнал: внешний counsel подключён на review contractor/payment setup и уже видит хрупкую смесь посредников и ручных исключений. Разговор держится на defensibility, traceability и границах ответственности.'
+        rendered_text: 'Сигнал: внешний юридический советник подключён к проверке схемы подрядчиков и выплат и уже видит хрупкую смесь посредников и ручных исключений. Разговор держится на защищаемости, прослеживаемости и границах ответственности.'
       },
       {
         card_id: 'external-legal-card-2',
         signal_type: 'LEGAL_REVIEW_TRIGGER',
         heat: 'hot',
         outreach_window: '5 дней',
-        contact: { name: 'David Schmidt', title: 'External Counsel', linkedin: 'linkedin.com/in/david-schmidt-law' },
-        company: { name: 'Steelway Commerce', industry: 'eCommerce', size: '310 сотрудников', hq: 'Frankfurt', founded_year: 2016, latest_event: 'External counsel нашёл непоследовательность в contractor payment chain в ходе expansion review.' },
-        what_happened: 'При review новой юрисдикции external counsel обнаружил несоответствия между тем, как классифицируются подрядчики, и реальной схемой выплат.',
+        contact: { name: 'David Schmidt', title: 'Внешний юридический советник', linkedin: 'linkedin.com/in/david-schmidt-law' },
+        company: { name: 'Steelway Commerce', industry: 'eCommerce', size: '310 сотрудников', hq: 'Frankfurt', founded_year: 2016, latest_event: 'Внешний юрист нашёл непоследовательность в платёжной цепочке подрядчиков во время проверки расширения.' },
+        what_happened: 'При проверке новой юрисдикции внешний юрист обнаружил несоответствия между тем, как классифицируются подрядчики, и реальной схемой выплат.',
         apollo_context: [
-          'Expansion в NL и UK, договорная база устарела',
-          'Counsel видит несоответствие classification и реального payment flow',
+          'Расширение в NL и UK, договорная база устарела',
+          'Внешний юрист видит несоответствие между классификацией и реальным платёжным процессом',
           'Любая маркетинговая вата немедленно снижает доверие'
         ],
         target_profile: 'H',
-        probable_pain: 'Несоответствие между contractor classification и реальным payment flow создаёт regulatory exposure',
+        probable_pain: 'Несоответствие между классификацией подрядчиков и реальным платёжным процессом создаёт регуляторный риск',
         recommended_product: 'CoR',
-        recommended_channel: 'email + short call',
-        first_touch_hint: 'Говори точно: что конкретно контролирует Mellow, где audit trail, где граница ответственности.',
+        recommended_channel: 'email + короткий созвон',
+        first_touch_hint: 'Говори точно: что конкретно контролирует Mellow, где остаётся прозрачный след операций, где проходит граница ответственности.',
         dont_do: ['Не обещай юридической определённости', 'Не уходи в маркетинговые тезисы'],
-        rendered_text: 'Сигнал: external counsel при expansion review нашёл несоответствие между contractor classification и реальной payment схемой у Steelway Commerce. Разговор держится на точных формулировках, audit trail и границах ответственности.'
+        rendered_text: 'Сигнал: внешний юридический советник во время проверки расширения нашёл несоответствие между классификацией подрядчиков и реальной схемой выплат у Steelway Commerce. Разговор держится на точных формулировках, прозрачном следе операций и границах ответственности.'
       }
     ]
   }
@@ -1571,23 +1571,82 @@ function normalizeSellerLanguage(text, lang = 'ru') {
   if (!out) return out;
   if (lang === 'ru') {
     const replacements = [
+      [/\blead investor\b/gi, 'ведущий инвестор'],
+      [/\bboard\b/gi, 'совет'],
+      [/\bbuyer\b/gi, 'покупатель'],
+      [/\bcapability\b/gi, 'возможность'],
+      [/\bturbulence\b/gi, 'турбулентность'],
+      [/\bhidden cost\/risk trade-off\b/gi, 'скрытые издержки и риски'],
+      [/\beconomic logic\b/gi, 'экономическую логику'],
+      [/\bpayout statuses\b/gi, 'статусы выплат'],
+      [/\bpayout status\b/gi, 'статус выплаты'],
+      [/\bpayout\b/gi, 'выплата'],
+      [/\bexplainable\b/gi, 'объяснимый'],
+      [/\binvestor scrutiny\b/gi, 'давление со стороны инвестора'],
+      [/\binvestor-level\b/gi, 'на уровне инвестора'],
+      [/\bfuture due diligence\b/gi, 'будущий дью-дилидженс'],
+      [/\bdue diligence\b/gi, 'дью-дилидженс'],
+      [/\bdiligence-readiness\b/gi, 'готовность к дью-дилидженсу'],
+      [/\breadiness\b/gi, 'готовность'],
+      [/\bexplainability\b/gi, 'объяснимость'],
+      [/\bpredictability\b/gi, 'предсказуемость'],
+      [/\bdefensibility\b/gi, 'защищаемость'],
+      [/\btrigger\b/gi, 'сигнал'],
+      [/\bchanged fit\b/gi, 'изменившееся совпадение по задаче'],
+      [/\bfit\b/gi, 'совпадение по задаче'],
+      [/\bworkflow\b/gi, 'процесс'],
+      [/\bcontractor flow\b/gi, 'контур работы с подрядчиками'],
+      [/\bpayment flow\b/gi, 'платёжный процесс'],
+      [/\bpayout flow\b/gi, 'процесс выплат'],
+      [/\bflow\b/gi, 'процесс'],
+      [/\baudit trail\b/gi, 'прозрачный след операций'],
+      [/\btrail\b/gi, 'след операций'],
+      [/\bgrey zones\b/gi, 'серые зоны'],
+      [/\bgrey zone\b/gi, 'серая зона'],
+      [/\bgrey provider\b/gi, 'серый провайдер'],
+      [/\boutside counsel\b/gi, 'внешний юрист'],
+      [/\bexternal counsel\b/gi, 'внешний юрист'],
+      [/\bexternal legal review\b/gi, 'внешняя юридическая проверка'],
+      [/\blegal review\b/gi, 'юридическая проверка'],
+      [/\binternal legal\b/gi, 'внутренний юрист'],
+      [/\bfinance team\b/gi, 'финансовая команда'],
+      [/\bfinance\b/gi, 'финансы'],
+      [/\bops manager\b/gi, 'операционный менеджер'],
+      [/\bops\b/gi, 'операционный контур'],
+      [/\bboard update\b/gi, 'обновление для совета'],
+      [/\bquarterly review\b/gi, 'квартальный разбор'],
+      [/\breview call\b/gi, 'разборный созвон'],
       [/\bwritten outline\b/gi, 'письменная схема'],
       [/\bone invoice\b/gi, 'единый счет'],
       [/\badmin overhead\b/gi, 'лишняя ручная нагрузка'],
-      [/\bworkflow\b/gi, 'процесс'],
-      [/\bfit\b/gi, 'совпадение по задаче'],
       [/\bcontour\b/gi, 'контур'],
       [/\boutline\b/gi, 'схема'],
-      [/\breview call\b/gi, 'разборный созвон'],
       [/\bcall\b/gi, 'созвон'],
       [/\breview\b/gi, 'разбор'],
       [/\bbrief\b/gi, 'краткий материал'],
       [/\bmemo\b/gi, 'записка'],
       [/\bslice\b/gi, 'срез'],
+      [/\bpremium\b/gi, 'премия к цене'],
+      [/\bfollow-ups\b/gi, 'дополнительные напоминания'],
+      [/\bfollow-up\b/gi, 'дополнительное напоминание'],
+      [/\bfollow ups\b/gi, 'дополнительные напоминания'],
+      [/\bbottleneck\b/gi, 'узкое место'],
+      [/\bnamed owner\b/gi, 'выделенный ответственный'],
+      [/\bowner model\b/gi, 'модель ответственности'],
+      [/\bcontrol zone\b/gi, 'зона контроля'],
+      [/\bpressure\b/gi, 'давление'],
+      [/\bcontrol\b/gi, 'контроль'],
+      [/\bimplementation\b/gi, 'внедрение'],
+      [/\bchampion\b/gi, 'внутренний сторонник'],
+      [/\benterprise theatre\b/gi, 'корпоративная показуха'],
+      [/\bcontractors\b/gi, 'подрядчики'],
+      [/\bcontractor\b/gi, 'подрядчик'],
       [/\bnext step\b/gi, 'следующий шаг'],
       [/\bmarketing slang\b/gi, 'маркетинговый шум'],
     ];
     for (const [pattern, replacement] of replacements) out = out.replace(pattern, replacement);
+    out = out.replace(/Не спорь с рынком\.?\s*/gi, '');
+    out = out.replace(/Сразу заходи через\s*/gi, 'Сразу говори про ');
   }
   return out.replace(/\s{2,}/g, ' ').replace(/\s+([,.;!?])/g, '$1').trim();
 }
@@ -8102,9 +8161,9 @@ function buildSignalAwareOpeners(session, lang = 'ru') {
   const card = session?.sde_card || {};
   const contactName = card?.contact?.name || personaMeta(session)?.name || (lang === 'en' ? 'there' : 'коллеги');
   const companyName = card?.company?.name || (lang === 'en' ? 'your team' : 'вашей команды');
-  const whatHappened = String(card?.what_happened || card?.rendered_text || '').trim();
-  const probablePain = String(card?.probable_pain || '').trim();
-  const firstTouchHint = String(card?.first_touch_hint || '').trim();
+  const whatHappened = normalizeSellerLanguage(String(card?.what_happened || card?.rendered_text || '').trim(), lang);
+  const probablePain = normalizeSellerLanguage(String(card?.probable_pain || '').trim(), lang);
+  const firstTouchHint = normalizeSellerLanguage(String(card?.first_touch_hint || '').trim(), lang);
   const signalLabel = String(card?.signal_type || '').trim();
   const product = getRecommendedProduct(session) === 'cor' ? 'Mellow CoR' : 'Mellow CM';
 
@@ -8119,7 +8178,7 @@ function buildSignalAwareOpeners(session, lang = 'ru') {
 
   return [
     `${contactName}, вижу у ${companyName} не абстрактный интерес, а конкретный сигнал: ${whatHappened || 'в contractor flow появился реальный сдвиг'}. Похоже, узел сейчас в следующем: ${probablePain || 'ручная нагрузка и слабая управляемость под давлением'}. ${product} имеет смысл обсуждать только если это бьёт ровно в этот контекст. Где сейчас самая острая точка?`,
-    `${contactName}, стартовать тут стоит не с общего питча, а через конкретный trigger: ${whatHappened || probablePain || signalLabel || 'активный сигнал сессии'}. ${firstTouchHint || 'Хочу зайти точно в этот контекст, без широких обещаний.'} Это действительно тот узел, который сейчас создаёт вам наибольшее давление?`,
+    `${contactName}, вижу здесь не общий интерес, а конкретный рабочий сигнал: ${whatHappened || probablePain || signalLabel || 'активный сигнал сессии'}. ${firstTouchHint || 'Хочу зайти точно в этот контекст, без широких обещаний.'} Это действительно тот узел, который сейчас создаёт вам наибольшее давление?`,
   ].filter(Boolean);
 }
 
