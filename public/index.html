@@ -300,15 +300,15 @@
               </div>
               <div class="run-signal-state" id="runSignalState">
                 <div class="run-signal-pill-group">
-                  <span class="run-signal-pill-label">Requested signal</span>
+                  <span class="run-signal-pill-label">Selected signal</span>
                   <span id="runRequestedSignal" class="run-signal-pill">Not set</span>
                 </div>
                 <div class="run-signal-pill-group">
-                  <span class="run-signal-pill-label">Active session signal</span>
+                  <span class="run-signal-pill-label">Live signal</span>
                   <span id="runActualSignal" class="run-signal-pill run-signal-pill--active">Waiting for session</span>
                 </div>
               </div>
-              <p id="runSignalConfirmation" class="muted run-signal-confirmation">Choose a scenario to see the active trigger.</p>
+              <p id="runSignalConfirmation" class="muted run-signal-confirmation">The live trigger should match the selected scenario.</p>
             </section>
 
             <section class="run-stage-card run-stage-card--progress">
@@ -334,7 +334,7 @@
                   <div class="conversation-thread-head">
                     <div>
                       <strong class="conversation-thread-title">Message exchange</strong>
-                      <p class="muted conversation-thread-meta">Write like a real outbound conversation, not like filling a form.</p>
+                      <p class="muted conversation-thread-meta">Keep it natural, specific, and useful.</p>
                     </div>
                   </div>
 
@@ -355,7 +355,10 @@
                     </div>
 
                     <div class="composer-shell composer-shell--messaging">
-                      <p class="composer-focus" id="composerFocus"></p>
+                      <div class="composer-focus-wrap">
+                        <span class="composer-focus-label">Current focus</span>
+                        <p class="composer-focus" id="composerFocus"></p>
+                      </div>
                       <form id="messageForm" class="composer composer--messaging">
                         <textarea id="messageInput" rows="3" placeholder="Write your first touch or next message"></textarea>
                         <div class="composer-row composer-row--messaging">
@@ -398,7 +401,7 @@
               </section>
 
               <details class="context-stack-details" open>
-                <summary>Buyer context</summary>
+                <summary>Supporting context</summary>
                 <div class="context-stack-body">
                   <section class="run-insight-card run-insight-card--compact" id="buyerBriefCard">
                     <div class="run-insight-head">
