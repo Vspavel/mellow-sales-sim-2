@@ -920,20 +920,20 @@ const DEFAULT_SIGNAL_TYPE_DOCTRINES = {
     description: 'The buyer does not yet place Mellow cleanly and needs category clarity before deeper evaluation.',
   },
   churn_signal: {
-    id: 'churn_signal', side: 'demand', product: 'cor', label: 'Churn or trust shock',
-    description: 'A prior failure or trust break created an active recovery or retention trigger.',
+    id: 'churn_signal', side: 'demand', product: 'cor', label: 'Trust-break recovery',
+    description: 'A prior failure, late communication, or service shock created an active recovery and trust-repair conversation.',
   },
   competitor_price_objection: {
     id: 'competitor_price_objection', side: 'demand', product: 'cor', label: 'Competitor price objection',
     description: 'A cheaper competitor frame is dominating and forcing value defense beyond headline price.',
   },
   compliance_pressure: {
-    id: 'compliance_pressure', side: 'demand', product: 'cor', label: 'Compliance pressure',
-    description: 'Compliance or legal scrutiny around contractor setup and payment flow.',
+    id: 'compliance_pressure', side: 'demand', product: 'cor', label: 'Compliance pressure (finance / review)',
+    description: 'Finance, investor, or review-driven scrutiny around contractor setup and payment flow before a major check.',
   },
   compliance_switch: {
-    id: 'compliance_switch', side: 'demand', product: 'cor', label: 'Compliance switch after grey provider',
-    description: 'A grey-provider experience is forcing a more defensible replacement path.',
+    id: 'compliance_switch', side: 'demand', product: 'cor', label: 'Compliance switch (after grey provider)',
+    description: 'A prior grey-provider or weak-structure experience is forcing a safer, more defensible replacement path.',
   },
   direct_contract_need: {
     id: 'direct_contract_need', side: 'demand', product: 'cor', label: 'Direct contract need',
@@ -968,8 +968,8 @@ const DEFAULT_SIGNAL_TYPE_DOCTRINES = {
     description: 'A concrete payout failure, delay, or operational breakdown already happened.',
   },
   post_onboarding_risk: {
-    id: 'post_onboarding_risk', side: 'demand', product: 'cor', label: 'Post-onboarding risk',
-    description: 'The buyer experienced a trust shock after onboarding and now needs economics or control repair.',
+    id: 'post_onboarding_risk', side: 'demand', product: 'cor', label: 'Post-onboarding economics / control risk',
+    description: 'After onboarding, the buyer experienced an economics, FX, or control shock and now needs explanation and trust repair.',
   },
   rate_pressure: {
     id: 'rate_pressure', side: 'demand', product: 'cor', label: 'Rate pressure',
