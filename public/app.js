@@ -998,11 +998,12 @@ function doctrineEntries(layer) {
 }
 
 function normalizeSignalTypeId(value = '') {
-  return String(value || '')
+  const normalized = String(value || '')
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '') || 'general';
+  return ({ event_reengagement: 're_engagement_signal' }[normalized] || normalized);
 }
 
 function signalTypeOptionLabel(id = '') {

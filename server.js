@@ -939,10 +939,6 @@ const DEFAULT_SIGNAL_TYPE_DOCTRINES = {
     id: 'direct_contract_need', side: 'demand', product: 'cor', label: 'Direct contract need',
     description: 'The buyer needs a narrower direct-contract or roster-slice transition path.',
   },
-  event_reengagement: {
-    id: 'event_reengagement', side: 'demand', product: 'cor', label: 'Event-driven re-engagement',
-    description: 'A new event or operating change reopened a previously cold conversation.',
-  },
   finance_control_gap: {
     id: 'finance_control_gap', side: 'demand', product: 'cor', label: 'Finance control gap',
     description: 'Finance lacks visibility, control, or trust in the current payment process.',
@@ -981,7 +977,7 @@ const DEFAULT_SIGNAL_TYPE_DOCTRINES = {
   },
   re_engagement_signal: {
     id: 're_engagement_signal', side: 'demand', product: 'cor', label: 'Re-engagement signal',
-    description: 'A previously stalled account is back in motion and can be reopened through a narrower fit signal.',
+    description: 'A previously stalled account is back in motion through an event or new operating trigger and can be reopened via a narrower fit signal.',
   },
   sanctions_stress: {
     id: 'sanctions_stress', side: 'demand', product: 'cor', label: 'Sanctions stress',
@@ -995,6 +991,10 @@ const DEFAULT_SIGNAL_TYPE_DOCTRINES = {
     id: 'general', side: 'demand', product: 'cor', label: 'General trigger',
     description: 'Fallback trigger when the specific signal type is not yet classified.',
   },
+};
+
+const SIGNAL_TYPE_ALIASES = {
+  event_reengagement: 're_engagement_signal',
 };
 
 const DEFAULT_DIALOGUE_TYPE_DOCTRINES = {
@@ -1214,7 +1214,7 @@ function enrichPersonaWithScenario(persona) {
     ...persona,
     market_side: profile.side || 'demand',
     product: profile.product || 'cor',
-    available_signal_types: [...new Set((persona.cards || []).map((card) => String(card?.signal_type || '').trim()).filter(Boolean))],
+    available_signal_types: [...new Set((persona.cards || []).map((card) => normalizeSignalTypeId(card?.signal_type)).filter(Boolean))],
     signal_types: Object.values(doctrineConfig?.signal_types || {}).filter((signal) => {
       if (signal.side && signal.side !== (profile.side || 'demand')) return false;
       if (signal.product && signal.product !== (profile.product || 'cor')) return false;
@@ -1229,11 +1229,12 @@ function enrichPersonaWithScenario(persona) {
 }
 
 function normalizeSignalTypeId(value = '') {
-  return String(value || '')
+  const normalized = String(value || '')
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '') || 'general';
+  return SIGNAL_TYPE_ALIASES[normalized] || normalized;
 }
 
 function signalTypeVariants(value = '') {
