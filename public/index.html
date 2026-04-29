@@ -290,6 +290,17 @@
               <p class="phase-label">Scenario</p>
               <span id="runScenarioMeta" class="muted run-insight-meta">Preparing scenario</span>
             </div>
+            <div class="run-signal-state" id="runSignalState">
+              <div class="run-signal-pill-group">
+                <span class="run-signal-pill-label">Requested signal</span>
+                <span id="runRequestedSignal" class="run-signal-pill">Not set</span>
+              </div>
+              <div class="run-signal-pill-group">
+                <span class="run-signal-pill-label">Active session signal</span>
+                <span id="runActualSignal" class="run-signal-pill run-signal-pill--active">Waiting for session</span>
+              </div>
+            </div>
+            <p id="runSignalConfirmation" class="muted run-signal-confirmation">Choose a scenario to see the active trigger.</p>
           </section>
 
           <section class="run-stage-card">

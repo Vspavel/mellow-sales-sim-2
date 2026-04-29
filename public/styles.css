@@ -106,6 +106,14 @@ button:disabled { opacity: 0.55; cursor: default; }
 .run-meta { display: flex; flex-direction: column; gap: 4px; }
 .run-meta-top { display: flex; align-items: center; gap: 10px; }
 .run-focus { font-size: 0.88rem; }
+.run-signal-state { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.run-signal-pill-group { display: flex; flex-direction: column; gap: 5px; }
+.run-signal-pill-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.run-signal-pill { display: inline-flex; align-items: center; width: fit-content; min-height: 34px; padding: 8px 12px; border-radius: 999px; background: var(--surface-subtle); border: 1px solid var(--border); font-size: 0.82rem; font-weight: 600; color: var(--text); }
+.run-signal-pill--active { background: var(--accent-soft); border-color: var(--border-strong); }
+.run-signal-pill--match { background: var(--success-bg); border-color: color-mix(in srgb, var(--success-text) 22%, var(--border)); color: var(--success-text); }
+.run-signal-pill--mismatch { background: var(--warn-bg); border-color: color-mix(in srgb, var(--warn-text) 24%, var(--border)); color: var(--warn-text); }
+.run-signal-confirmation { font-size: 0.84rem; line-height: 1.45; }
 .run-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .run-stage-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
 .run-stage-card--compact { padding: 12px 20px; margin-bottom: 12px; }

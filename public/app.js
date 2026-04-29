@@ -89,6 +89,9 @@ const backFromAnalyticsBtn = document.getElementById('backFromAnalyticsBtn');
 const runStatus = document.getElementById('runStatus');
 const runFocus = document.getElementById('runFocus');
 const runScenarioMeta = document.getElementById('runScenarioMeta');
+const runRequestedSignal = document.getElementById('runRequestedSignal');
+const runActualSignal = document.getElementById('runActualSignal');
+const runSignalConfirmation = document.getElementById('runSignalConfirmation');
 const suggestBtn = document.getElementById('suggestBtn');
 const hintLangSelect = document.getElementById('hintLangSelect');
 const suggestionPanel = document.getElementById('suggestionPanel');
@@ -1367,6 +1370,34 @@ function updateRunState() {
     runScenarioMeta.textContent = persona
       ? `${selectedScenarioSummary(persona)} · ${persona.name}`
       : 'Choose a scenario to open the cockpit.';
+  }
+
+  const requestedSignalId = state.selectedSignalType || state.session?.scenario_selection?.signal_type || '';
+  const activeSignalId = state.session?.sde_card?.signal_type || '';
+  const normalizedRequestedSignal = normalizeSignalTypeId(requestedSignalId);
+  const normalizedActiveSignal = normalizeSignalTypeId(activeSignalId);
+  const requestedSignalLabel = requestedSignalId ? signalTypeOptionLabel(requestedSignalId) : 'Not set';
+  const activeSignalLabel = activeSignalId ? signalTypeOptionLabel(activeSignalId) : 'Waiting for session';
+
+  if (runRequestedSignal) {
+    runRequestedSignal.textContent = requestedSignalLabel;
+    runRequestedSignal.className = 'run-signal-pill';
+  }
+  if (runActualSignal) {
+    runActualSignal.textContent = activeSignalLabel;
+    runActualSignal.className = 'run-signal-pill run-signal-pill--active';
+    if (activeSignalId && requestedSignalId) {
+      runActualSignal.classList.add(normalizedRequestedSignal === normalizedActiveSignal ? 'run-signal-pill--match' : 'run-signal-pill--mismatch');
+    }
+  }
+  if (runSignalConfirmation) {
+    runSignalConfirmation.textContent = !requestedSignalId
+      ? 'Choose a signal type to lock the trigger for this run.'
+      : !activeSignalId
+      ? `Requested trigger: ${requestedSignalLabel}. Start the session to confirm the active signal.`
+      : normalizedRequestedSignal === normalizedActiveSignal
+      ? `Signal confirmed. This run is operating on ${activeSignalLabel}.`
+      : `Signal mismatch. Requested ${requestedSignalLabel}, but the active session is using ${activeSignalLabel}.`;
   }
 
   if (composerFocus) {
