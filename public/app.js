@@ -76,6 +76,9 @@ const analyticsSignalTable = document.getElementById('analyticsSignalTable');
 const analyticsRecentRuns = document.getElementById('analyticsRecentRuns');
 const analyticsDialogueCount = document.getElementById('analyticsDialogueCount');
 const analyticsFunnelTable = document.getElementById('analyticsFunnelTable');
+const analyticsWinReasons = document.getElementById('analyticsWinReasons');
+const analyticsLoseReasons = document.getElementById('analyticsLoseReasons');
+const analyticsStageReasons = document.getElementById('analyticsStageReasons');
 const analyticsBrief = document.getElementById('analyticsBrief');
 const analyticsSideFilter = document.getElementById('analyticsSideFilter');
 const analyticsProductFilter = document.getElementById('analyticsProductFilter');
@@ -555,6 +558,81 @@ function renderDialogueCards(items, total) {
   });
 }
 
+function renderReasonList(container, items, emptyText, options = {}) {
+  if (!container) return;
+  if (!items?.length) {
+    container.innerHTML = `<p class="muted">${escapeHtml(emptyText)}</p>`;
+    return;
+  }
+  container.innerHTML = `<div class="reason-list">${items.map((item) => {
+    const rate = Number(item.rate);
+    const count = Number(item.count);
+    const meta = [Number.isFinite(count) ? `${count} runs` : null, Number.isFinite(rate) ? formatPercent(rate) : null].filter(Boolean).join(' · ');
+    return `
+      <article class="reason-card${options.tone ? ` reason-card--${options.tone}` : ''}">
+        <div class="reason-card-head">
+          <strong>${escapeHtml(item.label || item.reason || 'Unknown reason')}</strong>
+          ${meta ? `<span class="muted">${escapeHtml(meta)}</span>` : ''}
+        </div>
+        ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ''}
+      </article>
+    `;
+  }).join('')}</div>`;
+}
+
+function renderFunnelVisual(funnel = []) {
+  if (!analyticsFunnelTable) return;
+  if (!funnel.length) {
+    analyticsFunnelTable.innerHTML = '<p class="muted">No funnel data for this slice yet.</p>';
+    return;
+  }
+  const maxEntered = Math.max(...funnel.map((stage) => Number(stage.entered) || 0), 1);
+  analyticsFunnelTable.innerHTML = `<div class="funnel-visual">${funnel.map((stage) => {
+    const entered = Number(stage.entered) || 0;
+    const conversion = stage.conversion_to_next === null || stage.conversion_to_next === undefined ? null : Number(stage.conversion_to_next);
+    const width = Math.max(10, Math.round((entered / maxEntered) * 100));
+    return `
+      <article class="funnel-stage-card">
+        <div class="funnel-stage-head">
+          <strong>${escapeHtml(String(stage.stage || '').replace(/_/g, ' '))}</strong>
+          <span>${entered}</span>
+        </div>
+        <div class="funnel-stage-bar"><span style="width:${width}%"></span></div>
+        <div class="funnel-stage-meta">
+          <span>Entered: ${entered}</span>
+          <span>${conversion === null || !Number.isFinite(conversion) ? 'Final stage' : `To next: ${formatPercent(conversion)}`}</span>
+        </div>
+      </article>
+    `;
+  }).join('')}</div>`;
+}
+
+function renderStageReasons(funnel = []) {
+  if (!analyticsStageReasons) return;
+  if (!funnel.length) {
+    analyticsStageReasons.innerHTML = '<p class="muted">No stage-transition data for this slice yet.</p>';
+    return;
+  }
+  analyticsStageReasons.innerHTML = `<div class="stage-reason-stack">${funnel.map((stage) => `
+    <article class="stage-reason-card">
+      <div class="stage-reason-head">
+        <strong>${escapeHtml(String(stage.stage || '').replace(/_/g, ' '))}</strong>
+        <span class="muted">${stage.conversion_to_next === null || stage.conversion_to_next === undefined ? 'Final stage' : `To next: ${formatPercent(stage.conversion_to_next)}`}</span>
+      </div>
+      <div class="stage-reason-grid">
+        <div>
+          <p class="phase-label">What moved it forward</p>
+          ${(stage.win_reasons || []).length ? `<ul class="stage-reason-list">${stage.win_reasons.map((item) => `<li><strong>${escapeHtml(item.label)}</strong>${item.count ? ` <span class="muted">· ${escapeHtml(String(item.count))}</span>` : ''}</li>`).join('')}</ul>` : '<p class="muted">No clear win reasons captured.</p>'}
+        </div>
+        <div>
+          <p class="phase-label">What blocked progress</p>
+          ${(stage.lose_reasons || []).length ? `<ul class="stage-reason-list">${stage.lose_reasons.map((item) => `<li><strong>${escapeHtml(item.label)}</strong>${item.count ? ` <span class="muted">· ${escapeHtml(String(item.count))}</span>` : ''}</li>`).join('')}</ul>` : '<p class="muted">No clear loss reasons captured.</p>'}
+        </div>
+      </div>
+    </article>
+  `).join('')}</div>`;
+}
+
 function applyAnalyticsFilters() {
   const sideVal = analyticsSideFilter?.value || '';
   const productVal = analyticsProductFilter?.value || '';
@@ -589,6 +667,9 @@ async function loadAnalytics(options = {}) {
   if (analyticsSignalTable) analyticsSignalTable.innerHTML = '';
   analyticsRecentRuns.innerHTML = '';
   if (analyticsFunnelTable) analyticsFunnelTable.innerHTML = '';
+  if (analyticsWinReasons) analyticsWinReasons.innerHTML = '';
+  if (analyticsLoseReasons) analyticsLoseReasons.innerHTML = '';
+  if (analyticsStageReasons) analyticsStageReasons.innerHTML = '';
   if (analyticsBrief) analyticsBrief.innerHTML = '';
   analyticsData = null;
 
@@ -691,25 +772,20 @@ async function loadAnalytics(options = {}) {
       </div>`
     : '<p class="muted">No finished runs yet.</p>';
 
-  if (analyticsFunnelTable) {
-    const rows = (data.slice?.funnel || []).map((stage) => `
-      <div class="analytics-row">
-        <div><strong>${escapeHtml(stage.stage.replace(/_/g, ' '))}</strong></div>
-        <div>${stage.entered}</div>
-        <div>${stage.conversion_to_next === null ? '—' : formatPercent(stage.conversion_to_next)}</div>
-        <div class="muted">Win: ${(stage.win_reasons || []).map((item) => escapeHtml(item.label)).join(', ') || '—'}<br>Lose: ${(stage.lose_reasons || []).map((item) => escapeHtml(item.label)).join(', ') || '—'}</div>
-      </div>
-    `).join('');
-    analyticsFunnelTable.innerHTML = rows ? `<div class="analytics-table analytics-table--personas"><div class="analytics-row analytics-row--head"><div>Stage</div><div>Entered</div><div>To next</div><div>Reasons</div></div>${rows}</div>` : '<p class="muted">No funnel data for this slice yet.</p>';
-  }
+  const funnel = data.slice?.funnel || [];
+  renderFunnelVisual(funnel);
+  renderStageReasons(funnel);
+
+  const brief = data.slice?.analytical_brief;
+  renderReasonList(analyticsWinReasons, brief?.average_win_reasons || [], 'No aggregated win reasons for this slice yet.', { tone: 'win' });
+  renderReasonList(analyticsLoseReasons, brief?.average_lose_reasons || [], 'No aggregated loss reasons for this slice yet.', { tone: 'lose' });
 
   if (analyticsBrief) {
-    const brief = data.slice?.analytical_brief;
     analyticsBrief.innerHTML = brief ? `
-      <p>${escapeHtml(brief.overall || '')}</p>
-      <div class="detail-row"><strong>Average win reasons</strong><span>${escapeHtml((brief.average_win_reasons || []).map((item) => item.label).join(', ') || '—')}</span></div>
-      <div class="detail-row"><strong>Average lose reasons</strong><span>${escapeHtml((brief.average_lose_reasons || []).map((item) => item.label).join(', ') || '—')}</span></div>
-      <div class="coaching-list">${(brief.stage_summaries || []).map((item) => `<div class="coaching-item"><strong>${escapeHtml(item.stage.replace(/_/g, ' '))}</strong><p>${escapeHtml(item.summary || '')}</p></div>`).join('')}</div>
+      <div class="analytics-brief-block">
+        <p class="analytics-brief-text">${escapeHtml(brief.overall || '')}</p>
+        <div class="coaching-list">${(brief.stage_summaries || []).map((item) => `<div class="coaching-item"><strong>${escapeHtml(item.stage.replace(/_/g, ' '))}</strong><p>${escapeHtml(item.summary || '')}</p></div>`).join('')}</div>
+      </div>
     ` : '<p class="muted">No analytical brief for this slice yet.</p>';
   }
 

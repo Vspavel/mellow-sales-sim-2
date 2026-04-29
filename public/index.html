@@ -486,9 +486,25 @@
               </div>
             </div>
 
-            <div class="run-insight-card">
-              <div class="run-insight-head"><p class="phase-label">Funnel</p></div>
+            <div class="run-insight-card analytics-funnel-card">
+              <div class="run-insight-head"><p class="phase-label">Funnel movement</p></div>
               <div id="analyticsFunnelTable"></div>
+            </div>
+
+            <div class="analytics-reasons-grid">
+              <div class="run-insight-card">
+                <div class="run-insight-head"><p class="phase-label">Why we win</p></div>
+                <div id="analyticsWinReasons"></div>
+              </div>
+              <div class="run-insight-card">
+                <div class="run-insight-head"><p class="phase-label">Why we lose</p></div>
+                <div id="analyticsLoseReasons"></div>
+              </div>
+            </div>
+
+            <div class="run-insight-card">
+              <div class="run-insight-head"><p class="phase-label">Stage transition reasons</p></div>
+              <div id="analyticsStageReasons"></div>
             </div>
 
             <div class="run-insight-card">
@@ -496,48 +512,53 @@
               <div id="analyticsBrief"></div>
             </div>
 
-            <div class="run-insight-card">
-              <div class="run-insight-head"><p class="phase-label">Signal analytics</p></div>
-              <div id="analyticsSignalTable"></div>
-            </div>
+            <details class="run-details analytics-detail-stack">
+              <summary>Detailed breakdown</summary>
+              <div class="run-details-body">
+                <div class="run-insight-card">
+                  <div class="run-insight-head"><p class="phase-label">Signal analytics</p></div>
+                  <div id="analyticsSignalTable"></div>
+                </div>
 
-            <div class="run-insight-card">
-              <div class="run-insight-head"><p class="phase-label">By persona</p></div>
-              <div id="analyticsPersonaTable"></div>
-            </div>
+                <div class="run-insight-card">
+                  <div class="run-insight-head"><p class="phase-label">By persona</p></div>
+                  <div id="analyticsPersonaTable"></div>
+                </div>
 
-            <div class="run-insight-card">
-              <div class="run-insight-head">
-                <p class="phase-label">Dialogues</p>
-                <span id="analyticsDialogueCount" class="muted run-insight-meta"></span>
+                <div class="run-insight-card">
+                  <div class="run-insight-head">
+                    <p class="phase-label">Dialogues</p>
+                    <span id="analyticsDialogueCount" class="muted run-insight-meta"></span>
+                  </div>
+                  <div class="analytics-filters">
+                    <select id="filterPersona" class="analytics-filter-select">
+                      <option value="">All personas</option>
+                    </select>
+                    <select id="filterOutcome" class="analytics-filter-select">
+                      <option value="">All outcomes</option>
+                      <option value="booked">Meeting booked</option>
+                      <option value="not_booked">No meeting</option>
+                    </select>
+                    <select id="filterVerdict" class="analytics-filter-select">
+                      <option value="">All verdicts</option>
+                      <option value="PASS">Pass</option>
+                      <option value="PASS_WITH_NOTES">Pass with notes</option>
+                      <option value="FAIL">Fail</option>
+                      <option value="BLOCKER">Blocker</option>
+                    </select>
+                    <select id="sortDialogues" class="analytics-filter-select">
+                      <option value="date_desc">Newest first</option>
+                      <option value="date_asc">Oldest first</option>
+                      <option value="persona">By persona</option>
+                      <option value="outcome">Meeting booked first</option>
+                      <option value="score_desc">Score high → low</option>
+                      <option value="score_asc">Score low → high</option>
+                    </select>
+                  </div>
+                  <div id="analyticsRecentRuns"></div>
+                </div>
               </div>
-              <div class="analytics-filters">
-                <select id="filterPersona" class="analytics-filter-select">
-                  <option value="">All personas</option>
-                </select>
-                <select id="filterOutcome" class="analytics-filter-select">
-                  <option value="">All outcomes</option>
-                  <option value="booked">Meeting booked</option>
-                  <option value="not_booked">No meeting</option>
-                </select>
-                <select id="filterVerdict" class="analytics-filter-select">
-                  <option value="">All verdicts</option>
-                  <option value="PASS">Pass</option>
-                  <option value="PASS_WITH_NOTES">Pass with notes</option>
-                  <option value="FAIL">Fail</option>
-                  <option value="BLOCKER">Blocker</option>
-                </select>
-                <select id="sortDialogues" class="analytics-filter-select">
-                  <option value="date_desc">Newest first</option>
-                  <option value="date_asc">Oldest first</option>
-                  <option value="persona">By persona</option>
-                  <option value="outcome">Meeting booked first</option>
-                  <option value="score_desc">Score high → low</option>
-                  <option value="score_asc">Score low → high</option>
-                </select>
-              </div>
-              <div id="analyticsRecentRuns"></div>
-            </div>
+            </details>
           </div>
         </section>
 
