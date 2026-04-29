@@ -2297,6 +2297,18 @@ function topReasons(map = {}, limit = 5, options = {}) {
     .map(([reason, count]) => ({ reason, label: analyticsReasonLabel(reason), count, summary: analyticsReasonSummary(reason, options) }));
 }
 
+function mergeReasonMaps(stageReasonMaps = {}, tone = 'win', stages = []) {
+  const merged = {};
+  const targetStages = Array.isArray(stages) && stages.length ? stages : Object.keys(stageReasonMaps || {});
+  for (const stage of targetStages) {
+    const source = stageReasonMaps?.[stage]?.[tone] || {};
+    for (const [reason, count] of Object.entries(source)) {
+      incrementCounter(merged, reason, count);
+    }
+  }
+  return merged;
+}
+
 function analyticsStageReasonMaps() {
   return {
     mechanics_engaged: { win: {}, lose: {} },
@@ -2430,7 +2442,8 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
         if (stageReasons.length) stageReasons.forEach((reason) => incrementCounter(stageReasonMaps[stage].win, reason));
         else if (stage === 'meeting_booked') incrementCounter(stageReasonMaps[stage].win, 'buyer_explicitly_accepted_meeting');
       } else {
-        incrementCounter(stageReasonMaps[stage].lose, failReason || 'unknown');
+        if (stageReasons.length) stageReasons.forEach((reason) => incrementCounter(stageReasonMaps[stage].lose, reason));
+        else incrementCounter(stageReasonMaps[stage].lose, failReason || 'unknown');
       }
     }
     // Hint stage distribution from transcript turns
@@ -2641,7 +2654,8 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
         if (stageReasons.length) stageReasons.forEach((reason) => incrementCounter(filteredStageReasonMaps[stage].win, reason));
         else if (stage === 'meeting_booked') incrementCounter(filteredStageReasonMaps[stage].win, 'buyer_explicitly_accepted_meeting');
       } else {
-        incrementCounter(filteredStageReasonMaps[stage].lose, failReason || 'unknown');
+        if (stageReasons.length) stageReasons.forEach((reason) => incrementCounter(filteredStageReasonMaps[stage].lose, reason));
+        else incrementCounter(filteredStageReasonMaps[stage].lose, failReason || 'unknown');
       }
     }
   }
@@ -2670,13 +2684,18 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
 
   const filteredMeetingRate = filteredFinished.length ? Number((filteredMeetingBooked.length / filteredFinished.length).toFixed(3)) : 0;
   const filteredFirstBuyerReplyRate = filteredFinished.length ? Number((filteredFirstBuyerReply.length / filteredFinished.length).toFixed(3)) : 0;
-  const winReasonCounts = filteredMeetingBooked.reduce((acc, session) => {
-    const key = session.dialogue_summary?.acceptance_state || 'meeting_booked';
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {});
+  const aggregateWinReasons = mergeReasonMaps(filteredStageReasonMaps, 'win', ['written_step_requested', 'written_step_accepted', 'written_step_then_call', 'review_call_ready', 'meeting_booked']);
+  const aggregateLoseReasons = mergeReasonMaps(filteredStageReasonMaps, 'lose', ['mechanics_engaged', 'economics_engaged', 'written_step_requested', 'written_step_accepted', 'written_step_then_call', 'review_call_ready']);
+  const winReasonCounts = Object.keys(aggregateWinReasons).length
+    ? aggregateWinReasons
+    : filteredMeetingBooked.reduce((acc, session) => {
+        const key = session.dialogue_summary?.acceptance_state || 'meeting_booked';
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+  const loseReasonCounts = Object.keys(aggregateLoseReasons).length ? aggregateLoseReasons : filteredFailureBreakdown;
   const topWinReasons = topReasons(winReasonCounts, 5, { tone: 'win' });
-  const topLoseReasons = topReasons(filteredFailureBreakdown, 5, { tone: 'lose' });
+  const topLoseReasons = topReasons(loseReasonCounts, 5, { tone: 'lose' });
 
   const analyticalBrief = {
     overall: filteredFinished.length

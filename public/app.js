@@ -694,9 +694,10 @@ async function loadAnalytics(options = {}) {
 
   const baselineNote = data.baseline_reset_at ? `, baseline ${new Date(data.baseline_reset_at).toLocaleString()}` : '';
   analyticsGeneratedAt.textContent = `Updated ${new Date(data.generated_at).toLocaleString()}${baselineNote}`;
-  analyticsSuccessRate.textContent = formatPercent(data.totals?.meeting_booked_rate);
-  analyticsFinishedRuns.textContent = String(data.totals?.finished_sessions ?? 0);
-  analyticsSuccessfulDialogs.textContent = String(data.totals?.meeting_booked_count ?? 0);
+  const sliceTotals = data.slice?.totals || data.totals || {};
+  analyticsSuccessRate.textContent = formatPercent(sliceTotals.meeting_booked_rate);
+  analyticsFinishedRuns.textContent = String(sliceTotals.finished_sessions ?? 0);
+  analyticsSuccessfulDialogs.textContent = String(sliceTotals.meeting_booked_count ?? 0);
 
   const renderFilterSelect = (el, items, current, placeholder) => {
     if (!el) return;
