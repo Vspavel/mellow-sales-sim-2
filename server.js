@@ -7799,10 +7799,36 @@ function getRecommendedProduct(session) {
   return (session.sde_card?.recommended_product === 'CoR') ? 'cor' : 'cm';
 }
 
+function buildSignalAwareOpeners(session, lang = 'ru') {
+  const card = session?.sde_card || {};
+  const contactName = card?.contact?.name || personaMeta(session)?.name || (lang === 'en' ? 'there' : 'коллеги');
+  const companyName = card?.company?.name || (lang === 'en' ? 'your team' : 'вашей команды');
+  const whatHappened = String(card?.what_happened || card?.rendered_text || '').trim();
+  const probablePain = String(card?.probable_pain || '').trim();
+  const firstTouchHint = String(card?.first_touch_hint || '').trim();
+  const signalLabel = String(card?.signal_type || '').trim();
+  const product = getRecommendedProduct(session) === 'cor' ? 'Mellow CoR' : 'Mellow CM';
+
+  if (!whatHappened && !probablePain && !firstTouchHint) return [];
+
+  if (lang === 'en') {
+    return [
+      `${contactName}, I noticed a specific signal at ${companyName}: ${whatHappened || 'there is a concrete operational shift in the contractor flow'}. It looks like the pressure point is ${probablePain || 'manual risk and weak control under pressure'}. ${product} is only relevant if it helps with exactly that. Which part is the sharpest right now?`,
+      `${contactName}, this looks less like generic interest and more like a concrete trigger: ${whatHappened || probablePain || 'there is a real operating constraint in the current setup'}. ${firstTouchHint || `I would approach it through ${signalLabel || 'the active signal'}, not a broad pitch.`} Does that map to what is actually creating pressure on your side?`,
+    ].filter(Boolean);
+  }
+
+  return [
+    `${contactName}, вижу у ${companyName} не абстрактный интерес, а конкретный сигнал: ${whatHappened || 'в contractor flow появился реальный сдвиг'}. Похоже, узел сейчас в следующем: ${probablePain || 'ручная нагрузка и слабая управляемость под давлением'}. ${product} имеет смысл обсуждать только если это бьёт ровно в этот контекст. Где сейчас самая острая точка?`,
+    `${contactName}, стартовать тут стоит не с общего питча, а через конкретный trigger: ${whatHappened || probablePain || signalLabel || 'активный сигнал сессии'}. ${firstTouchHint || 'Хочу зайти точно в этот контекст, без широких обещаний.'} Это действительно тот узел, который сейчас создаёт вам наибольшее давление?`,
+  ].filter(Boolean);
+}
+
 // Persona-specific first-touch openers referencing the actual signal card context
 function buildSellerOpener(session) {
   const persona = personaMeta(session);
   const card = session.sde_card;
+  const signalAwareOpeners = buildSignalAwareOpeners(session, 'ru');
   const openers = {
     andrey: [
       `Андрей, увидел, что у Northstar перед внешним legal review один платёж завис на 23 дня, и finance команда тратит 3–4 дня в месяц на ручную сверку. Mellow работает как Contractor of Record — берём KYC, документы и платёжную цепочку на себя, с audit trail по каждой транзакции. Не обещаем снять ваш риск целиком, но убираем неструктурированный слой до review. Стоит посмотреть, подходит ли это?`,
@@ -7845,6 +7871,10 @@ function buildSellerOpener(session) {
       `Давид, external review — это честная проверка схемы. Mellow: CoR, чёткая граница ответственности, audit trail, документы. Не пытаемся быть всем. Что в текущей схеме Westline вы бы назвали критической слабостью?`,
     ],
   };
+  if (signalAwareOpeners.length) {
+    return chooseMemoryInformedCandidate(session, signalAwareOpeners, pick(signalAwareOpeners));
+  }
+
   if (openers[persona.id]?.length) {
     return pick(openers[persona.id]);
   }
@@ -8445,6 +8475,7 @@ function generateSellerSuggestionEN(session) {
   const resolvedCount = Object.keys(resolvedConcerns).length;
 
   if (sellerTurnCount === 0) {
+    const signalAwareOpeners = buildSignalAwareOpeners(session, 'en');
     // English opening suggestions per persona
     const openers = {
       andrey: [
@@ -8501,6 +8532,7 @@ function generateSellerSuggestionEN(session) {
       ],
     };
     const openerPool = [
+      ...signalAwareOpeners,
       ...tunedOpeners(persona.id),
       ...(openers[persona.id] || [
         `Hi! Mellow handles contractor payments — we take on documents, KYC, payout with audit trail on our side. What's the most pressing issue in your situation right now?`,
