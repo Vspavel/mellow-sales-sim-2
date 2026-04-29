@@ -974,12 +974,39 @@ function doctrineEntries(layer) {
   return Object.values(state.doctrineConfig?.[layer] || {});
 }
 
+function normalizeSignalTypeId(value = '') {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'general';
+}
+
+function signalTypeOptionLabel(id = '') {
+  const normalized = normalizeSignalTypeId(id);
+  return state.doctrineConfig?.signal_types?.[normalized]?.label
+    || String(id || '').replace(/[_-]+/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase())
+    || 'General';
+}
+
 function filteredSignalTypes() {
-  return doctrineEntries('signal_types').filter((signal) => {
+  const doctrineSignals = doctrineEntries('signal_types').filter((signal) => {
     if (signal.side && signal.side !== state.selectedSide) return false;
     if (signal.product && signal.product !== state.selectedProduct) return false;
     return true;
+  }).map((signal) => ({ id: signal.id, label: signal.label }));
+
+  const personaSignals = [...new Set(state.personas
+    .filter((persona) => persona.market_side === state.selectedSide && persona.product === state.selectedProduct)
+    .flatMap((persona) => Array.isArray(persona.available_signal_types) ? persona.available_signal_types : []))]
+    .map((id) => ({ id, label: signalTypeOptionLabel(id) }));
+
+  const merged = new Map();
+  [...doctrineSignals, ...personaSignals].forEach((item) => {
+    if (!item?.id) return;
+    if (!merged.has(item.id)) merged.set(item.id, item);
   });
+  return [...merged.values()];
 }
 
 function filteredProducts() {
@@ -1001,8 +1028,8 @@ function filteredPersonas() {
     if (persona.market_side !== state.selectedSide) return false;
     if (persona.product !== state.selectedProduct) return false;
     if (state.selectedSignalType && state.selectedSignalType !== 'general') {
-      const available = Array.isArray(persona.available_signal_types) ? persona.available_signal_types : [];
-      if (available.length && !available.includes(state.selectedSignalType)) return false;
+      const available = Array.isArray(persona.available_signal_types) ? persona.available_signal_types.map(normalizeSignalTypeId) : [];
+      if (available.length && !available.includes(normalizeSignalTypeId(state.selectedSignalType))) return false;
     }
     if (Array.isArray(persona.dialogue_types) && persona.dialogue_types.length && !persona.dialogue_types.includes(state.selectedScenarioDialogueType)) return false;
     if (Array.isArray(persona.environments) && persona.environments.length && !persona.environments.includes(state.dialogueType)) return false;

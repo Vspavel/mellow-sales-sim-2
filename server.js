@@ -1170,7 +1170,7 @@ function enrichPersonaWithScenario(persona) {
     ...persona,
     market_side: profile.side || 'demand',
     product: profile.product || 'cor',
-    available_signal_types: [...new Set((persona.cards || []).map((card) => normalizeSignalTypeId(card?.signal_type)).filter(Boolean))],
+    available_signal_types: [...new Set((persona.cards || []).map((card) => String(card?.signal_type || '').trim()).filter(Boolean))],
     signal_types: Object.values(doctrineConfig?.signal_types || {}).filter((signal) => {
       if (signal.side && signal.side !== (profile.side || 'demand')) return false;
       if (signal.product && signal.product !== (profile.product || 'cor')) return false;
@@ -1190,6 +1190,12 @@ function normalizeSignalTypeId(value = '') {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '') || 'general';
+}
+
+function signalTypeVariants(value = '') {
+  const raw = String(value || '').trim();
+  const normalized = normalizeSignalTypeId(raw);
+  return [...new Set([raw, normalized, raw.toUpperCase(), normalized.toUpperCase()].filter(Boolean))];
 }
 
 function inferScenarioSelection(session = null) {
@@ -5477,8 +5483,8 @@ function pickCard(personaId, randomizerConfig = null) {
 
   // Filter to allowed signal types if configured
   if (Array.isArray(randomizerConfig?.signal_types) && randomizerConfig.signal_types.length) {
-    const allowed = new Set(randomizerConfig.signal_types);
-    const filtered = cards.filter((c) => allowed.has(c.signal_type));
+    const allowed = new Set(randomizerConfig.signal_types.flatMap(signalTypeVariants));
+    const filtered = cards.filter((c) => signalTypeVariants(c.signal_type).some((variant) => allowed.has(variant)));
     if (filtered.length) cards = filtered;
   }
 
