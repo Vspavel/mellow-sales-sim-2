@@ -355,31 +355,34 @@
                     </div>
 
                     <div class="composer-shell composer-shell--messaging">
-                      <div class="composer-strategy-row">
-                        <div class="composer-chip-group">
-                          <span class="composer-chip-label">Move type</span>
-                          <button type="button" class="composer-chip is-active" data-move-type="clarify">Clarify</button>
-                          <button type="button" class="composer-chip" data-move-type="prove">Prove</button>
-                          <button type="button" class="composer-chip" data-move-type="ask">Ask narrowly</button>
-                        </div>
-                        <div class="composer-chip-group">
-                          <span class="composer-chip-label">Proof layer</span>
-                          <button type="button" class="composer-chip" data-proof-layer="case">Case snippet</button>
-                          <button type="button" class="composer-chip is-active" data-proof-layer="one_screen">One-screen proof</button>
-                          <button type="button" class="composer-chip" data-proof-layer="calculator">Calculator snapshot</button>
-                        </div>
-                      </div>
-
                       <p class="composer-focus" id="composerFocus"></p>
-                      <form id="messageForm" class="composer">
+                      <form id="messageForm" class="composer composer--messaging">
                         <textarea id="messageInput" rows="3" placeholder="Write your first touch or next message"></textarea>
-                        <div class="composer-row">
+                        <div class="composer-row composer-row--messaging">
                           <div class="hint-controls">
                             <button type="button" id="suggestBtn" class="ghost-btn">Recommended move</button>
                           </div>
                           <button type="submit">Send</button>
                         </div>
                       </form>
+
+                      <details class="composer-advanced-controls">
+                        <summary>Message controls</summary>
+                        <div class="composer-strategy-row composer-strategy-row--compact">
+                          <div class="composer-chip-group">
+                            <span class="composer-chip-label">Move type</span>
+                            <button type="button" class="composer-chip is-active" data-move-type="clarify">Clarify</button>
+                            <button type="button" class="composer-chip" data-move-type="prove">Prove</button>
+                            <button type="button" class="composer-chip" data-move-type="ask">Ask narrowly</button>
+                          </div>
+                          <div class="composer-chip-group">
+                            <span class="composer-chip-label">Proof layer</span>
+                            <button type="button" class="composer-chip" data-proof-layer="case">Case snippet</button>
+                            <button type="button" class="composer-chip is-active" data-proof-layer="one_screen">One-screen proof</button>
+                            <button type="button" class="composer-chip" data-proof-layer="calculator">Calculator snapshot</button>
+                          </div>
+                        </div>
+                      </details>
                     </div>
                   </div>
                 </div>
@@ -387,35 +390,40 @@
             </section>
 
             <aside class="cockpit-sidebar cockpit-sidebar--context">
-              <section class="run-insight-card" id="nextMoveCard">
+              <section class="run-insight-card run-insight-card--primary" id="nextMoveCard">
                 <div class="run-insight-head">
                   <p class="phase-label">Next move</p>
                 </div>
                 <div id="nextMovePanel"></div>
               </section>
 
-              <section class="run-insight-card" id="buyerBriefCard">
-                <div class="run-insight-head">
-                  <p class="phase-label">Buyer brief</p>
-                </div>
-                <div id="buyerBriefPanel"></div>
-              </section>
+              <details class="context-stack-details" open>
+                <summary>Buyer context</summary>
+                <div class="context-stack-body">
+                  <section class="run-insight-card run-insight-card--compact" id="buyerBriefCard">
+                    <div class="run-insight-head">
+                      <p class="phase-label">Buyer brief</p>
+                    </div>
+                    <div id="buyerBriefPanel"></div>
+                  </section>
 
-              <section class="run-insight-card" id="runSignalCard">
-                <div class="run-insight-head">
-                  <p class="phase-label">Why this conversation exists</p>
-                  <span id="runSignalBadge" class="channel-badge channel-badge--messenger">Selected by session</span>
-                </div>
-                <div id="runSignalPanel"></div>
-              </section>
+                  <section class="run-insight-card run-insight-card--compact" id="runSignalCard">
+                    <div class="run-insight-head">
+                      <p class="phase-label">Why this conversation exists</p>
+                      <span id="runSignalBadge" class="channel-badge channel-badge--messenger">Selected by session</span>
+                    </div>
+                    <div id="runSignalPanel"></div>
+                  </section>
 
-              <section class="run-insight-card">
-                <div class="run-insight-head">
-                  <p class="phase-label">Buyer readiness</p>
-                  <span id="buyerStateTurnMeta" class="muted run-insight-meta">Baseline before first seller turn</span>
+                  <section class="run-insight-card run-insight-card--compact">
+                    <div class="run-insight-head">
+                      <p class="phase-label">Buyer readiness</p>
+                      <span id="buyerStateTurnMeta" class="muted run-insight-meta">Baseline before first seller turn</span>
+                    </div>
+                    <div id="buyerStateLivePanel"></div>
+                  </section>
                 </div>
-                <div id="buyerStateLivePanel"></div>
-              </section>
+              </details>
             </aside>
           </div>
 
