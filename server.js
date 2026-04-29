@@ -915,37 +915,81 @@ const DEFAULT_PRODUCT_DOCTRINES = {
 };
 
 const DEFAULT_SIGNAL_TYPE_DOCTRINES = {
+  category_confusion: {
+    id: 'category_confusion', side: 'demand', product: 'cor', label: 'Category confusion',
+    description: 'The buyer does not yet place Mellow cleanly and needs category clarity before deeper evaluation.',
+  },
+  churn_signal: {
+    id: 'churn_signal', side: 'demand', product: 'cor', label: 'Churn or trust shock',
+    description: 'A prior failure or trust break created an active recovery or retention trigger.',
+  },
+  competitor_price_objection: {
+    id: 'competitor_price_objection', side: 'demand', product: 'cor', label: 'Competitor price objection',
+    description: 'A cheaper competitor frame is dominating and forcing value defense beyond headline price.',
+  },
   compliance_pressure: {
     id: 'compliance_pressure', side: 'demand', product: 'cor', label: 'Compliance pressure',
     description: 'Compliance or legal scrutiny around contractor setup and payment flow.',
   },
-  pain_signal: {
-    id: 'pain_signal', side: 'demand', product: 'cor', label: 'Operational payment failure',
-    description: 'A concrete payout failure, delay, or operational breakdown already happened.',
+  compliance_switch: {
+    id: 'compliance_switch', side: 'demand', product: 'cor', label: 'Compliance switch after grey provider',
+    description: 'A grey-provider experience is forcing a more defensible replacement path.',
   },
-  fundraising_diligence: {
-    id: 'fundraising_diligence', side: 'demand', product: 'cor', label: 'Post-round diligence',
-    description: 'Investor or diligence pressure is forcing the operating model into focus.',
+  direct_contract_need: {
+    id: 'direct_contract_need', side: 'demand', product: 'cor', label: 'Direct contract need',
+    description: 'The buyer needs a narrower direct-contract or roster-slice transition path.',
   },
-  team_scaling: {
-    id: 'team_scaling', side: 'demand', product: 'cor', label: 'Team scaling overload',
-    description: 'Hiring or contractor growth is stretching the current operating contour.',
-  },
-  operations_overload: {
-    id: 'operations_overload', side: 'demand', product: 'cor', label: 'Ops overload',
-    description: 'The current process is too manual and unstable for the team to carry.',
+  event_reengagement: {
+    id: 'event_reengagement', side: 'demand', product: 'cor', label: 'Event-driven re-engagement',
+    description: 'A new event or operating change reopened a previously cold conversation.',
   },
   finance_control_gap: {
     id: 'finance_control_gap', side: 'demand', product: 'cor', label: 'Finance control gap',
     description: 'Finance lacks visibility, control, or trust in the current payment process.',
   },
+  fundraising_diligence: {
+    id: 'fundraising_diligence', side: 'demand', product: 'cor', label: 'Post-round diligence',
+    description: 'Investor or diligence pressure is forcing the operating model into focus.',
+  },
+  fx_transparency: {
+    id: 'fx_transparency', side: 'demand', product: 'cor', label: 'FX transparency gap',
+    description: 'Foreign exchange logic or total-cost visibility is unclear and creating hesitation.',
+  },
   legal_review_trigger: {
     id: 'legal_review_trigger', side: 'demand', product: 'cor', label: 'Legal review trigger',
     description: 'Counsel or internal legal is reviewing the contractor and payments contour.',
   },
+  operations_overload: {
+    id: 'operations_overload', side: 'demand', product: 'cor', label: 'Ops overload',
+    description: 'The current process is too manual and unstable for the team to carry.',
+  },
   outside_counsel_check: {
     id: 'outside_counsel_check', side: 'demand', product: 'cor', label: 'Outside counsel check',
     description: 'External legal review is pressuring the buyer to tighten scope and defensibility.',
+  },
+  pain_signal: {
+    id: 'pain_signal', side: 'demand', product: 'cor', label: 'Operational payment failure',
+    description: 'A concrete payout failure, delay, or operational breakdown already happened.',
+  },
+  post_onboarding_risk: {
+    id: 'post_onboarding_risk', side: 'demand', product: 'cor', label: 'Post-onboarding risk',
+    description: 'The buyer experienced a trust shock after onboarding and now needs economics or control repair.',
+  },
+  rate_pressure: {
+    id: 'rate_pressure', side: 'demand', product: 'cor', label: 'Rate pressure',
+    description: 'Commercial pressure around rate, premium, or pricing justification is dominating the conversation.',
+  },
+  re_engagement_signal: {
+    id: 're_engagement_signal', side: 'demand', product: 'cor', label: 'Re-engagement signal',
+    description: 'A previously stalled account is back in motion and can be reopened through a narrower fit signal.',
+  },
+  sanctions_stress: {
+    id: 'sanctions_stress', side: 'demand', product: 'cor', label: 'Sanctions stress',
+    description: 'Geo, sanctions, or banking pressure is stressing the current contractor operating path.',
+  },
+  team_scaling: {
+    id: 'team_scaling', side: 'demand', product: 'cor', label: 'Team scaling overload',
+    description: 'Hiring or contractor growth is stretching the current operating contour.',
   },
   general: {
     id: 'general', side: 'demand', product: 'cor', label: 'General trigger',
