@@ -1060,7 +1060,21 @@ function filteredGroups() {
     if (group.product && group.product !== state.selectedProduct) return false;
     if (Array.isArray(group.dialogue_types) && group.dialogue_types.length && !group.dialogue_types.includes(state.selectedScenarioDialogueType)) return false;
     if (Array.isArray(group.environments) && group.environments.length && !group.environments.includes(state.dialogueType)) return false;
-    return true;
+
+    const matchingProfiles = state.personas.filter((persona) => {
+      if (persona.market_side !== state.selectedSide) return false;
+      if (persona.product !== state.selectedProduct) return false;
+      if ((persona.group_id || persona.doctrine_family || 'custom') !== group.id) return false;
+      if (Array.isArray(persona.dialogue_types) && persona.dialogue_types.length && !persona.dialogue_types.includes(state.selectedScenarioDialogueType)) return false;
+      if (Array.isArray(persona.environments) && persona.environments.length && !persona.environments.includes(state.dialogueType)) return false;
+      if (state.selectedSignalType && state.selectedSignalType !== 'general') {
+        const available = Array.isArray(persona.available_signal_types) ? persona.available_signal_types.map(normalizeSignalTypeId) : [];
+        if (available.length && !available.includes(normalizeSignalTypeId(state.selectedSignalType))) return false;
+      }
+      return true;
+    });
+
+    return matchingProfiles.length > 0;
   });
 }
 
