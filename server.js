@@ -1873,6 +1873,18 @@ function analyticsStageReasonMaps() {
   };
 }
 
+function sessionHasFirstBuyerReply(session) {
+  const transcript = Array.isArray(session?.transcript) ? session.transcript : [];
+  const firstSellerIndex = transcript.findIndex((entry) => entry.role === 'seller');
+  if (firstSellerIndex === -1) return false;
+  for (let index = firstSellerIndex + 1; index < transcript.length; index += 1) {
+    const entry = transcript[index];
+    if (entry.role === 'bot') return true;
+    if (entry.role === 'seller') return false;
+  }
+  return false;
+}
+
 async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = null, outcomeFilter = null, verdictFilter = null, sideFilter = null, productFilter = null, signalTypeFilter = null, salesTypeFilter = null, instrumentFilter = null, groupFilter = null, aggregateBy = 'average' } = {}) {
   const sessions = await listStoredSessions();
   const baselineSessions = sessions.filter(isAfterAnalyticsBaseline);
@@ -2093,6 +2105,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       finished_at: session.finished_at,
       dialogue_type: session.dialogue_type || 'messenger',
       signal_type: session.sde_card?.signal_type || null,
+      first_buyer_reply: sessionHasFirstBuyerReply(session),
       seller_turns: sellerMessages(session).length,
       positive_outcome: sessionHasPositiveOutcome(session),
       meeting_booked: sessionHasMeetingBooked(session),
@@ -2136,6 +2149,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     const signalId = scenario.signal_type || 'general';
     const failReason = summary.failure_reason || classifyMeetingFailureReason(session);
     const booked = sessionHasMeetingBooked(session);
+    const firstBuyerReply = sessionHasFirstBuyerReply(session);
     if (!slicePersona[personaId]) {
       slicePersona[personaId] = { persona_id: personaId, persona_name: personas[personaId]?.name || session.bot_name || personaId, runs: 0, meeting_booked_count: 0, group_id: groupId };
     }
@@ -2143,11 +2157,12 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       sliceGroup[groupId] = { group_id: groupId, label: doctrineConfig?.groups?.[groupId]?.label || getDoctrineFamilyLabel(groupId), runs: 0, meeting_booked_count: 0 };
     }
     if (!sliceSignal[signalId]) {
-      sliceSignal[signalId] = { signal_type: signalId, label: doctrineConfig?.signal_types?.[signalId]?.label || analyticsReasonLabel(signalId), runs: 0, meeting_booked_count: 0 };
+      sliceSignal[signalId] = { signal_type: signalId, label: doctrineConfig?.signal_types?.[signalId]?.label || analyticsReasonLabel(signalId), runs: 0, meeting_booked_count: 0, first_buyer_reply_count: 0 };
     }
     slicePersona[personaId].runs += 1;
     sliceGroup[groupId].runs += 1;
     sliceSignal[signalId].runs += 1;
+    if (firstBuyerReply) sliceSignal[signalId].first_buyer_reply_count += 1;
     if (booked) {
       slicePersona[personaId].meeting_booked_count += 1;
       sliceGroup[groupId].meeting_booked_count += 1;
@@ -2165,6 +2180,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
   }
 
   const filteredMeetingBooked = filteredFinished.filter(sessionHasMeetingBooked);
+  const filteredFirstBuyerReply = filteredFinished.filter(sessionHasFirstBuyerReply);
   const funnel = funnelStages.map((stage, index) => {
     const entered = sliceStageCounts[stage] || 0;
     const nextStage = funnelStages[index + 1] || null;
@@ -2181,6 +2197,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
   });
 
   const filteredMeetingRate = filteredFinished.length ? Number((filteredMeetingBooked.length / filteredFinished.length).toFixed(3)) : 0;
+  const filteredFirstBuyerReplyRate = filteredFinished.length ? Number((filteredFirstBuyerReply.length / filteredFinished.length).toFixed(3)) : 0;
   const winReasonCounts = filteredMeetingBooked.reduce((acc, session) => {
     const key = session.dialogue_summary?.acceptance_state || 'meeting_booked';
     acc[key] = (acc[key] || 0) + 1;
@@ -2189,10 +2206,11 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
 
   const analyticalBrief = {
     overall: filteredFinished.length
-      ? `Slice win rate is ${(filteredMeetingRate * 100).toFixed(1)}% across ${filteredFinished.length} finished runs. Main wins come from ${topReasons(winReasonCounts, 3).map((item) => item.label).join(', ') || 'meeting-booked states'}, while main losses come from ${topReasons(filteredFailureBreakdown, 3).map((item) => item.label).join(', ') || 'no dominant failure reason yet'}.`
+      ? `Slice first-reply rate is ${(filteredFirstBuyerReplyRate * 100).toFixed(1)}% and win rate is ${(filteredMeetingRate * 100).toFixed(1)}% across ${filteredFinished.length} finished runs. Main wins come from ${topReasons(winReasonCounts, 3).map((item) => item.label).join(', ') || 'meeting-booked states'}, while main losses come from ${topReasons(filteredFailureBreakdown, 3).map((item) => item.label).join(', ') || 'no dominant failure reason yet'}.`
       : 'No finished runs match the current slice yet.',
     average_win_reasons: topReasons(winReasonCounts, 5),
     average_lose_reasons: topReasons(filteredFailureBreakdown, 5),
+    first_buyer_reply_rate: filteredFirstBuyerReplyRate,
     stage_summaries: funnel.map((stage) => ({
       stage: stage.stage,
       entered: stage.entered,
@@ -2255,13 +2273,15 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       },
       totals: {
         finished_sessions: filteredFinished.length,
+        first_buyer_reply_count: filteredFirstBuyerReply.length,
+        first_buyer_reply_rate: filteredFirstBuyerReplyRate,
         meeting_booked_count: filteredMeetingBooked.length,
         meeting_booked_rate: filteredMeetingRate,
       },
       funnel,
       by_group: Object.values(sliceGroup).map((item) => ({ ...item, meeting_booked_rate: item.runs ? Number((item.meeting_booked_count / item.runs).toFixed(3)) : 0 })).sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs),
       by_persona: Object.values(slicePersona).map((item) => ({ ...item, meeting_booked_rate: item.runs ? Number((item.meeting_booked_count / item.runs).toFixed(3)) : 0 })).sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs),
-      by_signal_type: Object.values(sliceSignal).map((item) => ({ ...item, meeting_booked_rate: item.runs ? Number((item.meeting_booked_count / item.runs).toFixed(3)) : 0 })).sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs),
+      by_signal_type: Object.values(sliceSignal).map((item) => ({ ...item, first_buyer_reply_rate: item.runs ? Number((item.first_buyer_reply_count / item.runs).toFixed(3)) : 0, meeting_booked_rate: item.runs ? Number((item.meeting_booked_count / item.runs).toFixed(3)) : 0 })).sort((a, b) => b.first_buyer_reply_rate - a.first_buyer_reply_rate || b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs),
       analytical_brief: analyticalBrief,
     },
     recent_finished: recentFinished,
@@ -2514,6 +2534,15 @@ function canMakeAsk(session) {
         && (buyerShowsFinanceCallReadiness(session) || artifactAccepted);
     }
     if (acceptanceState === 'narrow_walkthrough') return trust >= 1.04;
+  }
+
+  if (['internal_legal', 'external_legal', 'olga'].includes(persona.id)) {
+    const artifactAccepted = buyerExplicitlyAcceptedWrittenStep(session);
+    if (acceptanceState === 'artifact_then_call') return trust >= 1.0;
+    if (acceptanceState === 'artifact_only') {
+      return trust >= 0.98 && artifactAccepted;
+    }
+    if (acceptanceState === 'narrow_walkthrough') return trust >= 1.0;
   }
 
   // Once the buyer has already accepted a bounded artifact or post-artifact call contour,
@@ -3022,9 +3051,11 @@ function getHintPolicyContext(session) {
   if ((buyerAskedForMaterial || buyerAskedForImplementation || requestedArtifactType || ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState)) && sellerMessages(session).length >= 2 && !repairState) {
     const personaId = personaMeta(session)?.id;
     const financeConversionPersona = isFinancePersonaId(personaId);
+    const legalConversionPersona = ['internal_legal', 'external_legal', 'olga'].includes(personaId);
     const forceDirectAfterArtifact = financeConversionPersona && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState);
     const forceConversionDirectAsk = ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState) && ['panic_churn_ops', 'grey_pain_switcher', 'cm_winback', 'direct_contract_transition'].includes(personaId);
-    hintStage = (acceptanceState === 'artifact_only' && !forceDirectAfterArtifact && !forceConversionDirectAsk) ? 'bridge_step' : 'direct_ask';
+    const forceLegalDirectAsk = legalConversionPersona && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(acceptanceState);
+    hintStage = (acceptanceState === 'artifact_only' && !forceDirectAfterArtifact && !forceConversionDirectAsk && !forceLegalDirectAsk) ? 'bridge_step' : 'direct_ask';
   }
 
   // Constrained retry paths: prevent infinite looping at bridge_step or direct_ask

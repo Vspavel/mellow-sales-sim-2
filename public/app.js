@@ -69,6 +69,7 @@ const analyticsSuccessRate = document.getElementById('analyticsSuccessRate');
 const analyticsFinishedRuns = document.getElementById('analyticsFinishedRuns');
 const analyticsSuccessfulDialogs = document.getElementById('analyticsSuccessfulDialogs');
 const analyticsPersonaTable = document.getElementById('analyticsPersonaTable');
+const analyticsSignalTable = document.getElementById('analyticsSignalTable');
 const analyticsRecentRuns = document.getElementById('analyticsRecentRuns');
 const analyticsDialogueCount = document.getElementById('analyticsDialogueCount');
 const analyticsFunnelTable = document.getElementById('analyticsFunnelTable');
@@ -568,6 +569,7 @@ function applyAnalyticsFilters() {
 async function loadAnalytics(options = {}) {
   analyticsGeneratedAt.textContent = 'Loading analytics...';
   analyticsPersonaTable.innerHTML = '';
+  if (analyticsSignalTable) analyticsSignalTable.innerHTML = '';
   analyticsRecentRuns.innerHTML = '';
   if (analyticsFunnelTable) analyticsFunnelTable.innerHTML = '';
   if (analyticsBrief) analyticsBrief.innerHTML = '';
@@ -692,6 +694,24 @@ async function loadAnalytics(options = {}) {
       <div class="detail-row"><strong>Average lose reasons</strong><span>${escapeHtml((brief.average_lose_reasons || []).map((item) => item.label).join(', ') || '—')}</span></div>
       <div class="coaching-list">${(brief.stage_summaries || []).map((item) => `<div class="coaching-item"><strong>${escapeHtml(item.stage.replace(/_/g, ' '))}</strong><p>${escapeHtml(item.summary || '')}</p></div>`).join('')}</div>
     ` : '<p class="muted">No analytical brief for this slice yet.</p>';
+  }
+
+  if (analyticsSignalTable) {
+    const rows = (data.slice?.by_signal_type || []).map((item) => `
+      <div class="analytics-row">
+        <div>
+          <strong>${escapeHtml(item.label || item.signal_type)}</strong>
+          <div class="muted">${escapeHtml(item.signal_type || '')}</div>
+        </div>
+        <div>${item.runs}</div>
+        <div>${formatPercent(item.first_buyer_reply_rate)}</div>
+        <div>${item.first_buyer_reply_count ?? '—'}</div>
+        <div>${formatPercent(item.meeting_booked_rate)}</div>
+      </div>
+    `).join('');
+    analyticsSignalTable.innerHTML = rows
+      ? `<div class="analytics-table analytics-table--personas"><div class="analytics-row analytics-row--head"><div>Signal</div><div>Runs</div><div>First reply %</div><div>Replies</div><div>Booked %</div></div>${rows}</div>`
+      : '<p class="muted">No signal analytics for this slice yet.</p>';
   }
 
   renderDialogueCards(data.recent_finished || [], data.recent_finished_total ?? (data.recent_finished || []).length);
