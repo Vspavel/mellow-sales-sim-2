@@ -151,7 +151,8 @@ button:disabled { opacity: 0.55; cursor: default; }
 .composer-chip-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .composer-chip-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-right: 4px; }
 .composer-chip { background: var(--surface-subtle); color: var(--text); border: 1px solid var(--border); padding: 7px 10px; font-size: 0.8rem; font-weight: 600; }
-#suggestBtn, .composer-advanced-controls { display: none; }
+#suggestBtn { display: inline-flex; align-items: center; justify-content: center; }
+.composer-advanced-controls { display: none; }
 .stage-reason-summary { margin: 2px 0 0; color: var(--muted); font-size: 0.84rem; line-height: 1.5; }
 .stage-reason-list li p { margin-top: 4px; }
 .composer-chip.is-active { background: var(--accent-soft); border-color: var(--border-strong); }
