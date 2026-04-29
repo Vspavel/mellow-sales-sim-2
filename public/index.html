@@ -59,18 +59,24 @@
                 <select id="productSelect" class="text-input"></select>
               </label>
               <label class="field-group">
-                <span class="field-label">Dialogue type</span>
-                <select id="scenarioDialogueTypeSelect" class="text-input"></select>
+                <span class="field-label">Signal type</span>
+                <select id="signalTypeSelect" class="text-input"></select>
               </label>
             </div>
 
-            <div class="field-group">
-              <span class="field-label">Environment</span>
-              <div class="segmented-control" id="dialogueTypePicker">
-                <button type="button" class="seg-btn is-active" id="dialogueTypeMessenger">Messenger</button>
-                <button type="button" class="seg-btn" id="dialogueTypeEmail">Email</button>
-              </div>
-              <p class="muted seg-hint" id="dialogueTypeHint">Short, conversational turns. Think LinkedIn DM or Telegram.</p>
+            <div class="split-grid split-grid--double">
+              <label class="field-group">
+                <span class="field-label">Dialogue type</span>
+                <select id="scenarioDialogueTypeSelect" class="text-input"></select>
+              </label>
+              <label class="field-group">
+                <span class="field-label">Environment</span>
+                <div class="segmented-control" id="dialogueTypePicker">
+                  <button type="button" class="seg-btn is-active" id="dialogueTypeMessenger">Messenger</button>
+                  <button type="button" class="seg-btn" id="dialogueTypeEmail">Email</button>
+                </div>
+                <p class="muted seg-hint" id="dialogueTypeHint">Short, conversational turns. Think LinkedIn DM or Telegram.</p>
+              </label>
             </div>
 
             <div class="split-grid split-grid--double">
@@ -194,6 +200,7 @@
                 <select id="settingsLayerSelect" class="text-input">
                   <option value="sides">Side</option>
                   <option value="products">Product</option>
+                  <option value="signal_types">Signal type</option>
                   <option value="dialogue_types">Dialogue type</option>
                   <option value="environments">Environment</option>
                   <option value="groups">Group</option>
@@ -411,6 +418,33 @@
                 <div class="run-insight-head"><p class="phase-label">Successful dialogues</p></div>
                 <div class="analytics-kpi-value" id="analyticsSuccessfulDialogs">—</div>
               </div>
+            </div>
+
+            <div class="run-insight-card">
+              <div class="run-insight-head"><p class="phase-label">Analytics slice</p></div>
+              <div class="analytics-filters analytics-filters--extended">
+                <select id="analyticsSideFilter" class="analytics-filter-select"></select>
+                <select id="analyticsProductFilter" class="analytics-filter-select"></select>
+                <select id="analyticsSignalTypeFilter" class="analytics-filter-select"></select>
+                <select id="analyticsSalesTypeFilter" class="analytics-filter-select"></select>
+                <select id="analyticsInstrumentFilter" class="analytics-filter-select"></select>
+                <select id="analyticsGroupFilter" class="analytics-filter-select"></select>
+                <select id="analyticsAggregateBy" class="analytics-filter-select">
+                  <option value="average">Average slice</option>
+                  <option value="group">By group</option>
+                  <option value="persona">By persona</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="run-insight-card">
+              <div class="run-insight-head"><p class="phase-label">Funnel</p></div>
+              <div id="analyticsFunnelTable"></div>
+            </div>
+
+            <div class="run-insight-card">
+              <div class="run-insight-head"><p class="phase-label">Analytical brief</p></div>
+              <div id="analyticsBrief"></div>
             </div>
 
             <div class="run-insight-card">

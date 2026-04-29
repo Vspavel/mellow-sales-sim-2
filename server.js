@@ -914,6 +914,45 @@ const DEFAULT_PRODUCT_DOCTRINES = {
   }
 };
 
+const DEFAULT_SIGNAL_TYPE_DOCTRINES = {
+  compliance_pressure: {
+    id: 'compliance_pressure', side: 'demand', product: 'cor', label: 'Compliance pressure',
+    description: 'Compliance or legal scrutiny around contractor setup and payment flow.',
+  },
+  pain_signal: {
+    id: 'pain_signal', side: 'demand', product: 'cor', label: 'Operational payment failure',
+    description: 'A concrete payout failure, delay, or operational breakdown already happened.',
+  },
+  fundraising_diligence: {
+    id: 'fundraising_diligence', side: 'demand', product: 'cor', label: 'Post-round diligence',
+    description: 'Investor or diligence pressure is forcing the operating model into focus.',
+  },
+  team_scaling: {
+    id: 'team_scaling', side: 'demand', product: 'cor', label: 'Team scaling overload',
+    description: 'Hiring or contractor growth is stretching the current operating contour.',
+  },
+  operations_overload: {
+    id: 'operations_overload', side: 'demand', product: 'cor', label: 'Ops overload',
+    description: 'The current process is too manual and unstable for the team to carry.',
+  },
+  finance_control_gap: {
+    id: 'finance_control_gap', side: 'demand', product: 'cor', label: 'Finance control gap',
+    description: 'Finance lacks visibility, control, or trust in the current payment process.',
+  },
+  legal_review_trigger: {
+    id: 'legal_review_trigger', side: 'demand', product: 'cor', label: 'Legal review trigger',
+    description: 'Counsel or internal legal is reviewing the contractor and payments contour.',
+  },
+  outside_counsel_check: {
+    id: 'outside_counsel_check', side: 'demand', product: 'cor', label: 'Outside counsel check',
+    description: 'External legal review is pressuring the buyer to tighten scope and defensibility.',
+  },
+  general: {
+    id: 'general', side: 'demand', product: 'cor', label: 'General trigger',
+    description: 'Fallback trigger when the specific signal type is not yet classified.',
+  },
+};
+
 const DEFAULT_DIALOGUE_TYPE_DOCTRINES = {
   inbound: {
     id: 'inbound', label: 'Inbound', description: 'Buyer or user initiated or already expressed interest.',
@@ -1071,6 +1110,7 @@ function seedDoctrineConfig() {
   return {
     sides: DEFAULT_SIDE_DOCTRINES,
     products: DEFAULT_PRODUCT_DOCTRINES,
+    signal_types: DEFAULT_SIGNAL_TYPE_DOCTRINES,
     dialogue_types: DEFAULT_DIALOGUE_TYPE_DOCTRINES,
     environments: DEFAULT_ENVIRONMENT_DOCTRINES,
     groups: DEFAULT_GROUP_DOCTRINES,
@@ -1110,6 +1150,7 @@ function normalizeDoctrineConfig(raw) {
   return {
     sides: normalizeMap(safe.sides, defaults.sides),
     products: normalizeMap(safe.products, defaults.products),
+    signal_types: normalizeMap(safe.signal_types, defaults.signal_types),
     dialogue_types: normalizeMap(safe.dialogue_types, defaults.dialogue_types),
     environments: normalizeMap(safe.environments, defaults.environments),
     groups: normalizeMap(safe.groups, defaults.groups),
@@ -1129,11 +1170,44 @@ function enrichPersonaWithScenario(persona) {
     ...persona,
     market_side: profile.side || 'demand',
     product: profile.product || 'cor',
+    available_signal_types: [...new Set((persona.cards || []).map((card) => normalizeSignalTypeId(card?.signal_type)).filter(Boolean))],
+    signal_types: Object.values(doctrineConfig?.signal_types || {}).filter((signal) => {
+      if (signal.side && signal.side !== (profile.side || 'demand')) return false;
+      if (signal.product && signal.product !== (profile.product || 'cor')) return false;
+      return true;
+    }).map((signal) => signal.id),
     dialogue_types: profile.dialogue_types?.length ? profile.dialogue_types : ['outbound'],
     environments: profile.environments?.length ? profile.environments : ['messenger', 'email'],
     group_id: groupId,
     group_label: group?.label || getDoctrineFamilyLabel(groupId),
     profile_label: profile.label || persona.name,
+  };
+}
+
+function normalizeSignalTypeId(value = '') {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'general';
+}
+
+function inferScenarioSelection(session = null) {
+  const personaId = getCanonicalPersonaId(session?.bot_id || '');
+  const persona = personaId ? personas[personaId] : null;
+  const enriched = persona ? enrichPersonaWithScenario(persona) : null;
+  const existing = session?.scenario_selection || {};
+  const signalType = existing.signal_type
+    || normalizeSignalTypeId(session?.sde_card?.signal_type)
+    || (enriched?.signal_types?.[0] || 'general');
+  return {
+    side: existing.side || enriched?.market_side || 'demand',
+    product: existing.product || enriched?.product || 'cor',
+    signal_type: signalType,
+    dialogue_type: existing.dialogue_type || 'outbound',
+    environment: existing.environment || normalizeDialogueType(session?.dialogue_type || 'messenger'),
+    group: existing.group || enriched?.group_id || 'custom',
+    profile: existing.profile || personaId || session?.bot_id || '',
   };
 }
 
@@ -1360,7 +1434,21 @@ function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'mes
   }
   const lang = language === 'ru' || language === 'en' ? language : 'en';
   const tier = Math.max(1, Math.min(3, parseInt(difficultyTier, 10) || 1));
-  const normalizedRandomizerConfig = normalizeRandomizerConfig(randomizerConfig);
+  const normalizedScenarioSelection = scenarioSelection && typeof scenarioSelection === 'object'
+    ? {
+        side: String(scenarioSelection.side || '').trim() || 'demand',
+        product: String(scenarioSelection.product || '').trim() || 'cor',
+        signal_type: normalizeSignalTypeId(scenarioSelection.signal_type),
+        dialogue_type: String(scenarioSelection.dialogue_type || '').trim() || 'outbound',
+        environment: String(scenarioSelection.environment || '').trim() || normalizeDialogueType(dialogueType),
+        group: String(scenarioSelection.group || '').trim() || 'custom',
+        profile: String(scenarioSelection.profile || '').trim() || personaId,
+      }
+    : null;
+  const normalizedRandomizerConfig = normalizeRandomizerConfig({
+    ...(randomizerConfig || {}),
+    signal_types: normalizedScenarioSelection?.signal_type ? [String((doctrineConfig?.signal_types?.[normalizedScenarioSelection.signal_type]?.id || normalizedScenarioSelection.signal_type).toUpperCase())] : randomizerConfig?.signal_types,
+  });
   const card = pickCard(personaId, normalizedRandomizerConfig);
   const sessionSeed = buildPersonaSeed(personaId);
   const persona = personas[personaId];
@@ -1377,7 +1465,7 @@ function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'mes
     trigger: null,
     language: lang,
     dialogue_type: resolvedDialogueType,
-    scenario_selection: scenarioSelection || null,
+    scenario_selection: normalizedScenarioSelection,
     difficulty_tier: tier,
     scenario_type: 'first_contact_to_discovery',
     sde_card_id: card.card_id,
@@ -1751,7 +1839,35 @@ function isHintRecordAfterAnalyticsBaseline(record) {
   return Number.isFinite(ts) && ts >= ANALYTICS_BASELINE_RESET_AT;
 }
 
-async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = null, outcomeFilter = null, verdictFilter = null } = {}) {
+function analyticsReasonLabel(reason = '') {
+  return String(reason || 'unknown').replace(/_/g, ' ');
+}
+
+function incrementCounter(map, key, amount = 1) {
+  if (!key) return;
+  map[key] = (map[key] || 0) + amount;
+}
+
+function topReasons(map = {}, limit = 5) {
+  return Object.entries(map)
+    .sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])))
+    .slice(0, limit)
+    .map(([reason, count]) => ({ reason, label: analyticsReasonLabel(reason), count }));
+}
+
+function analyticsStageReasonMaps() {
+  return {
+    mechanics_engaged: { win: {}, lose: {} },
+    economics_engaged: { win: {}, lose: {} },
+    written_step_requested: { win: {}, lose: {} },
+    written_step_accepted: { win: {}, lose: {} },
+    written_step_then_call: { win: {}, lose: {} },
+    review_call_ready: { win: {}, lose: {} },
+    meeting_booked: { win: {}, lose: {} },
+  };
+}
+
+async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = null, outcomeFilter = null, verdictFilter = null, sideFilter = null, productFilter = null, signalTypeFilter = null, salesTypeFilter = null, instrumentFilter = null, groupFilter = null, aggregateBy = 'average' } = {}) {
   const sessions = await listStoredSessions();
   const baselineSessions = sessions.filter(isAfterAnalyticsBaseline);
   const finished = baselineSessions.filter((session) => session.status === 'finished');
@@ -1781,8 +1897,10 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
   }
 
   const failureBreakdown = {};
+  const stageReasonMaps = analyticsStageReasonMaps();
 
   for (const session of finished) {
+    const scenario = inferScenarioSelection(session);
     const sourcePersonaId = session.bot_id || 'unknown';
     const personaId = getCanonicalPersonaId(sourcePersonaId);
     if (!byPersona[personaId]) {
@@ -1837,6 +1955,11 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     if (summary.acceptance_stage) reached.add(summary.acceptance_stage);
     for (const stage of funnelStages) {
       if (reached.has(stage)) doctrineBucket.funnel_counts[stage] += 1;
+    }
+    for (const stage of reached) {
+      if (!stageReasonMaps[stage]) continue;
+      if (sessionHasMeetingBooked(session)) incrementCounter(stageReasonMaps[stage].win, summary.acceptance_state || 'meeting_booked');
+      else incrementCounter(stageReasonMaps[stage].lose, failReason || 'unknown');
     }
     // Hint stage distribution from transcript turns
     for (const entry of session.transcript || []) {
@@ -1918,7 +2041,18 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
 
   // Apply server-side filters
   let filteredFinished = sortedFinished;
-  if (personaFilter) filteredFinished = filteredFinished.filter((s) => s.bot_id === personaFilter);
+  filteredFinished = filteredFinished.filter((session) => {
+    const scenario = inferScenarioSelection(session);
+    const pid = getCanonicalPersonaId(session.bot_id || 'unknown');
+    if (personaFilter && pid !== personaFilter) return false;
+    if (sideFilter && scenario.side !== sideFilter) return false;
+    if (productFilter && scenario.product !== productFilter) return false;
+    if (signalTypeFilter && scenario.signal_type !== signalTypeFilter) return false;
+    if (salesTypeFilter && scenario.dialogue_type !== salesTypeFilter) return false;
+    if (instrumentFilter && scenario.environment !== instrumentFilter) return false;
+    if (groupFilter && scenario.group !== groupFilter) return false;
+    return true;
+  });
   if (outcomeFilter === 'booked') filteredFinished = filteredFinished.filter(sessionHasMeetingBooked);
   if (outcomeFilter === 'not_booked') filteredFinished = filteredFinished.filter((s) => !sessionHasMeetingBooked(s));
   if (verdictFilter) filteredFinished = filteredFinished.filter((s) => s.assessment?.verdict === verdictFilter);
@@ -1928,6 +2062,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     const summary = session.dialogue_summary || buildDialogueSummary(session);
     const sourcePersonaId = session.bot_id || 'unknown';
     const canonicalPersonaId = getCanonicalPersonaId(sourcePersonaId);
+    const scenario = inferScenarioSelection(session);
     // hint_stage_breakdown may be absent on sessions stored before MEL-1044; derive it fresh from transcript
     const hintStageBreakdown = summary.hint_stage_breakdown || (() => {
       const breakdown = {};
@@ -1948,6 +2083,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       doctrine_family_label: summary.doctrine_family_label || getDoctrineFamilyLabel(summary.doctrine_family || getDoctrineFamilyForPersonaId(canonicalPersonaId, personaMeta(session)?.archetype || '')),
       language: summary.language || session.language || 'en',
       language_locked: summary.language_locked ?? Boolean(session?.meta?.language_locked),
+      scenario_selection: scenario,
       finished_at: session.finished_at,
       dialogue_type: session.dialogue_type || 'messenger',
       signal_type: session.sde_card?.signal_type || null,
@@ -1978,6 +2114,90 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       resolved_concerns: summary.resolved_concerns,
     };
   });
+
+  const filteredFailureBreakdown = {};
+  const filteredStageReasonMaps = analyticsStageReasonMaps();
+  const slicePersona = {};
+  const sliceGroup = {};
+  const sliceSignal = {};
+  const sliceStageCounts = Object.fromEntries(funnelStages.map((stage) => [stage, 0]));
+
+  for (const session of filteredFinished) {
+    const scenario = inferScenarioSelection(session);
+    const summary = session.dialogue_summary || buildDialogueSummary(session);
+    const personaId = getCanonicalPersonaId(session.bot_id || 'unknown');
+    const groupId = scenario.group || 'custom';
+    const signalId = scenario.signal_type || 'general';
+    const failReason = summary.failure_reason || classifyMeetingFailureReason(session);
+    const booked = sessionHasMeetingBooked(session);
+    if (!slicePersona[personaId]) {
+      slicePersona[personaId] = { persona_id: personaId, persona_name: personas[personaId]?.name || session.bot_name || personaId, runs: 0, meeting_booked_count: 0, group_id: groupId };
+    }
+    if (!sliceGroup[groupId]) {
+      sliceGroup[groupId] = { group_id: groupId, label: doctrineConfig?.groups?.[groupId]?.label || getDoctrineFamilyLabel(groupId), runs: 0, meeting_booked_count: 0 };
+    }
+    if (!sliceSignal[signalId]) {
+      sliceSignal[signalId] = { signal_type: signalId, label: doctrineConfig?.signal_types?.[signalId]?.label || analyticsReasonLabel(signalId), runs: 0, meeting_booked_count: 0 };
+    }
+    slicePersona[personaId].runs += 1;
+    sliceGroup[groupId].runs += 1;
+    sliceSignal[signalId].runs += 1;
+    if (booked) {
+      slicePersona[personaId].meeting_booked_count += 1;
+      sliceGroup[groupId].meeting_booked_count += 1;
+      sliceSignal[signalId].meeting_booked_count += 1;
+    }
+    incrementCounter(filteredFailureBreakdown, failReason || 'unknown');
+    const reached = new Set(summary.acceptance_stage_history?.map((item) => item.stage).filter(Boolean) || []);
+    if (summary.acceptance_stage) reached.add(summary.acceptance_stage);
+    for (const stage of reached) {
+      if (sliceStageCounts[stage] !== undefined) sliceStageCounts[stage] += 1;
+      if (!filteredStageReasonMaps[stage]) continue;
+      if (booked) incrementCounter(filteredStageReasonMaps[stage].win, summary.acceptance_state || 'meeting_booked');
+      else incrementCounter(filteredStageReasonMaps[stage].lose, failReason || 'unknown');
+    }
+  }
+
+  const filteredMeetingBooked = filteredFinished.filter(sessionHasMeetingBooked);
+  const funnel = funnelStages.map((stage, index) => {
+    const entered = sliceStageCounts[stage] || 0;
+    const nextStage = funnelStages[index + 1] || null;
+    const nextCount = nextStage ? (sliceStageCounts[nextStage] || 0) : null;
+    return {
+      stage,
+      entered,
+      next_stage: nextStage,
+      next_count: nextCount,
+      conversion_to_next: nextStage && entered ? Number((nextCount / entered).toFixed(3)) : null,
+      win_reasons: topReasons(filteredStageReasonMaps[stage]?.win || {}, 3),
+      lose_reasons: topReasons(filteredStageReasonMaps[stage]?.lose || {}, 3),
+    };
+  });
+
+  const filteredMeetingRate = filteredFinished.length ? Number((filteredMeetingBooked.length / filteredFinished.length).toFixed(3)) : 0;
+  const winReasonCounts = filteredMeetingBooked.reduce((acc, session) => {
+    const key = session.dialogue_summary?.acceptance_state || 'meeting_booked';
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  const analyticalBrief = {
+    overall: filteredFinished.length
+      ? `Slice win rate is ${(filteredMeetingRate * 100).toFixed(1)}% across ${filteredFinished.length} finished runs. Main wins come from ${topReasons(winReasonCounts, 3).map((item) => item.label).join(', ') || 'meeting-booked states'}, while main losses come from ${topReasons(filteredFailureBreakdown, 3).map((item) => item.label).join(', ') || 'no dominant failure reason yet'}.`
+      : 'No finished runs match the current slice yet.',
+    average_win_reasons: topReasons(winReasonCounts, 5),
+    average_lose_reasons: topReasons(filteredFailureBreakdown, 5),
+    stage_summaries: funnel.map((stage) => ({
+      stage: stage.stage,
+      entered: stage.entered,
+      conversion_to_next: stage.conversion_to_next,
+      summary: stage.entered
+        ? `${analyticsReasonLabel(stage.stage)} entered ${stage.entered} runs${stage.conversion_to_next !== null ? ` and converted ${(stage.conversion_to_next * 100).toFixed(1)}% to the next stage` : ''}.`
+        : `${analyticsReasonLabel(stage.stage)} has no runs in this slice yet.`,
+      win_reasons: stage.win_reasons,
+      lose_reasons: stage.lose_reasons,
+    })),
+  };
 
   const totalMeetingRate = finished.length ? Number((meetingBooked.length / finished.length).toFixed(3)) : 0;
   const bridgeHints = hintRecords.filter((r) => r.hint_stage === 'bridge_step');
@@ -2016,6 +2236,28 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     },
     doctrine_stats: doctrineStats,
     persona_stats: personaStats,
+    slice: {
+      filters: {
+        side: sideFilter,
+        product: productFilter,
+        signal_type: signalTypeFilter,
+        dialogue_type: salesTypeFilter,
+        environment: instrumentFilter,
+        group: groupFilter,
+        persona_id: personaFilter,
+        aggregate_by: aggregateBy,
+      },
+      totals: {
+        finished_sessions: filteredFinished.length,
+        meeting_booked_count: filteredMeetingBooked.length,
+        meeting_booked_rate: filteredMeetingRate,
+      },
+      funnel,
+      by_group: Object.values(sliceGroup).map((item) => ({ ...item, meeting_booked_rate: item.runs ? Number((item.meeting_booked_count / item.runs).toFixed(3)) : 0 })).sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs),
+      by_persona: Object.values(slicePersona).map((item) => ({ ...item, meeting_booked_rate: item.runs ? Number((item.meeting_booked_count / item.runs).toFixed(3)) : 0 })).sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs),
+      by_signal_type: Object.values(sliceSignal).map((item) => ({ ...item, meeting_booked_rate: item.runs ? Number((item.meeting_booked_count / item.runs).toFixed(3)) : 0 })).sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs),
+      analytical_brief: analyticalBrief,
+    },
     recent_finished: recentFinished,
     recent_finished_total: recentFinishedTotal,
   };
@@ -10102,6 +10344,10 @@ app.get('/api/personas', (_req, res) => {
   }));
 });
 
+app.get('/api/signals', (_req, res) => {
+  res.json(Object.values(doctrineConfig?.signal_types || {}));
+});
+
 app.get('/api/doctrine-config', (_req, res) => {
   res.json(doctrineConfig);
 });
@@ -10109,7 +10355,7 @@ app.get('/api/doctrine-config', (_req, res) => {
 app.patch('/api/doctrine-config/:layer/:id', async (req, res) => {
   const layer = String(req.params.layer || '').trim();
   const id = String(req.params.id || '').trim();
-  if (!['sides', 'products', 'dialogue_types', 'environments', 'groups', 'profiles'].includes(layer)) {
+  if (!['sides', 'products', 'signal_types', 'dialogue_types', 'environments', 'groups', 'profiles'].includes(layer)) {
     return res.status(400).json({ error: 'Unknown doctrine layer' });
   }
   if (!id) return res.status(400).json({ error: 'Doctrine id is required' });
@@ -10257,7 +10503,14 @@ app.get('/api/analytics', async (req, res) => {
   const personaFilter = req.query.personaId ? getCanonicalPersonaId(String(req.query.personaId)) : null;
   const outcomeFilter = req.query.outcome ? String(req.query.outcome) : null;
   const verdictFilter = req.query.verdict ? String(req.query.verdict) : null;
-  res.json(await buildAnalyticsSummary({ limit, offset, personaFilter, outcomeFilter, verdictFilter }));
+  const sideFilter = req.query.side ? String(req.query.side) : null;
+  const productFilter = req.query.product ? String(req.query.product) : null;
+  const signalTypeFilter = req.query.signalType ? normalizeSignalTypeId(String(req.query.signalType)) : null;
+  const salesTypeFilter = req.query.salesType ? String(req.query.salesType) : null;
+  const instrumentFilter = req.query.instrument ? String(req.query.instrument) : null;
+  const groupFilter = req.query.groupId ? String(req.query.groupId) : null;
+  const aggregateBy = req.query.aggregateBy ? String(req.query.aggregateBy) : 'average';
+  res.json(await buildAnalyticsSummary({ limit, offset, personaFilter, outcomeFilter, verdictFilter, sideFilter, productFilter, signalTypeFilter, salesTypeFilter, instrumentFilter, groupFilter, aggregateBy }));
 });
 
 app.get('/api/hint-memory/summary', (req, res) => {

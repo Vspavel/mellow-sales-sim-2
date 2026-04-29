@@ -4,6 +4,7 @@ const state = {
   selectedPersonaId: '',
   selectedSide: 'demand',
   selectedProduct: 'cor',
+  selectedSignalType: 'general',
   selectedScenarioDialogueType: 'outbound',
   selectedGroupId: '',
   settingsLayer: 'sides',
@@ -30,6 +31,7 @@ const state = {
 const personaSelect = document.getElementById('personaSelect');
 const sideSelect = document.getElementById('sideSelect');
 const productSelect = document.getElementById('productSelect');
+const signalTypeSelect = document.getElementById('signalTypeSelect');
 const scenarioDialogueTypeSelect = document.getElementById('scenarioDialogueTypeSelect');
 const groupSelect = document.getElementById('groupSelect');
 const navRunBtn = document.getElementById('navRunBtn');
@@ -69,6 +71,15 @@ const analyticsSuccessfulDialogs = document.getElementById('analyticsSuccessfulD
 const analyticsPersonaTable = document.getElementById('analyticsPersonaTable');
 const analyticsRecentRuns = document.getElementById('analyticsRecentRuns');
 const analyticsDialogueCount = document.getElementById('analyticsDialogueCount');
+const analyticsFunnelTable = document.getElementById('analyticsFunnelTable');
+const analyticsBrief = document.getElementById('analyticsBrief');
+const analyticsSideFilter = document.getElementById('analyticsSideFilter');
+const analyticsProductFilter = document.getElementById('analyticsProductFilter');
+const analyticsSignalTypeFilter = document.getElementById('analyticsSignalTypeFilter');
+const analyticsSalesTypeFilter = document.getElementById('analyticsSalesTypeFilter');
+const analyticsInstrumentFilter = document.getElementById('analyticsInstrumentFilter');
+const analyticsGroupFilter = document.getElementById('analyticsGroupFilter');
+const analyticsAggregateBy = document.getElementById('analyticsAggregateBy');
 const filterPersona = document.getElementById('filterPersona');
 const filterOutcome = document.getElementById('filterOutcome');
 const filterVerdict = document.getElementById('filterVerdict');
@@ -225,6 +236,7 @@ function buildUrlForState() {
   if (state.dialogueType) params.set('dialogueType', state.dialogueType);
   if (state.selectedSide) params.set('side', state.selectedSide);
   if (state.selectedProduct) params.set('product', state.selectedProduct);
+  if (state.selectedSignalType) params.set('signalType', state.selectedSignalType);
   if (state.selectedScenarioDialogueType) params.set('scenarioDialogueType', state.selectedScenarioDialogueType);
   if (state.selectedGroupId) params.set('group', state.selectedGroupId);
   if (state.phase === 'run' && state.session?.session_id) params.set('session', state.session.session_id);
@@ -523,12 +535,25 @@ function renderDialogueCards(items, total) {
 }
 
 function applyAnalyticsFilters() {
+  const sideVal = analyticsSideFilter?.value || '';
+  const productVal = analyticsProductFilter?.value || '';
+  const signalTypeVal = analyticsSignalTypeFilter?.value || '';
+  const salesTypeVal = analyticsSalesTypeFilter?.value || '';
+  const instrumentVal = analyticsInstrumentFilter?.value || '';
+  const groupVal = analyticsGroupFilter?.value || '';
+  const aggregateByVal = analyticsAggregateBy?.value || 'average';
   const personaVal = filterPersona?.value || '';
   const outcomeVal = filterOutcome?.value || '';
   const verdictVal = filterVerdict?.value || '';
 
-  // Server-side filters (persona, outcome, verdict) — re-fetch with new params
   loadAnalytics({
+    side: sideVal || undefined,
+    product: productVal || undefined,
+    signalType: signalTypeVal || undefined,
+    salesType: salesTypeVal || undefined,
+    instrument: instrumentVal || undefined,
+    groupId: groupVal || undefined,
+    aggregateBy: aggregateByVal || undefined,
     personaId: personaVal || undefined,
     outcome: outcomeVal || undefined,
     verdict: verdictVal || undefined,
@@ -541,9 +566,18 @@ async function loadAnalytics(options = {}) {
   analyticsGeneratedAt.textContent = 'Loading analytics...';
   analyticsPersonaTable.innerHTML = '';
   analyticsRecentRuns.innerHTML = '';
+  if (analyticsFunnelTable) analyticsFunnelTable.innerHTML = '';
+  if (analyticsBrief) analyticsBrief.innerHTML = '';
   analyticsData = null;
 
   const params = new URLSearchParams({ limit: '100' });
+  if (options.side) params.set('side', options.side);
+  if (options.product) params.set('product', options.product);
+  if (options.signalType) params.set('signalType', options.signalType);
+  if (options.salesType) params.set('salesType', options.salesType);
+  if (options.instrument) params.set('instrument', options.instrument);
+  if (options.groupId) params.set('groupId', options.groupId);
+  if (options.aggregateBy) params.set('aggregateBy', options.aggregateBy);
   if (options.personaId) params.set('personaId', options.personaId);
   if (options.outcome) params.set('outcome', options.outcome);
   if (options.verdict) params.set('verdict', options.verdict);
@@ -557,10 +591,25 @@ async function loadAnalytics(options = {}) {
   analyticsFinishedRuns.textContent = String(data.totals?.finished_sessions ?? 0);
   analyticsSuccessfulDialogs.textContent = String(data.totals?.meeting_booked_count ?? 0);
 
+  const renderFilterSelect = (el, items, current, placeholder) => {
+    if (!el) return;
+    el.innerHTML = `<option value="">${placeholder}</option>` + items.map((item) => `<option value="${escapeHtml(item.id)}"${item.id === current ? ' selected' : ''}>${escapeHtml(item.label || item.id)}</option>`).join('');
+  };
+
+  renderFilterSelect(analyticsSideFilter, doctrineEntries('sides'), options.side || '', 'All sides');
+  const sideForProducts = options.side || '';
+  renderFilterSelect(analyticsProductFilter, doctrineEntries('products').filter((item) => !sideForProducts || item.side === sideForProducts), options.product || '', 'All products');
+  const productForSignals = options.product || '';
+  renderFilterSelect(analyticsSignalTypeFilter, doctrineEntries('signal_types').filter((item) => (!sideForProducts || item.side === sideForProducts) && (!productForSignals || item.product === productForSignals)), options.signalType || '', 'All signal types');
+  renderFilterSelect(analyticsSalesTypeFilter, doctrineEntries('dialogue_types'), options.salesType || '', 'All sales types');
+  renderFilterSelect(analyticsInstrumentFilter, doctrineEntries('environments'), options.instrument || '', 'All instruments');
+  renderFilterSelect(analyticsGroupFilter, doctrineEntries('groups').filter((item) => (!sideForProducts || item.side === sideForProducts) && (!productForSignals || item.product === productForSignals)), options.groupId || '', 'All groups');
+  if (analyticsAggregateBy) analyticsAggregateBy.value = options.aggregateBy || 'average';
+
   // Populate persona filter
   if (filterPersona) {
     const currentPersonaVal = options.personaId || '';
-    const personas = data.persona_stats || [];
+    const personas = data.slice?.by_persona || data.persona_stats || [];
     filterPersona.innerHTML = '<option value="">All personas</option>' +
       personas.map((p) => `<option value="${escapeHtml(p.persona_id)}"${p.persona_id === currentPersonaVal ? ' selected' : ''}>${escapeHtml((p.doctrine_family_label ? `${p.doctrine_family_label} / ` : '') + (p.persona_name || p.persona_id))}</option>`).join('');
   }
@@ -583,16 +632,17 @@ async function loadAnalytics(options = {}) {
     `;
   }).join('');
 
-  const personaRows = (data.persona_stats || []).map((item) => `
+  const personaRowsSource = (options.aggregateBy === 'group' ? (data.slice?.by_group || []) : options.aggregateBy === 'persona' ? (data.slice?.by_persona || []) : (data.persona_stats || []));
+  const personaRows = personaRowsSource.map((item) => `
     <div class="analytics-row">
       <div>
-        <strong>${escapeHtml(item.persona_name || item.persona_id)}</strong>
-        <div class="muted">${escapeHtml(item.persona_id || '')}${item.doctrine_family_label ? ` · ${escapeHtml(item.doctrine_family_label)}` : ''}</div>
+        <strong>${escapeHtml(item.persona_name || item.label || item.persona_id || item.group_id)}</strong>
+        <div class="muted">${escapeHtml(item.persona_id || item.group_id || '')}${item.doctrine_family_label ? ` · ${escapeHtml(item.doctrine_family_label)}` : ''}</div>
       </div>
       <div>${item.runs}</div>
       <div>${formatPercent(item.meeting_booked_rate)}</div>
       <div>${item.meeting_booked_count}</div>
-      <div>${item.avg_turns}</div>
+      <div>${item.avg_turns ?? '—'}</div>
     </div>
   `).join('');
 
@@ -618,6 +668,28 @@ async function loadAnalytics(options = {}) {
         ${personaRows}
       </div>`
     : '<p class="muted">No finished runs yet.</p>';
+
+  if (analyticsFunnelTable) {
+    const rows = (data.slice?.funnel || []).map((stage) => `
+      <div class="analytics-row">
+        <div><strong>${escapeHtml(stage.stage.replace(/_/g, ' '))}</strong></div>
+        <div>${stage.entered}</div>
+        <div>${stage.conversion_to_next === null ? '—' : formatPercent(stage.conversion_to_next)}</div>
+        <div class="muted">Win: ${(stage.win_reasons || []).map((item) => escapeHtml(item.label)).join(', ') || '—'}<br>Lose: ${(stage.lose_reasons || []).map((item) => escapeHtml(item.label)).join(', ') || '—'}</div>
+      </div>
+    `).join('');
+    analyticsFunnelTable.innerHTML = rows ? `<div class="analytics-table analytics-table--personas"><div class="analytics-row analytics-row--head"><div>Stage</div><div>Entered</div><div>To next</div><div>Reasons</div></div>${rows}</div>` : '<p class="muted">No funnel data for this slice yet.</p>';
+  }
+
+  if (analyticsBrief) {
+    const brief = data.slice?.analytical_brief;
+    analyticsBrief.innerHTML = brief ? `
+      <p>${escapeHtml(brief.overall || '')}</p>
+      <div class="detail-row"><strong>Average win reasons</strong><span>${escapeHtml((brief.average_win_reasons || []).map((item) => item.label).join(', ') || '—')}</span></div>
+      <div class="detail-row"><strong>Average lose reasons</strong><span>${escapeHtml((brief.average_lose_reasons || []).map((item) => item.label).join(', ') || '—')}</span></div>
+      <div class="coaching-list">${(brief.stage_summaries || []).map((item) => `<div class="coaching-item"><strong>${escapeHtml(item.stage.replace(/_/g, ' '))}</strong><p>${escapeHtml(item.summary || '')}</p></div>`).join('')}</div>
+    ` : '<p class="muted">No analytical brief for this slice yet.</p>';
+  }
 
   renderDialogueCards(data.recent_finished || [], data.recent_finished_total ?? (data.recent_finished || []).length);
 }
@@ -902,6 +974,14 @@ function doctrineEntries(layer) {
   return Object.values(state.doctrineConfig?.[layer] || {});
 }
 
+function filteredSignalTypes() {
+  return doctrineEntries('signal_types').filter((signal) => {
+    if (signal.side && signal.side !== state.selectedSide) return false;
+    if (signal.product && signal.product !== state.selectedProduct) return false;
+    return true;
+  });
+}
+
 function filteredProducts() {
   return doctrineEntries('products').filter((product) => product.side === state.selectedSide);
 }
@@ -920,6 +1000,10 @@ function filteredPersonas() {
   return state.personas.filter((persona) => {
     if (persona.market_side !== state.selectedSide) return false;
     if (persona.product !== state.selectedProduct) return false;
+    if (state.selectedSignalType && state.selectedSignalType !== 'general') {
+      const available = Array.isArray(persona.available_signal_types) ? persona.available_signal_types : [];
+      if (available.length && !available.includes(state.selectedSignalType)) return false;
+    }
     if (Array.isArray(persona.dialogue_types) && persona.dialogue_types.length && !persona.dialogue_types.includes(state.selectedScenarioDialogueType)) return false;
     if (Array.isArray(persona.environments) && persona.environments.length && !persona.environments.includes(state.dialogueType)) return false;
     if (state.selectedGroupId && persona.group_id !== state.selectedGroupId) return false;
@@ -933,6 +1017,9 @@ function ensureScenarioSelection() {
 
   const products = filteredProducts();
   if (!products.some((item) => item.id === state.selectedProduct)) state.selectedProduct = products[0]?.id || '';
+
+  const signalTypes = filteredSignalTypes();
+  if (!signalTypes.some((item) => item.id === state.selectedSignalType)) state.selectedSignalType = signalTypes[0]?.id || 'general';
 
   const dialogueTypes = doctrineEntries('dialogue_types');
   if (!dialogueTypes.some((item) => item.id === state.selectedScenarioDialogueType)) state.selectedScenarioDialogueType = dialogueTypes[0]?.id || 'outbound';
@@ -961,6 +1048,8 @@ function renderScenarioSelectors() {
   sideSelect.value = state.selectedSide;
   renderSelectOptions(productSelect, filteredProducts(), 'id', 'label');
   productSelect.value = state.selectedProduct;
+  renderSelectOptions(signalTypeSelect, filteredSignalTypes(), 'id', 'label');
+  signalTypeSelect.value = state.selectedSignalType;
   renderSelectOptions(scenarioDialogueTypeSelect, doctrineEntries('dialogue_types'), 'id', 'label');
   scenarioDialogueTypeSelect.value = state.selectedScenarioDialogueType;
   renderSelectOptions(groupSelect, filteredGroups(), 'id', 'label');
@@ -983,10 +1072,11 @@ function selectedScenarioSummary(persona) {
   if (!persona) return '';
   const side = state.doctrineConfig?.sides?.[persona.market_side || state.selectedSide]?.label || state.selectedSide;
   const product = state.doctrineConfig?.products?.[persona.product || state.selectedProduct]?.label || state.selectedProduct;
+  const signalType = state.doctrineConfig?.signal_types?.[state.selectedSignalType]?.label || state.selectedSignalType;
   const dialogue = state.doctrineConfig?.dialogue_types?.[state.selectedScenarioDialogueType]?.label || state.selectedScenarioDialogueType;
   const env = state.doctrineConfig?.environments?.[state.dialogueType]?.label || state.dialogueType;
   const group = state.doctrineConfig?.groups?.[persona.group_id || state.selectedGroupId]?.label || persona.group_label || state.selectedGroupId;
-  return `${side} / ${product} / ${dialogue} / ${env} / ${group}`;
+  return `${side} / ${product} / ${signalType} / ${dialogue} / ${env} / ${group}`;
 }
 
 function selectedPersona() {
@@ -1476,10 +1566,14 @@ async function selectPersona(personaId) {
       body: JSON.stringify({
         personaId,
         dialogueType: state.dialogueType,
-        randomizerConfig: state.randomizerConfig,
+        randomizerConfig: {
+          ...state.randomizerConfig,
+          signal_types: state.selectedSignalType ? [state.selectedSignalType.toUpperCase()] : state.randomizerConfig.signal_types,
+        },
         scenarioSelection: {
           side: state.selectedSide,
           product: state.selectedProduct,
+          signal_type: state.selectedSignalType,
           dialogue_type: state.selectedScenarioDialogueType,
           environment: state.dialogueType,
           group: state.selectedGroupId,
@@ -1715,6 +1809,11 @@ productSelect?.addEventListener('change', async () => {
   await syncScenarioFlow(true);
 });
 
+signalTypeSelect?.addEventListener('change', async () => {
+  state.selectedSignalType = signalTypeSelect.value;
+  await syncScenarioFlow(true);
+});
+
 scenarioDialogueTypeSelect?.addEventListener('change', async () => {
   state.selectedScenarioDialogueType = scenarioDialogueTypeSelect.value;
   state.selectedGroupId = '';
@@ -1812,6 +1911,13 @@ backFromAnalyticsBtn?.addEventListener('click', () => showPhase(state.session ? 
 filterPersona?.addEventListener('change', applyAnalyticsFilters);
 filterOutcome?.addEventListener('change', applyAnalyticsFilters);
 filterVerdict?.addEventListener('change', applyAnalyticsFilters);
+analyticsSideFilter?.addEventListener('change', applyAnalyticsFilters);
+analyticsProductFilter?.addEventListener('change', applyAnalyticsFilters);
+analyticsSignalTypeFilter?.addEventListener('change', applyAnalyticsFilters);
+analyticsSalesTypeFilter?.addEventListener('change', applyAnalyticsFilters);
+analyticsInstrumentFilter?.addEventListener('change', applyAnalyticsFilters);
+analyticsGroupFilter?.addEventListener('change', applyAnalyticsFilters);
+analyticsAggregateBy?.addEventListener('change', applyAnalyticsFilters);
 sortDialogues?.addEventListener('change', () => {
   // Sort within currently loaded items without re-fetching
   if (!analyticsData?.recent_finished?.length) return;
@@ -2190,6 +2296,7 @@ function readInitialRoute() {
     personaId: params.get('persona') || '',
     side: params.get('side') || 'demand',
     product: params.get('product') || 'cor',
+    signalType: params.get('signalType') || 'general',
     scenarioDialogueType: params.get('scenarioDialogueType') || 'outbound',
     groupId: params.get('group') || '',
     dialogueType: params.get('dialogueType') || 'messenger',
@@ -2276,6 +2383,7 @@ runSignalCard?.addEventListener('click', () => {
 const initialRoute = readInitialRoute();
 state.selectedSide = initialRoute.side || 'demand';
 state.selectedProduct = initialRoute.product || 'cor';
+state.selectedSignalType = initialRoute.signalType || 'general';
 state.selectedScenarioDialogueType = initialRoute.scenarioDialogueType || 'outbound';
 state.selectedGroupId = initialRoute.groupId || '';
 loadRandomizerConfig();
@@ -2332,6 +2440,7 @@ window.addEventListener('popstate', async () => {
   const route = readInitialRoute();
   state.selectedSide = route.side || state.selectedSide;
   state.selectedProduct = route.product || state.selectedProduct;
+  state.selectedSignalType = route.signalType || state.selectedSignalType;
   state.selectedScenarioDialogueType = route.scenarioDialogueType || state.selectedScenarioDialogueType;
   state.selectedGroupId = route.groupId || state.selectedGroupId;
   if (route.dialogueType && route.dialogueType !== state.dialogueType) {
