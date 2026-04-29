@@ -273,11 +273,13 @@
           </div>
         </section>
 
-        <section class="phase-panel hidden" id="runPanel">
-          <header class="panel-header">
-            <a class="app-brand-link app-brand-link--compact" href="/" aria-label="Go to Mellow Sales Simulator home">
+        <section class="phase-panel phase-panel--run hidden" id="runPanel">
+          <header class="panel-header panel-header--run">
+            <div class="run-header-copy">
               <p class="phase-label">Conversation cockpit</p>
-            </a>
+              <h1>Run the conversation</h1>
+              <p class="lead">One active scenario, one clear next move, one central conversation surface.</p>
+            </div>
             <div class="run-meta">
               <div class="run-meta-top">
                 <strong id="runStatus"></strong>
@@ -290,52 +292,45 @@
             </div>
           </header>
 
-          <section class="run-stage-card run-stage-card--compact">
-            <div class="run-insight-head">
-              <p class="phase-label">Scenario</p>
-              <span id="runScenarioMeta" class="muted run-insight-meta">Preparing scenario</span>
-            </div>
-            <div class="run-signal-state" id="runSignalState">
-              <div class="run-signal-pill-group">
-                <span class="run-signal-pill-label">Requested signal</span>
-                <span id="runRequestedSignal" class="run-signal-pill">Not set</span>
+          <div class="run-top-grid">
+            <section class="run-stage-card run-stage-card--compact run-stage-card--scenario">
+              <div class="run-insight-head">
+                <p class="phase-label">Scenario</p>
+                <span id="runScenarioMeta" class="muted run-insight-meta">Preparing scenario</span>
               </div>
-              <div class="run-signal-pill-group">
-                <span class="run-signal-pill-label">Active session signal</span>
-                <span id="runActualSignal" class="run-signal-pill run-signal-pill--active">Waiting for session</span>
+              <div class="run-signal-state" id="runSignalState">
+                <div class="run-signal-pill-group">
+                  <span class="run-signal-pill-label">Requested signal</span>
+                  <span id="runRequestedSignal" class="run-signal-pill">Not set</span>
+                </div>
+                <div class="run-signal-pill-group">
+                  <span class="run-signal-pill-label">Active session signal</span>
+                  <span id="runActualSignal" class="run-signal-pill run-signal-pill--active">Waiting for session</span>
+                </div>
               </div>
-            </div>
-            <p id="runSignalConfirmation" class="muted run-signal-confirmation">Choose a scenario to see the active trigger.</p>
-          </section>
+              <p id="runSignalConfirmation" class="muted run-signal-confirmation">Choose a scenario to see the active trigger.</p>
+            </section>
 
-          <section class="run-stage-card">
-            <div class="run-insight-head">
-              <p class="phase-label">Deal progression</p>
-              <span id="progressStageMeta" class="muted run-insight-meta">Waiting for first seller move</span>
-            </div>
-            <div id="progressRail" class="progress-rail"></div>
-          </section>
+            <section class="run-stage-card run-stage-card--progress">
+              <div class="run-insight-head">
+                <p class="phase-label">Deal progression</p>
+                <span id="progressStageMeta" class="muted run-insight-meta">Waiting for first seller move</span>
+              </div>
+              <div id="progressRail" class="progress-rail"></div>
+            </section>
+          </div>
 
           <div class="cockpit-layout">
-            <aside class="cockpit-sidebar cockpit-sidebar--left">
-              <section class="run-insight-card" id="buyerBriefCard">
-                <div class="run-insight-head">
-                  <p class="phase-label">Buyer brief</p>
-                </div>
-                <div id="buyerBriefPanel"></div>
-              </section>
-
-              <section class="run-insight-card" id="runSignalCard">
-                <div class="run-insight-head">
-                  <p class="phase-label">Why this conversation exists</p>
-                  <span id="runSignalBadge" class="channel-badge channel-badge--messenger">Selected by session</span>
-                </div>
-                <div id="runSignalPanel"></div>
-              </section>
-            </aside>
-
             <section class="cockpit-main">
-              <div id="transcript" class="transcript transcript--cockpit" aria-live="polite"></div>
+              <section class="conversation-stage-card">
+                <div class="run-insight-head conversation-stage-head">
+                  <div>
+                    <p class="phase-label">Live conversation</p>
+                    <p class="muted conversation-stage-subtitle">The transcript is the main work surface. Everything else supports this.</p>
+                  </div>
+                </div>
+                <div id="transcript" class="transcript transcript--cockpit" aria-live="polite"></div>
+              </section>
 
               <div id="suggestionPanel" class="suggestion-panel hidden">
                 <div class="suggestion-panel-head">
@@ -379,12 +374,27 @@
               </div>
             </section>
 
-            <aside class="cockpit-sidebar cockpit-sidebar--right">
+            <aside class="cockpit-sidebar cockpit-sidebar--context">
               <section class="run-insight-card" id="nextMoveCard">
                 <div class="run-insight-head">
                   <p class="phase-label">Next move</p>
                 </div>
                 <div id="nextMovePanel"></div>
+              </section>
+
+              <section class="run-insight-card" id="buyerBriefCard">
+                <div class="run-insight-head">
+                  <p class="phase-label">Buyer brief</p>
+                </div>
+                <div id="buyerBriefPanel"></div>
+              </section>
+
+              <section class="run-insight-card" id="runSignalCard">
+                <div class="run-insight-head">
+                  <p class="phase-label">Why this conversation exists</p>
+                  <span id="runSignalBadge" class="channel-badge channel-badge--messenger">Selected by session</span>
+                </div>
+                <div id="runSignalPanel"></div>
               </section>
 
               <section class="run-insight-card">

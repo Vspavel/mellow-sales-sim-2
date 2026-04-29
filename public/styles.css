@@ -30,7 +30,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 .hidden { display: none !important; }
 .muted { color: var(--muted); }
 
-.shell { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 28px; min-height: 100dvh; max-width: 1320px; margin: 0 auto; padding: 32px 24px 80px; align-items: start; }
+.shell { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 28px; min-height: 100dvh; max-width: 1480px; margin: 0 auto; padding: 32px 24px 80px; align-items: start; }
 .sidebar { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 22px; padding: 20px 18px; background: var(--surface-subtle); border: 1px solid var(--border); border-radius: 20px; min-height: calc(100dvh - 56px); }
 .sidebar-brand h1 { font-size: 1.35rem; line-height: 1.1; letter-spacing: -0.03em; }
 .sidebar-tagline { font-size: 0.84rem; line-height: 1.5; }
@@ -41,7 +41,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 .sidebar-nav-btn:hover, .sidebar-nav-btn:focus-visible { background: var(--surface); border-color: var(--border); }
 .sidebar-nav-btn.is-active { background: var(--surface); border-color: var(--border-strong); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 .sidebar-footnote { margin-top: auto; font-size: 0.8rem; line-height: 1.45; }
-.content { width: 100%; max-width: 920px; }
+.content { width: 100%; max-width: 1180px; }
 .settings-mode-switch { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
 .settings-mode-switch .sidebar-nav-btn { padding: 10px 12px; border-color: var(--border); background: var(--surface); }
 .settings-mode-switch .sidebar-nav-btn.is-active { background: var(--accent-soft); }
@@ -107,9 +107,12 @@ button:disabled { opacity: 0.55; cursor: default; }
 .dont-list { margin: 4px 0 0; padding-left: 16px; color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
 
 /* Run panel */
-.run-meta { display: flex; flex-direction: column; gap: 4px; }
+.panel-header--run { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: end; gap: 18px; }
+.run-header-copy { display: flex; flex-direction: column; gap: 6px; }
+.run-meta { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 .run-meta-top { display: flex; align-items: center; gap: 10px; }
 .run-focus { font-size: 0.88rem; }
+.run-top-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr); gap: 16px; align-items: stretch; }
 .run-signal-state { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
 .run-signal-pill-group { display: flex; flex-direction: column; gap: 5px; }
 .run-signal-pill-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
@@ -120,17 +123,21 @@ button:disabled { opacity: 0.55; cursor: default; }
 .run-signal-confirmation { font-size: 0.84rem; line-height: 1.45; }
 .run-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .run-stage-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
-.run-stage-card--compact { padding: 12px 20px; margin-bottom: 12px; }
+.run-stage-card--compact { padding: 14px 20px; }
 .progress-rail { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .progress-step { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.82rem; }
 .progress-step-dot { width: 10px; height: 10px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface-subtle); flex-shrink: 0; }
 .progress-step.is-done .progress-step-dot { background: var(--accent); border-color: var(--accent); }
 .progress-step.is-current .progress-step-dot { background: var(--text); border-color: var(--text); box-shadow: 0 0 0 4px var(--accent-num); }
 .progress-step.is-current .progress-step-label { color: var(--text); font-weight: 700; }
-.cockpit-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr) 280px; gap: 16px; align-items: start; }
+.cockpit-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
 .cockpit-sidebar, .cockpit-main { display: flex; flex-direction: column; gap: 16px; }
-.transcript--cockpit { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px; min-height: 420px; }
-.composer-shell { display: flex; flex-direction: column; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px 18px; }
+.cockpit-sidebar--context { position: sticky; top: 24px; }
+.conversation-stage-card { background: var(--surface); border: 1px solid var(--border); border-radius: calc(var(--radius-card) + 2px); padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+.conversation-stage-subtitle { font-size: 0.88rem; line-height: 1.5; margin-top: 4px; }
+.transcript--cockpit { background: linear-gradient(180deg, #fcfbf8 0%, #ffffff 100%); border: 1px solid var(--border); border-radius: 14px; padding: 18px; min-height: 520px; }
+.transcript--cockpit:empty::before { content: 'Conversation will appear here. Start with a specific message tied to the selected signal.'; display: block; padding: 18px; border: 1px dashed var(--border-strong); border-radius: 12px; color: var(--muted); font-size: 0.92rem; line-height: 1.55; background: var(--surface-subtle); }
+.composer-shell { display: flex; flex-direction: column; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: calc(var(--radius-card) + 2px); padding: 16px 18px; box-shadow: 0 8px 28px rgba(26,22,20,0.04); }
 .composer-strategy-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; justify-content: space-between; }
 .composer-chip-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .composer-chip-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-right: 4px; }
@@ -152,8 +159,10 @@ button:disabled { opacity: 0.55; cursor: default; }
 .bubble.bot { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); }
 .bubble.system-note { align-self: center; background: var(--surface-subtle); border: 1px dashed var(--border-strong); color: var(--muted); font-size: 0.84rem; max-width: 100%; }
 .composer { display: flex; flex-direction: column; gap: 12px; }
-.composer textarea { width: 100%; min-height: 100px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); resize: vertical; }
+.composer textarea { width: 100%; min-height: 120px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); resize: vertical; }
 .composer-row, .run-footer { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.run-footer { padding-top: 2px; }
+.phase-panel--run .detail-actions { justify-content: flex-end; }
 
 .channel-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 9px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
 .channel-badge--messenger { background: var(--accent-soft); color: var(--accent); }
@@ -346,6 +355,11 @@ button:disabled { opacity: 0.55; cursor: default; }
 .inheritance-card p { line-height: 1.5; }
 .settings-layer-hidden { display: none !important; }
 
+@media (max-width: 960px) {
+  .panel-header--run, .run-top-grid, .cockpit-layout { grid-template-columns: 1fr; }
+  .cockpit-sidebar--context { position: static; }
+}
+
 @media (max-width: 640px) {
   .shell { grid-template-columns: 1fr; padding: 20px 16px 60px; gap: 18px; }
   .sidebar { position: static; min-height: auto; padding: 14px; border-radius: 16px; }
@@ -356,6 +370,8 @@ button:disabled { opacity: 0.55; cursor: default; }
   .run-overview, .cockpit-layout, .progress-rail, .settings-layout, .settings-grid, .settings-mode-switch { grid-template-columns: 1fr; }
   .settings-sidebar, .doctrine-preview-card { position: static; max-height: none; }
   .settings-record-list { max-height: none; }
+  .panel-header--run { align-items: start; }
+  .transcript--cockpit { min-height: 360px; padding: 14px; }
   .progress-step { padding: 6px 0; }
   .composer-strategy-row { flex-direction: column; }
   .detail-cols, .split-grid { grid-template-columns: 1fr; }
