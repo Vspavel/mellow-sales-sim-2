@@ -322,56 +322,68 @@
 
           <div class="cockpit-layout">
             <section class="cockpit-main">
-              <section class="conversation-stage-card">
+              <section class="conversation-stage-card conversation-stage-card--messaging">
                 <div class="run-insight-head conversation-stage-head">
                   <div>
                     <p class="phase-label">Live conversation</p>
-                    <p class="muted conversation-stage-subtitle">The transcript is the main work surface. Everything else supports this.</p>
-                  </div>
-                </div>
-                <div id="transcript" class="transcript transcript--cockpit" aria-live="polite"></div>
-              </section>
-
-              <div id="suggestionPanel" class="suggestion-panel hidden">
-                <div class="suggestion-panel-head">
-                  <p class="suggestion-label">Recommended next move</p>
-                  <select id="hintLangSelect" class="hint-lang-select">
-                    <option value="ru" selected>Русский</option>
-                    <option value="en">English</option>
-                  </select>
-                </div>
-                <p id="suggestionMeta" class="suggestion-meta muted"></p>
-                <p id="suggestionText" class="suggestion-text"></p>
-                <button id="useSuggestionBtn">Use</button>
-              </div>
-
-              <div class="composer-shell">
-                <div class="composer-strategy-row">
-                  <div class="composer-chip-group">
-                    <span class="composer-chip-label">Move type</span>
-                    <button type="button" class="composer-chip is-active" data-move-type="clarify">Clarify</button>
-                    <button type="button" class="composer-chip" data-move-type="prove">Prove</button>
-                    <button type="button" class="composer-chip" data-move-type="ask">Ask narrowly</button>
-                  </div>
-                  <div class="composer-chip-group">
-                    <span class="composer-chip-label">Proof layer</span>
-                    <button type="button" class="composer-chip" data-proof-layer="case">Case snippet</button>
-                    <button type="button" class="composer-chip is-active" data-proof-layer="one_screen">One-screen proof</button>
-                    <button type="button" class="composer-chip" data-proof-layer="calculator">Calculator snapshot</button>
+                    <p class="muted conversation-stage-subtitle">This is the primary work surface. Run the deal through the message exchange itself.</p>
                   </div>
                 </div>
 
-                <p class="composer-focus" id="composerFocus"></p>
-                <form id="messageForm" class="composer">
-                  <textarea id="messageInput" rows="3" placeholder="Write your first touch or next message"></textarea>
-                  <div class="composer-row">
-                    <div class="hint-controls">
-                      <button type="button" id="suggestBtn" class="ghost-btn">Recommended move</button>
+                <div class="conversation-thread-shell">
+                  <div class="conversation-thread-head">
+                    <div>
+                      <strong class="conversation-thread-title">Message exchange</strong>
+                      <p class="muted conversation-thread-meta">Write like a real outbound conversation, not like filling a form.</p>
                     </div>
-                    <button type="submit">Send</button>
                   </div>
-                </form>
-              </div>
+
+                  <div id="transcript" class="transcript transcript--cockpit" aria-live="polite"></div>
+
+                  <div class="conversation-thread-footer">
+                    <div id="suggestionPanel" class="suggestion-panel hidden">
+                      <div class="suggestion-panel-head">
+                        <p class="suggestion-label">Recommended next move</p>
+                        <select id="hintLangSelect" class="hint-lang-select">
+                          <option value="ru" selected>Русский</option>
+                          <option value="en">English</option>
+                        </select>
+                      </div>
+                      <p id="suggestionMeta" class="suggestion-meta muted"></p>
+                      <p id="suggestionText" class="suggestion-text"></p>
+                      <button id="useSuggestionBtn">Use</button>
+                    </div>
+
+                    <div class="composer-shell composer-shell--messaging">
+                      <div class="composer-strategy-row">
+                        <div class="composer-chip-group">
+                          <span class="composer-chip-label">Move type</span>
+                          <button type="button" class="composer-chip is-active" data-move-type="clarify">Clarify</button>
+                          <button type="button" class="composer-chip" data-move-type="prove">Prove</button>
+                          <button type="button" class="composer-chip" data-move-type="ask">Ask narrowly</button>
+                        </div>
+                        <div class="composer-chip-group">
+                          <span class="composer-chip-label">Proof layer</span>
+                          <button type="button" class="composer-chip" data-proof-layer="case">Case snippet</button>
+                          <button type="button" class="composer-chip is-active" data-proof-layer="one_screen">One-screen proof</button>
+                          <button type="button" class="composer-chip" data-proof-layer="calculator">Calculator snapshot</button>
+                        </div>
+                      </div>
+
+                      <p class="composer-focus" id="composerFocus"></p>
+                      <form id="messageForm" class="composer">
+                        <textarea id="messageInput" rows="3" placeholder="Write your first touch or next message"></textarea>
+                        <div class="composer-row">
+                          <div class="hint-controls">
+                            <button type="button" id="suggestBtn" class="ghost-btn">Recommended move</button>
+                          </div>
+                          <button type="submit">Send</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </section>
             </section>
 
             <aside class="cockpit-sidebar cockpit-sidebar--context">
