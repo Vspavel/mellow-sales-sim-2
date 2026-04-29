@@ -1435,11 +1435,71 @@ function buildEmailSubject(session) {
   return `${company}: contractor workflow`;
 }
 
+function sanitizeEmailHintText(text, lang = 'ru') {
+  let out = String(text || '').trim();
+  if (!out) return out;
+  const bannedLeadins = [
+    /(^|\s)стартовать тут стоит не с общего питча[^.?!]*[.?!]?/gi,
+    /(^|\s)не спорь с рынком[^.?!]*[.?!]?/gi,
+    /(^|\s)сразу заходи через[^.?!]*[.?!]?/gi,
+    /(^|\s)начни с observed context[^.?!]*[.?!]?/gi,
+    /(^|\s)зайди через readiness[^.?!]*[.?!]?/gi,
+    /(^|\s)reset the category map[^.?!]*[.?!]?/gi,
+    /(^|\s)i would approach it through[^.?!]*[.?!]?/gi,
+  ];
+  for (const pattern of bannedLeadins) out = out.replace(pattern, ' ');
+  if (lang === 'ru') {
+    const replacements = [
+      [/\btrigger\b/gi, 'сигнал'],
+      [/\bpredictability\b/gi, 'предсказуемость'],
+      [/\bexplainability\b/gi, 'объяснимость'],
+      [/\bpressure\b/gi, 'давление'],
+      [/\bdefensibility\b/gi, 'защищаемость'],
+      [/\bobserved context\b/gi, 'наблюдаемый контекст'],
+      [/\breadiness\b/gi, 'готовность'],
+      [/\beconomic logic\b/gi, 'экономическую логику'],
+      [/\bhidden cost\/risk trade-off\b/gi, 'скрытые издержки и риски'],
+    ];
+    for (const [pattern, replacement] of replacements) out = out.replace(pattern, replacement);
+  }
+  return out.replace(/\s{2,}/g, ' ').replace(/\s+([,.;!?])/g, '$1').trim();
+}
+
+function shouldUseRawEmailText(text, lang = 'ru') {
+  const value = String(text || '').trim();
+  if (!value) return false;
+  if (lang === 'en') return true;
+  return detectMessageLanguage(value, lang) === lang;
+}
+
+function buildEmailSignalAwareOpeners(session, lang = 'ru') {
+  const card = session?.sde_card || {};
+  const companyName = String(card?.company?.name || 'the company').trim();
+  const contactName = String(card?.contact?.name || session?.bot_name || 'there').trim();
+  const firstName = contactName.split(/\s+/)[0] || contactName;
+  const rawWhatHappened = sanitizeEmailHintText(String(card?.what_happened || '').trim(), lang);
+  const rawProbablePain = sanitizeEmailHintText(String(card?.probable_pain || '').trim(), lang);
+  const whatHappened = shouldUseRawEmailText(rawWhatHappened, lang) ? rawWhatHappened : '';
+  const probablePain = shouldUseRawEmailText(rawProbablePain, lang) ? rawProbablePain : '';
+  const product = getRecommendedProduct(session) === 'cor' ? 'Mellow CoR' : 'Mellow CM';
+  if (lang === 'en') {
+    return [
+      `${firstName}, I noticed a concrete signal at ${companyName}: ${whatHappened || 'the contractor workflow is under new pressure'}. This usually matters when the team needs a cleaner control and operating path, not a broad tool pitch. Is this already a live issue on your side?`,
+      `${firstName}, from the outside it looks like ${companyName} is dealing with ${probablePain || whatHappened || 'a contractor-flow control problem'}. ${product} is only relevant if it helps reduce that pressure in a concrete way. Would it be useful to compare this against your current setup?`,
+    ].map((line) => sanitizeEmailHintText(line, 'en')).filter(Boolean);
+  }
+  return [
+    `${firstName}, увидела у ${companyName} конкретный сигнал: ${whatHappened || 'в contractor flow появился новый рабочий риск'}. Обычно это становится важным, когда команде нужна более чистая схема контроля и исполнения, а не ещё один общий инструмент. Это уже живая проблема у вас внутри?`,
+    `${firstName}, со стороны это выглядит так, будто у ${companyName} сейчас узел в теме ${probablePain || whatHappened || 'контроля и управляемости contractor flow'}. ${product} имеет смысл обсуждать только если это реально снимает именно это давление. Это сейчас один из ваших приоритетных вопросов?`,
+  ].map((line) => sanitizeEmailHintText(line, 'ru')).filter(Boolean);
+}
+
 function toEmailSellerMessage(base, session) {
   const card = session?.sde_card || {};
   const contactName = String(card?.contact?.name || '').trim() || 'there';
   const firstName = contactName.split(/\s+/)[0] || contactName;
-  const cleanedBase = String(base || '').trim().replace(new RegExp(`^${firstName},?\\s*`, 'i'), '').trim();
+  const lang = session?.language === 'en' ? 'en' : 'ru';
+  const cleanedBase = sanitizeEmailHintText(String(base || '').trim(), lang).replace(new RegExp(`^${firstName},?\\s*`, 'i'), '').trim();
   const sentences = splitIntoSentences(cleanedBase);
   const intro = sentences.slice(0, 2).join(' ');
   const ask = sentences.slice(2).join(' ') || 'Would it make sense to compare this against your current flow?';
@@ -8067,7 +8127,7 @@ function buildSignalAwareOpeners(session, lang = 'ru') {
 function buildSellerOpener(session) {
   const persona = personaMeta(session);
   const card = session.sde_card;
-  const signalAwareOpeners = buildSignalAwareOpeners(session, 'ru');
+  const signalAwareOpeners = isEmailMode(session) ? buildEmailSignalAwareOpeners(session, 'ru') : buildSignalAwareOpeners(session, 'ru');
   const openers = {
     andrey: [
       `Андрей, увидел, что у Northstar перед внешним legal review один платёж завис на 23 дня, и finance команда тратит 3–4 дня в месяц на ручную сверку. Mellow работает как Contractor of Record — берём KYC, документы и платёжную цепочку на себя, с audit trail по каждой транзакции. Не обещаем снять ваш риск целиком, но убираем неструктурированный слой до review. Стоит посмотреть, подходит ли это?`,
@@ -8110,7 +8170,11 @@ function buildSellerOpener(session) {
       `Давид, external review — это честная проверка схемы. Mellow: CoR, чёткая граница ответственности, audit trail, документы. Не пытаемся быть всем. Что в текущей схеме Westline вы бы назвали критической слабостью?`,
     ],
   };
-  if (signalAwareOpeners.length) {
+  if (!isEmailMode(session) && signalAwareOpeners.length) {
+    return chooseMemoryInformedCandidate(session, signalAwareOpeners, pick(signalAwareOpeners));
+  }
+
+  if (isEmailMode(session) && signalAwareOpeners.length) {
     return chooseMemoryInformedCandidate(session, signalAwareOpeners, pick(signalAwareOpeners));
   }
 
