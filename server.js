@@ -1537,7 +1537,7 @@ async function commitAutoMessageTurn(session) {
     session.meta.ghost_turns = (session.meta.ghost_turns || 0) + 1;
     sellerEntry.buyer_reply_outcome = 'silent';
   }
-  if (reply && !session.meta.meeting_booked && detectBuyerMeetingAcceptance(reply, session.language)) {
+  if (reply && !session.meta.meeting_booked && (detectBuyerMeetingAcceptance(reply, session.language) || detectConditionalLegalReviewAcceptance(reply, sellerText, personaMeta(session)?.id))) {
     session.meta.meeting_booked = true;
     session.meta.meeting_booked_turn = sellerMessages(session).length;
   }
@@ -1812,6 +1812,16 @@ function detectBuyerMeetingAcceptance(text, lang) {
 
     return false;
   }
+}
+
+function detectConditionalLegalReviewAcceptance(replyText, latestSellerText = '', personaId = '') {
+  if (!['internal_legal', 'external_legal', 'olga'].includes(personaId)) return false;
+  const reply = String(replyText || '').toLowerCase();
+  const seller = String(latestSellerText || '').toLowerCase();
+  const buyerWaitingForMaterials = /(waiting for your email|waiting for the materials|жду письмо|жду материалы|пришлите|отправьте)/.test(reply);
+  const buyerAgreed = /(agreed|works for me|sounds good|согласен|согласна|договорились|подходит|ок)/.test(reply);
+  const sellerOfferedTentativeReview = /(11:30|15:00|tomorrow|завтра|15-минут|15 minute|review call|open points|слот)/.test(seller);
+  return buyerWaitingForMaterials && buyerAgreed && sellerOfferedTentativeReview;
 }
 
 // Checks if buyer explicitly agreed to a meeting/call in any session transcript entry.
@@ -3293,6 +3303,18 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
   const winPattern = detectBuyerWinPattern(session);
   const sellerTurnCount = sellerMessages(session).length;
   const latestBuyer = latestBuyerReplyText(session).toLowerCase();
+  const legalPersona = ['internal_legal', 'external_legal', 'olga'].includes(persona?.id);
+
+  if (legalPersona && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(policy.acceptanceState)) {
+    const asksForSendTiming = /when will you send|when can you send|когда пришл[её]те|когда отправите|waiting for the materials|waiting for your email|жду материалы|жду письмо/.test(latestBuyer);
+    const conditionallyOpenToReview = /if it'?s clean|if the logic holds|if it works|найд[её]м 15 минут|можно созвониться|if.*review call|если.*созвон|если.*review call/.test(latestBuyer);
+    if (asksForSendTiming || conditionallyOpenToReview) {
+      if (lang === 'en') {
+        return `I'll send the one-page memo today with scope boundary, documents, safeguards, and one incident-path example. If it reads clean on your side, let's tentatively hold 15 minutes tomorrow just for open points, and you can confirm or move it after review. Would 11:30 or 15:00 work better?`;
+      }
+      return `Я пришлю одностраничный memo сегодня: зона контроля, документы, safeguards и один incident-path example. Если по формулировкам всё чисто, давайте сразу подержим 15 минут завтра только под open points, а после review вы либо подтвердите слот, либо сдвинем. Вам удобнее 11:30 или 15:00?`;
+    }
+  }
 
   const deterministicFinancePersona = ['rate_floor_cfo', 'fx_trust_shock_finance', 'cfo_round', 'head_finance'].includes(persona?.id);
   if (deterministicFinancePersona && lang !== 'en') {
@@ -10637,7 +10659,7 @@ app.post('/api/sessions/:id/message', async (req, res) => {
     session.meta.ghost_turns = (session.meta.ghost_turns || 0) + 1;
     sellerEntry.buyer_reply_outcome = 'silent';
   }
-  if (reply && !session.meta.meeting_booked && detectBuyerMeetingAcceptance(reply, session.language)) {
+  if (reply && !session.meta.meeting_booked && (detectBuyerMeetingAcceptance(reply, session.language) || detectConditionalLegalReviewAcceptance(reply, sellerText, personaMeta(session)?.id))) {
     session.meta.meeting_booked = true;
     session.meta.meeting_booked_turn = sellerMessages(session).length;
   }
