@@ -1031,7 +1031,15 @@ const DEFAULT_ENVIRONMENT_DOCTRINES = {
     value_frame: 'Structured clarity, explicit framing, and calm follow-through.',
     tone_rules: ['Formal', 'Self-contained', 'Paragraph-based'],
     allowed_moves: ['clear subject', 'structured paragraph', 'single concrete ask'],
-    forbidden_moves: ['chat shorthand', 'fragmented replies']
+    forbidden_moves: ['chat shorthand', 'fragmented replies'],
+    email_additions: {
+      tone_rules: ['Calm', 'Deliberate', 'Written-friendly'],
+      structure_rules: ['open with context in sentence one', 'keep one thread per email', 'use short paragraphs', 'close with one bounded CTA'],
+      subject_rules: ['specific not clever', 'reflect the real issue or review context', 'avoid vague follow-up subjects'],
+      cta_rules: ['one bounded next step only', 'prefer review ask over broad meeting ask', 'do not stack multiple asks in one email'],
+      proof_policy: ['self-contained written proof', 'concise evidence', 'written clarity before expansion'],
+      forbidden_moves: ['messenger fragments', 'just checking in fluff', 'artificial urgency without signal justification']
+    }
   }
 };
 
@@ -1044,7 +1052,14 @@ const DEFAULT_GROUP_DOCTRINES = {
     proof_policy: ['mechanics first', 'economics next', 'bounded written proof before broad ask when needed'],
     ask_policy: ['narrow finance review', 'written proof to review call'],
     success_criteria: ['Agreement to review call or written proof review'],
-    forbidden_moves: ['generic compliance language', 'misclassification overclaim']
+    forbidden_moves: ['generic compliance language', 'misclassification overclaim'],
+    email_additions: {
+      tone_rules: ['Executive written tone', 'Control-first framing'],
+      structure_rules: ['state finance context early', 'separate mechanism from economics', 'keep proof review-friendly'],
+      cta_rules: ['ask for short review slot or reply with comments', 'avoid casual chat-style CTA'],
+      subject_rules: ['lead with control, audit, diligence, FX, or cost topic'],
+      proof_policy: ['one-screen economics proof', 'auditability explanation', 'control boundary clarity']
+    }
   },
   legal: {
     id: 'legal', side: 'demand', product: 'cor', dialogue_types: ['outbound'], environments: ['messenger', 'email'],
@@ -1054,7 +1069,14 @@ const DEFAULT_GROUP_DOCTRINES = {
     proof_policy: ['document boundary', 'control zone', 'process safeguards'],
     ask_policy: ['written review first', 'narrow legal review'],
     success_criteria: ['Agreement to review documentation or legal fit call'],
-    forbidden_moves: ['broad promises', 'hand-wavy compliance claims']
+    forbidden_moves: ['broad promises', 'hand-wavy compliance claims'],
+    email_additions: {
+      tone_rules: ['Precise', 'Restrained', 'Document-oriented'],
+      structure_rules: ['state boundary first', 'scope claims tightly', 'make document trail explicit'],
+      cta_rules: ['offer memo or bounded review slot', 'ask for comments on written material'],
+      subject_rules: ['reference review, scope, safeguards, or documentation'],
+      proof_policy: ['document references', 'scope boundary', 'process safeguards in writing']
+    }
   },
   ops_recovery: {
     id: 'ops_recovery', side: 'demand', product: 'cor', dialogue_types: ['outbound'], environments: ['messenger', 'email'],
@@ -1064,7 +1086,14 @@ const DEFAULT_GROUP_DOCTRINES = {
     proof_policy: ['owner model', 'incident path', 'workflow relief'],
     ask_policy: ['narrow operational walkthrough'],
     success_criteria: ['Agreement to recovery-fit or workflow review'],
-    forbidden_moves: ['finance-heavy pitch', 'generic product tour']
+    forbidden_moves: ['finance-heavy pitch', 'generic product tour'],
+    email_additions: {
+      tone_rules: ['Operationally calm', 'Concrete', 'Low-drama'],
+      structure_rules: ['summarize the operational issue quickly', 'show owner path and workflow change', 'keep the email short'],
+      cta_rules: ['offer narrow workflow review', 'ask what part should be pressure-tested first'],
+      subject_rules: ['reference incident, workflow, ops load, or recovery path'],
+      proof_policy: ['owner model in writing', 'incident path summary', 'workflow simplification proof']
+    }
   },
   transition_winback: {
     id: 'transition_winback', side: 'demand', product: 'cor', dialogue_types: ['outbound'], environments: ['messenger', 'email'],
@@ -1074,7 +1103,14 @@ const DEFAULT_GROUP_DOCTRINES = {
     proof_policy: ['slice fit', 'transition safety', 'owner model'],
     ask_policy: ['bounded slice review'],
     success_criteria: ['Agreement to narrow review of a new slice'],
-    forbidden_moves: ['broad comeback pitch', 'pretend history did not happen']
+    forbidden_moves: ['broad comeback pitch', 'pretend history did not happen'],
+    email_additions: {
+      tone_rules: ['Measured', 'Respectful of history', 'Non-pushy'],
+      structure_rules: ['acknowledge prior context early', 'propose one narrow new slice', 'avoid restart rhetoric'],
+      cta_rules: ['invite a narrow re-check or written reaction', 'do not ask for full relaunch discussion'],
+      subject_rules: ['reference specific slice, transition path, or narrower fit'],
+      proof_policy: ['slice-specific proof', 'transition safety in writing', 'ownership clarity']
+    }
   },
   custom: {
     id: 'custom', side: 'demand', product: 'cor', dialogue_types: ['outbound'], environments: ['messenger', 'email'],
@@ -1113,6 +1149,22 @@ function normalizeDoctrineFieldList(value, fallback = []) {
   return list.map((item) => String(item || '').trim()).filter(Boolean);
 }
 
+function normalizeDoctrineEmailAdditions(value, fallback = {}) {
+  const merged = { ...(fallback || {}), ...((value && typeof value === 'object') ? value : {}) };
+  return {
+    objective: String(merged.objective || '').trim(),
+    value_frame: String(merged.value_frame || '').trim(),
+    proof_policy: normalizeDoctrineFieldList(merged.proof_policy, fallback.proof_policy || []),
+    ask_policy: normalizeDoctrineFieldList(merged.ask_policy, fallback.ask_policy || []),
+    tone_rules: normalizeDoctrineFieldList(merged.tone_rules, fallback.tone_rules || []),
+    allowed_moves: normalizeDoctrineFieldList(merged.allowed_moves, fallback.allowed_moves || []),
+    forbidden_moves: normalizeDoctrineFieldList(merged.forbidden_moves, fallback.forbidden_moves || []),
+    structure_rules: normalizeDoctrineFieldList(merged.structure_rules, fallback.structure_rules || []),
+    subject_rules: normalizeDoctrineFieldList(merged.subject_rules, fallback.subject_rules || []),
+    cta_rules: normalizeDoctrineFieldList(merged.cta_rules, fallback.cta_rules || []),
+  };
+}
+
 function normalizeDoctrineRecord(record, fallback = {}) {
   const merged = { ...fallback, ...(record || {}) };
   return {
@@ -1128,7 +1180,85 @@ function normalizeDoctrineRecord(record, fallback = {}) {
     tone_rules: normalizeDoctrineFieldList(merged.tone_rules, fallback.tone_rules || []),
     allowed_moves: normalizeDoctrineFieldList(merged.allowed_moves, fallback.allowed_moves || []),
     forbidden_moves: normalizeDoctrineFieldList(merged.forbidden_moves, fallback.forbidden_moves || []),
+    email_additions: normalizeDoctrineEmailAdditions(merged.email_additions, fallback.email_additions || {}),
   };
+}
+
+function mergeDoctrineList(...lists) {
+  return [...new Set(lists.flat().map((item) => String(item || '').trim()).filter(Boolean))];
+}
+
+function mergeDoctrineEmailAdditions(base = {}, patch = {}) {
+  const next = patch && typeof patch === 'object' ? patch : {};
+  return {
+    objective: String(next.objective || base.objective || '').trim(),
+    value_frame: String(next.value_frame || base.value_frame || '').trim(),
+    proof_policy: mergeDoctrineList(base.proof_policy || [], next.proof_policy || []),
+    ask_policy: mergeDoctrineList(base.ask_policy || [], next.ask_policy || []),
+    tone_rules: mergeDoctrineList(base.tone_rules || [], next.tone_rules || []),
+    allowed_moves: mergeDoctrineList(base.allowed_moves || [], next.allowed_moves || []),
+    forbidden_moves: mergeDoctrineList(base.forbidden_moves || [], next.forbidden_moves || []),
+    structure_rules: mergeDoctrineList(base.structure_rules || [], next.structure_rules || []),
+    subject_rules: mergeDoctrineList(base.subject_rules || [], next.subject_rules || []),
+    cta_rules: mergeDoctrineList(base.cta_rules || [], next.cta_rules || []),
+  };
+}
+
+function compileDoctrineForSession(session = null) {
+  const scenario = inferScenarioSelection(session);
+  const personaId = getCanonicalPersonaId(session?.bot_id || scenario.profile || '');
+  const profile = doctrineProfileForPersona(personaId) || {};
+  const stack = [
+    doctrineConfig?.sides?.[scenario.side || profile.side || 'demand'],
+    doctrineConfig?.products?.[scenario.product || profile.product || 'cor'],
+    doctrineConfig?.signal_types?.[scenario.signal_type || 'general'],
+    doctrineConfig?.dialogue_types?.[normalizeDialogueType(session?.dialogue_type || scenario.dialogue_type || 'messenger')],
+    doctrineConfig?.environments?.[scenario.environment || normalizeDialogueType(session?.dialogue_type || 'messenger')],
+    doctrineConfig?.groups?.[scenario.group || profile.group_id || 'custom'],
+    profile,
+  ].filter(Boolean);
+
+  const compiled = stack.reduce((acc, layer) => ({
+    objective: String(layer.objective || acc.objective || '').trim(),
+    value_frame: String(layer.value_frame || acc.value_frame || '').trim(),
+    proof_policy: mergeDoctrineList(acc.proof_policy || [], layer.proof_policy || []),
+    ask_policy: mergeDoctrineList(acc.ask_policy || [], layer.ask_policy || []),
+    success_criteria: mergeDoctrineList(acc.success_criteria || [], layer.success_criteria || []),
+    tone_rules: mergeDoctrineList(acc.tone_rules || [], layer.tone_rules || []),
+    allowed_moves: mergeDoctrineList(acc.allowed_moves || [], layer.allowed_moves || []),
+    forbidden_moves: mergeDoctrineList(acc.forbidden_moves || [], layer.forbidden_moves || []),
+    email_additions: mergeDoctrineEmailAdditions(acc.email_additions || {}, layer.email_additions || {}),
+  }), { email_additions: {} });
+
+  compiled.layers = stack.map((layer) => layer.id).filter(Boolean);
+  compiled.environment = scenario.environment || normalizeDialogueType(session?.dialogue_type || 'messenger');
+  if (compiled.environment === 'email') {
+    compiled.objective = compiled.email_additions?.objective || compiled.objective || '';
+    compiled.value_frame = compiled.email_additions?.value_frame || compiled.value_frame || '';
+    compiled.proof_policy = mergeDoctrineList(compiled.proof_policy || [], compiled.email_additions?.proof_policy || []);
+    compiled.ask_policy = mergeDoctrineList(compiled.ask_policy || [], compiled.email_additions?.ask_policy || []);
+    compiled.tone_rules = mergeDoctrineList(compiled.tone_rules || [], compiled.email_additions?.tone_rules || []);
+    compiled.allowed_moves = mergeDoctrineList(compiled.allowed_moves || [], compiled.email_additions?.allowed_moves || []);
+    compiled.forbidden_moves = mergeDoctrineList(compiled.forbidden_moves || [], compiled.email_additions?.forbidden_moves || []);
+  }
+  return compiled;
+}
+
+function formatDoctrineGuidance(doctrine = {}, { includeEmail = false } = {}) {
+  const lines = [];
+  if (doctrine.objective) lines.push(`Objective: ${doctrine.objective}`);
+  if (doctrine.value_frame) lines.push(`Value frame: ${doctrine.value_frame}`);
+  if ((doctrine.proof_policy || []).length) lines.push(`Proof policy: ${(doctrine.proof_policy || []).join('; ')}`);
+  if ((doctrine.ask_policy || []).length) lines.push(`Ask policy: ${(doctrine.ask_policy || []).join('; ')}`);
+  if ((doctrine.tone_rules || []).length) lines.push(`Tone rules: ${(doctrine.tone_rules || []).join('; ')}`);
+  if ((doctrine.allowed_moves || []).length) lines.push(`Allowed moves: ${(doctrine.allowed_moves || []).join('; ')}`);
+  if ((doctrine.forbidden_moves || []).length) lines.push(`Forbidden moves: ${(doctrine.forbidden_moves || []).join('; ')}`);
+  if (includeEmail && doctrine.email_additions) {
+    if ((doctrine.email_additions.structure_rules || []).length) lines.push(`Email structure rules: ${doctrine.email_additions.structure_rules.join('; ')}`);
+    if ((doctrine.email_additions.subject_rules || []).length) lines.push(`Email subject rules: ${doctrine.email_additions.subject_rules.join('; ')}`);
+    if ((doctrine.email_additions.cta_rules || []).length) lines.push(`Email CTA rules: ${doctrine.email_additions.cta_rules.join('; ')}`);
+  }
+  return lines.join('\n');
 }
 
 function seedDoctrineConfig() {
@@ -1284,15 +1414,17 @@ function splitIntoSentences(text) {
 
 function emailPersonaGuidance(session) {
   const persona = personaMeta(session);
+  const doctrine = compileDoctrineForSession(session);
+  const doctrineGuidance = formatDoctrineGuidance(doctrine, { includeEmail: true });
   const custom = String(persona?.email_prompt || '').trim();
-  if (custom) return custom;
+  if (custom) return [custom, doctrineGuidance].filter(Boolean).join('\n');
   if (persona?.archetype === 'finance') {
-    return 'Email mode: sound like a finance buyer in email, not chat. Use a calm formal tone, self-contained paragraphs, explicit responsibility boundaries, and ask one concrete question at a time.';
+    return ['Email mode: sound like a finance buyer in email, not chat. Use a calm formal tone, self-contained paragraphs, explicit responsibility boundaries, and ask one concrete question at a time.', doctrineGuidance].filter(Boolean).join('\n');
   }
   if (persona?.archetype === 'legal') {
-    return 'Email mode: sound like legal counsel in email. Be precise, restrained, and document-oriented. Avoid chatty shorthand and keep the concern focused on scope, safeguards, and traceability.';
+    return ['Email mode: sound like legal counsel in email. Be precise, restrained, and document-oriented. Avoid chatty shorthand and keep the concern focused on scope, safeguards, and traceability.', doctrineGuidance].filter(Boolean).join('\n');
   }
-  return 'Email mode: sound like a real business email thread. Use complete sentences, a clear acknowledgment, one concrete concern, and avoid compressed messenger-style phrasing.';
+  return ['Email mode: sound like a real business email thread. Use complete sentences, a clear acknowledgment, one concrete concern, and avoid compressed messenger-style phrasing.', doctrineGuidance].filter(Boolean).join('\n');
 }
 
 function buildEmailSubject(session) {
@@ -2194,6 +2326,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
   const slicePersona = {};
   const sliceGroup = {};
   const sliceSignal = {};
+  const sliceEnvironment = {};
   const sliceStageCounts = Object.fromEntries(funnelStages.map((stage) => [stage, 0]));
 
   for (const session of filteredFinished) {
@@ -2202,6 +2335,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     const personaId = getCanonicalPersonaId(session.bot_id || 'unknown');
     const groupId = scenario.group || 'custom';
     const signalId = scenario.signal_type || 'general';
+    const environmentId = scenario.environment || normalizeDialogueType(session.dialogue_type || 'messenger');
     const failReason = summary.failure_reason || classifyMeetingFailureReason(session);
     const booked = sessionHasMeetingBooked(session);
     const firstBuyerReply = sessionHasFirstBuyerReply(session);
@@ -2214,14 +2348,20 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     if (!sliceSignal[signalId]) {
       sliceSignal[signalId] = { signal_type: signalId, label: doctrineConfig?.signal_types?.[signalId]?.label || analyticsReasonLabel(signalId), runs: 0, meeting_booked_count: 0, first_buyer_reply_count: 0 };
     }
+    if (!sliceEnvironment[environmentId]) {
+      sliceEnvironment[environmentId] = { environment: environmentId, label: doctrineConfig?.environments?.[environmentId]?.label || environmentId, runs: 0, meeting_booked_count: 0, first_buyer_reply_count: 0 };
+    }
     slicePersona[personaId].runs += 1;
     sliceGroup[groupId].runs += 1;
     sliceSignal[signalId].runs += 1;
+    sliceEnvironment[environmentId].runs += 1;
     if (firstBuyerReply) sliceSignal[signalId].first_buyer_reply_count += 1;
+    if (firstBuyerReply) sliceEnvironment[environmentId].first_buyer_reply_count += 1;
     if (booked) {
       slicePersona[personaId].meeting_booked_count += 1;
       sliceGroup[groupId].meeting_booked_count += 1;
       sliceSignal[signalId].meeting_booked_count += 1;
+      sliceEnvironment[environmentId].meeting_booked_count += 1;
     }
     incrementCounter(filteredFailureBreakdown, failReason || 'unknown');
     const reached = new Set(summary.acceptance_stage_history?.map((item) => item.stage).filter(Boolean) || []);
@@ -2334,6 +2474,7 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
         meeting_booked_rate: filteredMeetingRate,
       },
       funnel,
+      by_environment: Object.values(sliceEnvironment).map((item) => ({ ...item, first_buyer_reply_rate: item.runs ? Number((item.first_buyer_reply_count / item.runs).toFixed(3)) : 0, meeting_booked_rate: item.runs ? Number((item.meeting_booked_count / item.runs).toFixed(3)) : 0 })).sort((a, b) => b.first_buyer_reply_rate - a.first_buyer_reply_rate || b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs),
       by_group: Object.values(sliceGroup).map((item) => ({ ...item, meeting_booked_rate: item.runs ? Number((item.meeting_booked_count / item.runs).toFixed(3)) : 0 })).sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs),
       by_persona: Object.values(slicePersona).map((item) => ({ ...item, meeting_booked_rate: item.runs ? Number((item.meeting_booked_count / item.runs).toFixed(3)) : 0 })).sort((a, b) => b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs),
       by_signal_type: Object.values(sliceSignal).map((item) => ({ ...item, first_buyer_reply_rate: item.runs ? Number((item.first_buyer_reply_count / item.runs).toFixed(3)) : 0, meeting_booked_rate: item.runs ? Number((item.meeting_booked_count / item.runs).toFixed(3)) : 0 })).sort((a, b) => b.first_buyer_reply_rate - a.first_buyer_reply_rate || b.meeting_booked_rate - a.meeting_booked_rate || b.runs - a.runs),
@@ -9086,6 +9227,8 @@ function buildLlmSystemPrompt(session) {
   if (!systemPrompt) return null;
   const lang = session.language === 'en' ? 'en' : 'ru';
   const assets = getRelevantSalesAssets(session, lang);
+  const doctrine = compileDoctrineForSession(session);
+  const doctrineGuidance = formatDoctrineGuidance(doctrine, { includeEmail: isEmailMode(session) });
 
   const card = session.sde_card || {};
   const cardContext = [
@@ -9102,6 +9245,10 @@ function buildLlmSystemPrompt(session) {
   let fullSystem = systemPrompt;
   if (cardContext) {
     fullSystem += `\n\n--- ACTIVE SIGNAL CARD ---\n${cardContext}`;
+  }
+
+  if (doctrineGuidance) {
+    fullSystem += `\n\n--- COMPILED DOCTRINE ---\n${doctrineGuidance}`;
   }
 
   const emailPrompt = String(persona?.email_prompt || '').trim();
@@ -9182,6 +9329,8 @@ function buildFirstHintSystemPrompt(session, snapshot, strategy = 'exploit', rec
   const contrastive = snapshot?.contrastive || {};
   const lang = session.language === 'en' ? 'English' : 'Russian';
   const assets = getRelevantSalesAssets(session, session.language === 'en' ? 'en' : 'ru');
+  const doctrine = compileDoctrineForSession(session);
+  const doctrineGuidance = formatDoctrineGuidance(doctrine, { includeEmail: isEmailMode(session) });
 
   const lines = [
     `You are an expert B2B sales coach writing the first opening hint for an SDR at Mellow.io.`,
@@ -9214,6 +9363,7 @@ function buildFirstHintSystemPrompt(session, snapshot, strategy = 'exploit', rec
     `If there is a tradeoff, tension, or limitation, acknowledge it honestly instead of forcing optimism. Genuine help beats smooth persuasion.`,
     `Mellow values must be visible in the hint: reliability (things work under pressure), streamlining (less manual chaos, cleaner flow), and ownership (we do not shrug when something breaks).`,
     `Trust is often earned through a concrete micro-story, not a slogan. When useful, ground the point in a tiny operational vignette: what the buyer sees before payment, who owns the issue if something slips, or what manual burden disappears.`,
+    doctrineGuidance ? `Compiled doctrine: ${doctrineGuidance.replace(/\n/g, ' | ')}` : '',
     ``,
     `## Selected signal`,
     `Signal type: ${card.signal_type || 'unknown'}`,
@@ -9304,6 +9454,8 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
   const contrastive = snapshot?.contrastive || {};
   const lang = session.language === 'en' ? 'English' : 'Russian';
   const assets = getRelevantSalesAssets(session, session.language === 'en' ? 'en' : 'ru');
+  const doctrine = compileDoctrineForSession(session);
+  const doctrineGuidance = formatDoctrineGuidance(doctrine, { includeEmail: isEmailMode(session) });
 
   const resolvedCount = Object.keys(session.meta?.resolved_concerns || {}).length;
   const askReady = policy.askAllowed;
@@ -9388,6 +9540,7 @@ function buildHintGenerationSystemPrompt(session, snapshot, strategy = 'exploit'
     `Available structured written proof asset: ${assets.writtenProof}`,
     `Available calculator asset: ${assets.calculator}`,
     `Asset use rule: use at most one main asset in this hint. Case snippet is for proof, written proof is for bounded next-step, calculator is mainly for economics/review stage, not for opener or generic pitch.`,
+    doctrineGuidance ? `Compiled doctrine: ${doctrineGuidance.replace(/\n/g, ' | ')}` : '',
     `Critical seam rule: if the buyer already accepted a written step or said they will review the material, do NOT repeat the material offer. Answer the remaining doubt directly, then convert to one bounded 15-minute review call tied to that material.`,
     ``,
     ...(hintVariant !== 'first_attempt' ? [
