@@ -594,7 +594,7 @@ function renderFunnelVisual(funnel = []) {
     return `
       <article class="funnel-stage-card">
         <div class="funnel-stage-head">
-          <strong>${escapeHtml(String(stage.stage || '').replace(/_/g, ' '))}</strong>
+          <strong>${escapeHtml(acceptanceStageLabel(stage.stage) || String(stage.stage || '').replace(/_/g, ' '))}</strong>
           <span>${entered}</span>
         </div>
         <div class="funnel-stage-bar"><span style="width:${width}%"></span></div>
@@ -619,7 +619,7 @@ function renderStageReasons(funnel = []) {
   analyticsStageReasons.innerHTML = `<div class="stage-reason-stack">${funnel.map((stage) => `
     <article class="stage-reason-card">
       <div class="stage-reason-head">
-        <strong>${escapeHtml(String(stage.stage || '').replace(/_/g, ' '))}</strong>
+        <strong>${escapeHtml(acceptanceStageLabel(stage.stage) || String(stage.stage || '').replace(/_/g, ' '))}</strong>
         <span class="muted">${stage.conversion_to_next === null || stage.conversion_to_next === undefined ? 'Final stage' : `To next: ${formatPercent(stage.conversion_to_next)}`}</span>
       </div>
       ${stage.summary ? `<p class="stage-reason-summary">${escapeHtml(stage.summary)}</p>` : ''}
@@ -788,7 +788,7 @@ async function loadAnalytics(options = {}) {
     analyticsBrief.innerHTML = brief ? `
       <div class="analytics-brief-block">
         <p class="analytics-brief-text">${escapeHtml(brief.overall || '')}</p>
-        <div class="coaching-list">${(brief.stage_summaries || []).map((item) => `<div class="coaching-item"><strong>${escapeHtml(item.stage.replace(/_/g, ' '))}</strong><p>${escapeHtml(item.summary || '')}</p></div>`).join('')}</div>
+        <div class="coaching-list">${(brief.stage_summaries || []).map((item) => `<div class="coaching-item"><strong>${escapeHtml(acceptanceStageLabel(item.stage) || item.stage.replace(/_/g, ' '))}</strong><p>${escapeHtml(item.summary || '')}</p></div>`).join('')}</div>
       </div>
     ` : '<p class="muted">No analytical brief for this slice yet.</p>';
   }

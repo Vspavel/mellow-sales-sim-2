@@ -2194,16 +2194,34 @@ function isHintRecordAfterAnalyticsBaseline(record) {
 function analyticsReasonLabel(reason = '') {
   const key = String(reason || 'unknown');
   return {
-    mechanics_engaged: 'Problem engaged',
+    mechanics_engaged: 'Mechanics engaged',
     economics_engaged: 'Economics engaged',
     written_step_requested: 'Written step requested',
     written_step_accepted: 'Written step accepted',
     written_step_then_call: 'Written step before call',
     review_call_ready: 'Review call ready',
     meeting_booked: 'Meeting booked',
-    artifact_only: 'Written proof accepted',
-    artifact_then_call: 'Written proof unlocked a call path',
-    narrow_walkthrough: 'Buyer was ready for a bounded walkthrough',
+    direct_call: 'Direct call ask landed',
+    artifact_only: 'Written proof was accepted',
+    artifact_then_call: 'Written proof opened a call path',
+    narrow_walkthrough: 'Buyer accepted a narrow review call',
+    accepts_artifact: 'Buyer asked for concrete written proof',
+    accepts_slice_map: 'Buyer accepted a narrow written outline',
+    accepts_cost_breakdown: 'Buyer wanted cost logic in writing',
+    accepts_implementation_review: 'Buyer wanted implementation detail in writing',
+    accepts_competitor_brief: 'Buyer wanted competitive comparison in writing',
+    accepts_artifact_then_call: 'Buyer accepted proof and a follow-up call path',
+    accepts_cost_breakdown_then_call: 'Buyer accepted cost proof plus follow-up call',
+    accepts_implementation_review_then_call: 'Buyer accepted implementation review plus call',
+    accepts_competitor_brief_then_call: 'Buyer accepted competitive proof plus call',
+    accepts_narrow_walkthrough: 'Buyer accepted a bounded review call',
+    accepts_direct_call: 'Buyer accepted the call directly',
+    buyer_asked_mechanics: 'Buyer engaged with operating mechanics',
+    buyer_asked_economics: 'Buyer engaged with economics and tradeoffs',
+    buyer_requested_written_material: 'Buyer explicitly asked for written material',
+    buyer_referenced_review_or_call: 'Buyer referenced review or live discussion',
+    buyer_signaled_call_readiness: 'Buyer signaled readiness for a live review',
+    buyer_explicitly_accepted_meeting: 'Buyer explicitly accepted a meeting',
     buyer_disengaged: 'Buyer disengaged',
     artifact_accepted_but_not_converted: 'Written proof did not convert',
     artifact_then_call_not_landed: 'Async proof did not turn into a call',
@@ -2220,9 +2238,27 @@ function analyticsReasonLabel(reason = '') {
 function analyticsReasonSummary(reason = '', { tone = 'neutral', stage = '' } = {}) {
   const key = String(reason || 'unknown');
   const summaries = {
-    artifact_only: 'The buyer accepted a bounded written artifact once the mechanics felt concrete enough to review asynchronously.',
-    artifact_then_call: 'Written proof reduced enough uncertainty to justify moving from async review into a live conversation.',
-    narrow_walkthrough: 'The conversation became specific enough that a narrow workflow review felt worth the buyer’s time.',
+    direct_call: 'The buyer was convinced enough to accept calendar time without needing an intermediate written step.',
+    artifact_only: 'The seller created enough clarity for the buyer to ask for written proof, but not yet enough urgency for a call.',
+    artifact_then_call: 'Written proof reduced uncertainty and made a follow-up call feel justified rather than premature.',
+    narrow_walkthrough: 'The conversation got specific enough that a bounded review call felt worth the buyer’s time.',
+    accepts_artifact: 'The buyer wanted something concrete in writing before risking a live discussion.',
+    accepts_slice_map: 'The buyer responded to a narrow, scoped outline rather than a broad pitch.',
+    accepts_cost_breakdown: 'The buyer needed economic proof, not more positioning, before moving forward.',
+    accepts_implementation_review: 'The buyer needed implementation detail to judge fit safely.',
+    accepts_competitor_brief: 'The buyer wanted a structured comparison before advancing.',
+    accepts_artifact_then_call: 'The buyer was open to written proof and already saw a plausible path to a live review.',
+    accepts_cost_breakdown_then_call: 'Economic proof made a follow-up call feel like the next logical step.',
+    accepts_implementation_review_then_call: 'Implementation clarity reduced enough execution risk to justify a call.',
+    accepts_competitor_brief_then_call: 'Comparison clarity lowered uncertainty enough to support a call.',
+    accepts_narrow_walkthrough: 'The buyer accepted a tightly bounded review rather than a generic sales call.',
+    accepts_direct_call: 'The buyer accepted the call directly because enough trust and relevance had already been built.',
+    buyer_asked_mechanics: 'The buyer started interrogating how the workflow actually operates, which is real engagement rather than polite interest.',
+    buyer_asked_economics: 'The buyer shifted into economic evaluation, meaning the conversation earned a more serious level of consideration.',
+    buyer_requested_written_material: 'The buyer asked for a written artifact, which usually means the conversation cleared the first trust threshold but still needs proof.',
+    buyer_referenced_review_or_call: 'The buyer referenced review or live discussion, signaling willingness to spend deeper attention on the problem.',
+    buyer_signaled_call_readiness: 'The buyer gave off clear readiness for a live review, not just passive interest.',
+    buyer_explicitly_accepted_meeting: 'The buyer explicitly accepted the meeting, which is the cleanest proof of forward motion.',
     meeting_booked: 'Trust, relevance, and next-step clarity were strong enough to secure calendar time.',
     buyer_disengaged: 'The conversation lost relevance or demanded too much too early, so the buyer stopped engaging.',
     artifact_accepted_but_not_converted: 'Interest stayed at the written-review layer because the seller did not convert it into a concrete live next step.',
@@ -2243,6 +2279,10 @@ function analyticsReasonSummary(reason = '', { tone = 'neutral', stage = '' } = 
 function buildReasonListSentence(items = [], fallback = 'no clear dominant pattern yet') {
   if (!items.length) return fallback;
   return items.map((item) => item.summary || analyticsReasonLabel(item.reason || item.label || '')).join(' ');
+}
+
+function stageHistoryEntry(summary = {}, stage = '') {
+  return (summary?.acceptance_stage_history || []).find((entry) => entry.stage === stage) || null;
 }
 
 function incrementCounter(map, key, amount = 1) {
@@ -2267,6 +2307,17 @@ function analyticsStageReasonMaps() {
     review_call_ready: { win: {}, lose: {} },
     meeting_booked: { win: {}, lose: {} },
   };
+}
+
+function normalizedFunnelStagesReached(summary, funnelStages = []) {
+  const stageRank = new Map(funnelStages.map((stage, index) => [stage, index]));
+  const explicitStages = [
+    ...(summary?.acceptance_stage_history || []).map((item) => item.stage),
+    summary?.acceptance_stage,
+  ].filter((stage) => stageRank.has(stage));
+  const highestRank = explicitStages.reduce((max, stage) => Math.max(max, stageRank.get(stage)), -1);
+  if (highestRank < 0) return new Set();
+  return new Set(funnelStages.slice(0, highestRank + 1));
 }
 
 function sessionHasFirstBuyerReply(session) {
@@ -2362,18 +2413,25 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     bucket.avg_turns += sellerTurns;
     doctrineBucket.avg_turns += sellerTurns;
     const failReason = session.dialogue_summary?.failure_reason || classifyMeetingFailureReason(session);
-    bucket.failure_breakdown[failReason] = (bucket.failure_breakdown[failReason] || 0) + 1;
-    failureBreakdown[failReason] = (failureBreakdown[failReason] || 0) + 1;
+    if (!sessionHasMeetingBooked(session)) {
+      bucket.failure_breakdown[failReason] = (bucket.failure_breakdown[failReason] || 0) + 1;
+      failureBreakdown[failReason] = (failureBreakdown[failReason] || 0) + 1;
+    }
     const summary = session.dialogue_summary || buildDialogueSummary(session);
-    const reached = new Set(summary.acceptance_stage_history?.map((item) => item.stage).filter(Boolean) || []);
-    if (summary.acceptance_stage) reached.add(summary.acceptance_stage);
+    const reached = normalizedFunnelStagesReached(summary, funnelStages);
     for (const stage of funnelStages) {
       if (reached.has(stage)) doctrineBucket.funnel_counts[stage] += 1;
     }
     for (const stage of reached) {
       if (!stageReasonMaps[stage]) continue;
-      if (sessionHasMeetingBooked(session)) incrementCounter(stageReasonMaps[stage].win, summary.acceptance_state || 'meeting_booked');
-      else incrementCounter(stageReasonMaps[stage].lose, failReason || 'unknown');
+      const stageEntry = stageHistoryEntry(summary, stage);
+      const stageReasons = stageEntry?.reasons?.length ? stageEntry.reasons : [];
+      if (sessionHasMeetingBooked(session)) {
+        if (stageReasons.length) stageReasons.forEach((reason) => incrementCounter(stageReasonMaps[stage].win, reason));
+        else if (stage === 'meeting_booked') incrementCounter(stageReasonMaps[stage].win, 'buyer_explicitly_accepted_meeting');
+      } else {
+        incrementCounter(stageReasonMaps[stage].lose, failReason || 'unknown');
+      }
     }
     // Hint stage distribution from transcript turns
     for (const entry of session.transcript || []) {
@@ -2572,14 +2630,19 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
       sliceSignal[signalId].meeting_booked_count += 1;
       sliceEnvironment[environmentId].meeting_booked_count += 1;
     }
-    incrementCounter(filteredFailureBreakdown, failReason || 'unknown');
-    const reached = new Set(summary.acceptance_stage_history?.map((item) => item.stage).filter(Boolean) || []);
-    if (summary.acceptance_stage) reached.add(summary.acceptance_stage);
+    if (!booked) incrementCounter(filteredFailureBreakdown, failReason || 'unknown');
+    const reached = normalizedFunnelStagesReached(summary, funnelStages);
     for (const stage of reached) {
       if (sliceStageCounts[stage] !== undefined) sliceStageCounts[stage] += 1;
       if (!filteredStageReasonMaps[stage]) continue;
-      if (booked) incrementCounter(filteredStageReasonMaps[stage].win, summary.acceptance_state || 'meeting_booked');
-      else incrementCounter(filteredStageReasonMaps[stage].lose, failReason || 'unknown');
+      const stageEntry = stageHistoryEntry(summary, stage);
+      const stageReasons = stageEntry?.reasons?.length ? stageEntry.reasons : [];
+      if (booked) {
+        if (stageReasons.length) stageReasons.forEach((reason) => incrementCounter(filteredStageReasonMaps[stage].win, reason));
+        else if (stage === 'meeting_booked') incrementCounter(filteredStageReasonMaps[stage].win, 'buyer_explicitly_accepted_meeting');
+      } else {
+        incrementCounter(filteredStageReasonMaps[stage].lose, failReason || 'unknown');
+      }
     }
   }
 
@@ -4662,6 +4725,7 @@ function buildDialogueSummary(session) {
   const trust = Number((session.meta?.trust || 1).toFixed(2));
   const acceptanceState = session.meta?.acceptance_state || getBuyerAcceptanceState(session);
   const acceptanceStage = session.meta?.acceptance_stage || getBuyerAcceptanceStage(session);
+  const latestAcceptanceEvent = acceptanceEvents.length ? acceptanceEvents[acceptanceEvents.length - 1].event : null;
 
   // Derive ordered stages reached and hint_stage_breakdown from transcript
   const stagesSeen = new Set();
@@ -4705,6 +4769,7 @@ function buildDialogueSummary(session) {
     ask_events: askEvents,
     acceptance_events: acceptanceEvents,
     acceptance_state: acceptanceState,
+    acceptance_event: latestAcceptanceEvent,
     acceptance_stage: acceptanceStage,
     acceptance_stage_history: acceptanceStageHistory,
     hint_stage_breakdown: hintStageBreakdown,
