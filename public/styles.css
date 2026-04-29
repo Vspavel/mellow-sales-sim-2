@@ -108,6 +108,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 .run-focus { font-size: 0.88rem; }
 .run-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .run-stage-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.run-stage-card--compact { padding: 12px 20px; margin-bottom: 12px; }
 .progress-rail { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .progress-step { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.82rem; }
 .progress-step-dot { width: 10px; height: 10px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface-subtle); flex-shrink: 0; }

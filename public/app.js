@@ -1,6 +1,13 @@
 const state = {
   personas: [],
+  doctrineConfig: null,
   selectedPersonaId: '',
+  selectedSide: 'demand',
+  selectedProduct: 'cor',
+  selectedScenarioDialogueType: 'outbound',
+  selectedGroupId: '',
+  settingsLayer: 'sides',
+  settingsRecordId: '',
   session: null,
   lastHint: null,
   appliedHintId: null,
@@ -21,7 +28,12 @@ const state = {
 };
 
 const personaSelect = document.getElementById('personaSelect');
+const sideSelect = document.getElementById('sideSelect');
+const productSelect = document.getElementById('productSelect');
+const scenarioDialogueTypeSelect = document.getElementById('scenarioDialogueTypeSelect');
+const groupSelect = document.getElementById('groupSelect');
 const navRunBtn = document.getElementById('navRunBtn');
+const openSettingsBtn = document.getElementById('openSettingsBtn');
 const createPersonaBtn = document.getElementById('createPersonaBtn');
 const personaEditor = document.getElementById('personaEditor');
 const personaEditorTitle = document.getElementById('personaEditorTitle');
@@ -45,9 +57,11 @@ const messageInput = document.getElementById('messageInput');
 const reviewPanel = document.getElementById('reviewPanel');
 const assessment = document.getElementById('assessment');
 const finishBtn = document.getElementById('finishBtn');
+const backToSetupBtn = document.getElementById('backToSetupBtn');
 const resetBtn = document.getElementById('resetBtn');
 const openAnalyticsBtn = document.getElementById('openAnalyticsBtn');
 const analyticsPanel = document.getElementById('analyticsPanel');
+const settingsPanel = document.getElementById('settingsPanel');
 const analyticsGeneratedAt = document.getElementById('analyticsGeneratedAt');
 const analyticsSuccessRate = document.getElementById('analyticsSuccessRate');
 const analyticsFinishedRuns = document.getElementById('analyticsFinishedRuns');
@@ -63,6 +77,7 @@ const refreshAnalyticsBtn = document.getElementById('refreshAnalyticsBtn');
 const backFromAnalyticsBtn = document.getElementById('backFromAnalyticsBtn');
 const runStatus = document.getElementById('runStatus');
 const runFocus = document.getElementById('runFocus');
+const runScenarioMeta = document.getElementById('runScenarioMeta');
 const suggestBtn = document.getElementById('suggestBtn');
 const hintLangSelect = document.getElementById('hintLangSelect');
 const suggestionPanel = document.getElementById('suggestionPanel');
@@ -131,11 +146,34 @@ const backToHistoryBtn = document.getElementById('backToHistoryBtn');
 const downloadResultBtn = document.getElementById('downloadResultBtn');
 const copyShareLinkBtn = document.getElementById('copyShareLinkBtn');
 const appVersion = document.getElementById('appVersion');
+const settingsLayerSelect = document.getElementById('settingsLayerSelect');
+const settingsRecordList = document.getElementById('settingsRecordList');
+const doctrineForm = document.getElementById('doctrineForm');
+const doctrineEditorTitle = document.getElementById('doctrineEditorTitle');
+const doctrineInheritancePreview = document.getElementById('doctrineInheritancePreview');
+const saveDoctrineBtn = document.getElementById('saveDoctrineBtn');
+
+const doctrineLabelInput = document.getElementById('doctrineLabel');
+const doctrineDescriptionInput = document.getElementById('doctrineDescription');
+const doctrineSideInput = document.getElementById('doctrineSide');
+const doctrineProductInput = document.getElementById('doctrineProduct');
+const doctrineGroupInput = document.getElementById('doctrineGroup');
+const doctrineDialogueTypesInput = document.getElementById('doctrineDialogueTypes');
+const doctrineEnvironmentsInput = document.getElementById('doctrineEnvironments');
+const doctrineObjectiveInput = document.getElementById('doctrineObjective');
+const doctrineValueFrameInput = document.getElementById('doctrineValueFrame');
+const doctrineProofPolicyInput = document.getElementById('doctrineProofPolicy');
+const doctrineAskPolicyInput = document.getElementById('doctrineAskPolicy');
+const doctrineSuccessCriteriaInput = document.getElementById('doctrineSuccessCriteria');
+const doctrineAllowedMovesInput = document.getElementById('doctrineAllowedMoves');
+const doctrineForbiddenMovesInput = document.getElementById('doctrineForbiddenMoves');
+const doctrineToneRulesInput = document.getElementById('doctrineToneRules');
 
 const navPhaseButtons = [
   [navRunBtn, 'run'],
   [openAnalyticsBtn, 'analytics'],
   [openHistoryBtn, 'history'],
+  [openSettingsBtn, 'settings'],
 ].filter(([el]) => el);
 
 let historyData = [];
@@ -185,11 +223,16 @@ function buildUrlForState() {
   const params = new URLSearchParams();
   if (state.selectedPersonaId) params.set('persona', state.selectedPersonaId);
   if (state.dialogueType) params.set('dialogueType', state.dialogueType);
+  if (state.selectedSide) params.set('side', state.selectedSide);
+  if (state.selectedProduct) params.set('product', state.selectedProduct);
+  if (state.selectedScenarioDialogueType) params.set('scenarioDialogueType', state.selectedScenarioDialogueType);
+  if (state.selectedGroupId) params.set('group', state.selectedGroupId);
   if (state.phase === 'run' && state.session?.session_id) params.set('session', state.session.session_id);
 
   const query = params.toString();
   if (state.phase === 'analytics') return '/analytics';
   if (state.phase === 'history') return '/history';
+  if (state.phase === 'settings') return `/settings${query ? `?${query}` : ''}`;
   if (state.phase === 'review' && state.session?.session_id) return `/share/${encodeURIComponent(state.session.session_id)}`;
   if (state.phase === 'run') return `/run${query ? `?${query}` : ''}`;
   return `/${query ? `?${query}` : ''}`;
@@ -211,6 +254,7 @@ function showPhase(phase, options = {}) {
   reviewPanel.classList.toggle('hidden', phase !== 'review');
   analyticsPanel.classList.toggle('hidden', phase !== 'analytics');
   historyPanel.classList.toggle('hidden', phase !== 'history');
+  settingsPanel.classList.toggle('hidden', phase !== 'settings');
   updateSidebarNav();
   if (!skipRoute) syncRoute(replace);
 }
@@ -218,6 +262,7 @@ function showPhase(phase, options = {}) {
 function sidebarActivePhase() {
   if (state.phase === 'analytics') return 'analytics';
   if (state.phase === 'history') return 'history';
+  if (state.phase === 'settings') return 'settings';
   return 'run';
 }
 
@@ -841,28 +886,107 @@ function roleEssence(persona) {
   return persona.intro || persona.prompt_style?.[0] || 'Custom buyer persona';
 }
 
+function listToTextarea(value) {
+  return (Array.isArray(value) ? value : []).join('\n');
+}
+
+function textareaToList(value) {
+  return String(value || '').split('\n').map((item) => item.trim()).filter(Boolean);
+}
+
+async function loadDoctrineConfig() {
+  state.doctrineConfig = await api('api/doctrine-config');
+}
+
+function doctrineEntries(layer) {
+  return Object.values(state.doctrineConfig?.[layer] || {});
+}
+
+function filteredProducts() {
+  return doctrineEntries('products').filter((product) => product.side === state.selectedSide);
+}
+
+function filteredGroups() {
+  return doctrineEntries('groups').filter((group) => {
+    if (group.side && group.side !== state.selectedSide) return false;
+    if (group.product && group.product !== state.selectedProduct) return false;
+    if (Array.isArray(group.dialogue_types) && group.dialogue_types.length && !group.dialogue_types.includes(state.selectedScenarioDialogueType)) return false;
+    if (Array.isArray(group.environments) && group.environments.length && !group.environments.includes(state.dialogueType)) return false;
+    return true;
+  });
+}
+
+function filteredPersonas() {
+  return state.personas.filter((persona) => {
+    if (persona.market_side !== state.selectedSide) return false;
+    if (persona.product !== state.selectedProduct) return false;
+    if (Array.isArray(persona.dialogue_types) && persona.dialogue_types.length && !persona.dialogue_types.includes(state.selectedScenarioDialogueType)) return false;
+    if (Array.isArray(persona.environments) && persona.environments.length && !persona.environments.includes(state.dialogueType)) return false;
+    if (state.selectedGroupId && persona.group_id !== state.selectedGroupId) return false;
+    return true;
+  });
+}
+
+function ensureScenarioSelection() {
+  const sideIds = doctrineEntries('sides').map((item) => item.id);
+  if (!sideIds.includes(state.selectedSide)) state.selectedSide = sideIds[0] || 'demand';
+
+  const products = filteredProducts();
+  if (!products.some((item) => item.id === state.selectedProduct)) state.selectedProduct = products[0]?.id || '';
+
+  const dialogueTypes = doctrineEntries('dialogue_types');
+  if (!dialogueTypes.some((item) => item.id === state.selectedScenarioDialogueType)) state.selectedScenarioDialogueType = dialogueTypes[0]?.id || 'outbound';
+
+  const groups = filteredGroups();
+  if (!groups.some((item) => item.id === state.selectedGroupId)) state.selectedGroupId = groups[0]?.id || '';
+
+  const personas = filteredPersonas();
+  if (!personas.some((item) => item.id === state.selectedPersonaId)) state.selectedPersonaId = personas[0]?.id || '';
+}
+
+function renderSelectOptions(selectEl, items, valueKey = 'id', labelKey = 'label', placeholder = '') {
+  if (!selectEl) return;
+  selectEl.innerHTML = placeholder ? `<option value="">${escapeHtml(placeholder)}</option>` : '';
+  items.forEach((item) => {
+    const opt = document.createElement('option');
+    opt.value = item[valueKey];
+    opt.textContent = item[labelKey] || item[valueKey];
+    selectEl.appendChild(opt);
+  });
+}
+
+function renderScenarioSelectors() {
+  ensureScenarioSelection();
+  renderSelectOptions(sideSelect, doctrineEntries('sides'), 'id', 'label');
+  sideSelect.value = state.selectedSide;
+  renderSelectOptions(productSelect, filteredProducts(), 'id', 'label');
+  productSelect.value = state.selectedProduct;
+  renderSelectOptions(scenarioDialogueTypeSelect, doctrineEntries('dialogue_types'), 'id', 'label');
+  scenarioDialogueTypeSelect.value = state.selectedScenarioDialogueType;
+  renderSelectOptions(groupSelect, filteredGroups(), 'id', 'label');
+  groupSelect.value = state.selectedGroupId;
+}
+
 function renderPersonaDropdown() {
-  const current = personaSelect.value;
-  personaSelect.innerHTML = '<option value="">Choose a role...</option>';
-  const groups = new Map();
-  state.personas.forEach((persona) => {
-    const family = persona.doctrine_family_label || persona.doctrine_family || 'Other';
-    if (!groups.has(family)) groups.set(family, []);
-    groups.get(family).push(persona);
+  const options = filteredPersonas();
+  personaSelect.innerHTML = '<option value="">Choose a profile...</option>';
+  options.forEach((persona) => {
+    const opt = document.createElement('option');
+    opt.value = persona.id;
+    opt.textContent = `${persona.name} · ${persona.role}`;
+    if (persona.id === state.selectedPersonaId) opt.selected = true;
+    personaSelect.appendChild(opt);
   });
-  groups.forEach((personas, family) => {
-    const optgroup = document.createElement('optgroup');
-    optgroup.label = family;
-    personas.forEach((persona) => {
-      const opt = document.createElement('option');
-      opt.value = persona.id;
-      opt.textContent = persona.role;
-      if (persona.id === state.selectedPersonaId) opt.selected = true;
-      optgroup.appendChild(opt);
-    });
-    personaSelect.appendChild(optgroup);
-  });
-  if (!state.selectedPersonaId && current) personaSelect.value = current;
+}
+
+function selectedScenarioSummary(persona) {
+  if (!persona) return '';
+  const side = state.doctrineConfig?.sides?.[persona.market_side || state.selectedSide]?.label || state.selectedSide;
+  const product = state.doctrineConfig?.products?.[persona.product || state.selectedProduct]?.label || state.selectedProduct;
+  const dialogue = state.doctrineConfig?.dialogue_types?.[state.selectedScenarioDialogueType]?.label || state.selectedScenarioDialogueType;
+  const env = state.doctrineConfig?.environments?.[state.dialogueType]?.label || state.dialogueType;
+  const group = state.doctrineConfig?.groups?.[persona.group_id || state.selectedGroupId]?.label || persona.group_label || state.selectedGroupId;
+  return `${side} / ${product} / ${dialogue} / ${env} / ${group}`;
 }
 
 function selectedPersona() {
@@ -882,7 +1006,7 @@ function renderSetupPersona() {
     return;
   }
 
-  selectedPersonaMeta.textContent = `${roleEssence(persona)} · ${persona.doctrine_family_label || persona.doctrine_family || 'Custom'}`;
+  selectedPersonaMeta.textContent = `${selectedScenarioSummary(persona)} · ${roleEssence(persona)}`;
   editPersonaBtn.classList.remove('hidden');
   if (selectedPersonaPrompt) {
     selectedPersonaPrompt.textContent = persona.system_prompt || 'No system prompt yet. Add one in the persona editor.';
@@ -907,11 +1031,14 @@ function setDialogueType(type, options = {}) {
   }
   // Recreate session with new dialogue type if persona already selected
   if (skipSessionRefresh) {
+    renderScenarioSelectors();
+    renderPersonaDropdown();
+    renderSetupPersona();
     syncRoute(replaceRoute);
     return;
   }
   if (state.selectedPersonaId) {
-    selectPersona(state.selectedPersonaId);
+    syncScenarioFlow(true);
   } else {
     syncRoute(replaceRoute);
   }
@@ -1119,6 +1246,12 @@ function updateRunState() {
     channelBadge.className = `channel-badge channel-badge--${type}`;
   }
 
+  if (runScenarioMeta) {
+    runScenarioMeta.textContent = persona
+      ? `${selectedScenarioSummary(persona)} · ${persona.name}`
+      : 'Choose a scenario to open the cockpit.';
+  }
+
   if (composerFocus) {
     const move = { clarify: 'Clarify', prove: 'Prove', ask: 'Ask narrowly' }[state.moveType] || 'Clarify';
     const proof = { case: 'case snippet', one_screen: 'one-screen proof', calculator: 'calculator snapshot' }[state.proofLayer] || 'one-screen proof';
@@ -1310,10 +1443,10 @@ function renderAssessment(fromHistory = false) {
 }
 
 async function loadPersonas() {
+  if (!state.doctrineConfig) await loadDoctrineConfig();
   state.personas = await api('api/personas');
-  if (!state.selectedPersonaId && state.personas[0]) {
-    state.selectedPersonaId = state.personas[0].id;
-  }
+  ensureScenarioSelection();
+  renderScenarioSelectors();
   renderPersonaDropdown();
   renderSetupPersona();
 }
@@ -1340,12 +1473,29 @@ async function selectPersona(personaId) {
   try {
     state.session = await api('api/sessions', {
       method: 'POST',
-      body: JSON.stringify({ personaId, dialogueType: state.dialogueType, randomizerConfig: state.randomizerConfig })
+      body: JSON.stringify({
+        personaId,
+        dialogueType: state.dialogueType,
+        randomizerConfig: state.randomizerConfig,
+        scenarioSelection: {
+          side: state.selectedSide,
+          product: state.selectedProduct,
+          dialogue_type: state.selectedScenarioDialogueType,
+          environment: state.dialogueType,
+          group: state.selectedGroupId,
+          profile: personaId,
+        }
+      })
     });
     renderSignalCard();
     signalBrief.classList.remove('hidden');
     setupCta.classList.remove('hidden');
     resetBtn.classList.remove('hidden');
+    showPhase('run', { replace: true });
+    updateRunState();
+    messageInput.placeholder = state.session?.dialogue_type === 'email'
+      ? 'Hi [Name],\n\n[Your message here]\n\nBest, [Your name]'
+      : 'Write your first touch or next message';
     syncRoute(true);
   } catch (error) {
     signalCard.innerHTML = `<p class="muted">${escapeHtml(error.message)}</p>`;
@@ -1431,7 +1581,151 @@ async function extractFromPrompt() {
   }
 }
 
+async function syncScenarioFlow(refreshSession = true) {
+  ensureScenarioSelection();
+  renderScenarioSelectors();
+  renderPersonaDropdown();
+  renderSetupPersona();
+  if (refreshSession && state.selectedPersonaId) {
+    await selectPersona(state.selectedPersonaId);
+  }
+}
+
+function currentDoctrineRecord() {
+  return state.doctrineConfig?.[state.settingsLayer]?.[state.settingsRecordId] || null;
+}
+
+function renderSettingsRecordList() {
+  const items = doctrineEntries(state.settingsLayer);
+  if (!items.length) {
+    settingsRecordList.innerHTML = '<p class="muted">No doctrine records on this layer yet.</p>';
+    return;
+  }
+  if (!items.some((item) => item.id === state.settingsRecordId)) {
+    state.settingsRecordId = items[0]?.id || '';
+  }
+  settingsRecordList.innerHTML = items.map((item) => `
+    <button type="button" class="settings-record-btn${item.id === state.settingsRecordId ? ' is-active' : ''}" data-settings-record="${escapeHtml(item.id)}">
+      <strong>${escapeHtml(item.label || item.id)}</strong>
+      <span>${escapeHtml(item.description || item.id)}</span>
+    </button>
+  `).join('');
+  settingsRecordList.querySelectorAll('[data-settings-record]').forEach((button) => button.addEventListener('click', () => {
+    state.settingsRecordId = button.dataset.settingsRecord || '';
+    renderSettingsRecordList();
+    renderDoctrineEditor();
+  }));
+}
+
+function compiledDoctrineChain(profileId = state.selectedPersonaId) {
+  const profile = state.doctrineConfig?.profiles?.[profileId] || null;
+  if (!profile) return [];
+  return [
+    ['Side', state.doctrineConfig?.sides?.[profile.side]],
+    ['Product', state.doctrineConfig?.products?.[profile.product]],
+    ['Dialogue type', state.doctrineConfig?.dialogue_types?.[profile.dialogue_types?.[0] || state.selectedScenarioDialogueType]],
+    ['Environment', state.doctrineConfig?.environments?.[profile.environments?.[0] || state.dialogueType]],
+    ['Group', state.doctrineConfig?.groups?.[profile.group_id]],
+    ['Profile', profile],
+  ].filter(([, value]) => value);
+}
+
+function renderDoctrineInheritancePreview() {
+  const activeProfileId = state.settingsLayer === 'profiles' ? state.settingsRecordId : state.selectedPersonaId;
+  const chain = compiledDoctrineChain(activeProfileId);
+  doctrineInheritancePreview.innerHTML = chain.length
+    ? chain.map(([label, item]) => `
+      <article class="inheritance-card">
+        <p class="phase-label">${escapeHtml(label)}</p>
+        <h3>${escapeHtml(item.label || item.id)}</h3>
+        <p class="muted">${escapeHtml(item.description || '')}</p>
+        <p>${escapeHtml(item.objective || '')}</p>
+      </article>
+    `).join('')
+    : '<p class="muted">Select a profile-aware scenario to preview inheritance.</p>';
+}
+
+function renderDoctrineEditor() {
+  const record = currentDoctrineRecord();
+  doctrineEditorTitle.textContent = record?.label || 'Select a doctrine';
+  doctrineLabelInput.value = record?.label || '';
+  doctrineDescriptionInput.value = record?.description || '';
+  doctrineSideInput.value = record?.side || '';
+  doctrineProductInput.value = record?.product || '';
+  doctrineGroupInput.value = record?.group_id || '';
+  doctrineDialogueTypesInput.value = listToTextarea(record?.dialogue_types || []);
+  doctrineEnvironmentsInput.value = listToTextarea(record?.environments || []);
+  doctrineObjectiveInput.value = record?.objective || '';
+  doctrineValueFrameInput.value = record?.value_frame || '';
+  doctrineProofPolicyInput.value = listToTextarea(record?.proof_policy || []);
+  doctrineAskPolicyInput.value = listToTextarea(record?.ask_policy || []);
+  doctrineSuccessCriteriaInput.value = listToTextarea(record?.success_criteria || []);
+  doctrineAllowedMovesInput.value = listToTextarea(record?.allowed_moves || []);
+  doctrineForbiddenMovesInput.value = listToTextarea(record?.forbidden_moves || []);
+  doctrineToneRulesInput.value = listToTextarea(record?.tone_rules || []);
+  renderDoctrineInheritancePreview();
+}
+
+async function saveDoctrineRecord(event) {
+  event.preventDefault();
+  const record = currentDoctrineRecord();
+  if (!record) return;
+  saveDoctrineBtn.disabled = true;
+  try {
+    const payload = {
+      label: doctrineLabelInput.value.trim(),
+      description: doctrineDescriptionInput.value.trim(),
+      side: doctrineSideInput.value.trim(),
+      product: doctrineProductInput.value.trim(),
+      group_id: doctrineGroupInput.value.trim(),
+      dialogue_types: textareaToList(doctrineDialogueTypesInput.value),
+      environments: textareaToList(doctrineEnvironmentsInput.value),
+      objective: doctrineObjectiveInput.value.trim(),
+      value_frame: doctrineValueFrameInput.value.trim(),
+      proof_policy: textareaToList(doctrineProofPolicyInput.value),
+      ask_policy: textareaToList(doctrineAskPolicyInput.value),
+      success_criteria: textareaToList(doctrineSuccessCriteriaInput.value),
+      allowed_moves: textareaToList(doctrineAllowedMovesInput.value),
+      forbidden_moves: textareaToList(doctrineForbiddenMovesInput.value),
+      tone_rules: textareaToList(doctrineToneRulesInput.value),
+    };
+    await api(`api/doctrine-config/${state.settingsLayer}/${state.settingsRecordId}`, { method: 'PATCH', body: JSON.stringify(payload) });
+    await loadDoctrineConfig();
+    await loadPersonas();
+    renderSettingsRecordList();
+    renderDoctrineEditor();
+  } catch (error) {
+    alert(`Failed to save doctrine: ${error.message}`);
+  } finally {
+    saveDoctrineBtn.disabled = false;
+  }
+}
+
 // Persona dropdown
+sideSelect?.addEventListener('change', async () => {
+  state.selectedSide = sideSelect.value;
+  state.selectedProduct = '';
+  state.selectedGroupId = '';
+  await syncScenarioFlow(true);
+});
+
+productSelect?.addEventListener('change', async () => {
+  state.selectedProduct = productSelect.value;
+  state.selectedGroupId = '';
+  await syncScenarioFlow(true);
+});
+
+scenarioDialogueTypeSelect?.addEventListener('change', async () => {
+  state.selectedScenarioDialogueType = scenarioDialogueTypeSelect.value;
+  state.selectedGroupId = '';
+  await syncScenarioFlow(true);
+});
+
+groupSelect?.addEventListener('change', async () => {
+  state.selectedGroupId = groupSelect.value;
+  await syncScenarioFlow(true);
+});
+
 personaSelect.addEventListener('change', () => {
   selectPersona(personaSelect.value);
 });
@@ -1495,6 +1789,18 @@ openAnalyticsBtn?.addEventListener('click', async () => {
     analyticsGeneratedAt.textContent = error.message || 'Failed to load analytics';
   }
 });
+openSettingsBtn?.addEventListener('click', async () => {
+  showPhase('settings');
+  renderSettingsRecordList();
+  renderDoctrineEditor();
+});
+settingsLayerSelect?.addEventListener('change', () => {
+  state.settingsLayer = settingsLayerSelect.value;
+  state.settingsRecordId = '';
+  renderSettingsRecordList();
+  renderDoctrineEditor();
+});
+doctrineForm?.addEventListener('submit', saveDoctrineRecord);
 refreshAnalyticsBtn?.addEventListener('click', async () => {
   try {
     await loadAnalytics();
@@ -1552,6 +1858,11 @@ startConvBtn.addEventListener('click', () => {
     ? 'Hi [Name],\n\n[Your message here]\n\nBest, [Your name]'
     : 'Write your first touch or next message';
   messageInput.focus();
+});
+
+backToSetupBtn?.addEventListener('click', () => {
+  showPhase('setup');
+  renderSetupPersona();
 });
 
 messageForm.addEventListener('submit', async (event) => {
@@ -1875,8 +2186,12 @@ function readInitialRoute() {
   const params = new URLSearchParams(window.location.search);
   return {
     pathname: window.location.pathname,
-    phase: window.location.pathname === '/analytics' ? 'analytics' : window.location.pathname === '/history' ? 'history' : window.location.pathname.startsWith('/run') ? 'run' : window.location.pathname.startsWith('/share/') ? 'review' : 'setup',
+    phase: window.location.pathname === '/analytics' ? 'analytics' : window.location.pathname === '/history' ? 'history' : window.location.pathname.startsWith('/settings') ? 'settings' : window.location.pathname.startsWith('/run') ? 'run' : window.location.pathname.startsWith('/share/') ? 'review' : 'setup',
     personaId: params.get('persona') || '',
+    side: params.get('side') || 'demand',
+    product: params.get('product') || 'cor',
+    scenarioDialogueType: params.get('scenarioDialogueType') || 'outbound',
+    groupId: params.get('group') || '',
     dialogueType: params.get('dialogueType') || 'messenger',
     sessionId: params.get('session') || '',
     shareSessionId: (window.location.pathname.match(/^\/share\/([^/]+)$/) || [])[1] || ''
@@ -1959,6 +2274,10 @@ runSignalCard?.addEventListener('click', () => {
 
 // Init
 const initialRoute = readInitialRoute();
+state.selectedSide = initialRoute.side || 'demand';
+state.selectedProduct = initialRoute.product || 'cor';
+state.selectedScenarioDialogueType = initialRoute.scenarioDialogueType || 'outbound';
+state.selectedGroupId = initialRoute.groupId || '';
 loadRandomizerConfig();
 setDialogueType(initialRoute.dialogueType, { skipSessionRefresh: true, replaceRoute: true });
 showPhase('setup', { replace: true });
@@ -1966,7 +2285,8 @@ updateRunState();
 syncRandomizerUI();
 loadVersionInfo();
 updateComposerStrategyChips();
-loadPersonas().then(async () => {
+Promise.all([loadDoctrineConfig(), loadPersonas()]).then(async () => {
+  settingsLayerSelect.value = state.settingsLayer;
   if (initialRoute.personaId) state.selectedPersonaId = initialRoute.personaId;
   if (initialRoute.shareSessionId) {
     try {
@@ -1992,6 +2312,12 @@ loadPersonas().then(async () => {
     await loadHistory();
     return;
   }
+  if (initialRoute.phase === 'settings') {
+    showPhase('settings', { replace: true });
+    renderSettingsRecordList();
+    renderDoctrineEditor();
+    return;
+  }
   if (initialRoute.phase === 'run' && state.session) {
     showPhase('run', { replace: true });
     updateRunState();
@@ -2004,6 +2330,10 @@ loadPersonas().then(async () => {
 
 window.addEventListener('popstate', async () => {
   const route = readInitialRoute();
+  state.selectedSide = route.side || state.selectedSide;
+  state.selectedProduct = route.product || state.selectedProduct;
+  state.selectedScenarioDialogueType = route.scenarioDialogueType || state.selectedScenarioDialogueType;
+  state.selectedGroupId = route.groupId || state.selectedGroupId;
   if (route.dialogueType && route.dialogueType !== state.dialogueType) {
     setDialogueType(route.dialogueType, { skipSessionRefresh: true, replaceRoute: true });
   }
@@ -2026,6 +2356,14 @@ window.addEventListener('popstate', async () => {
   if (route.phase === 'history') {
     showPhase('history', { skipRoute: true });
     await loadHistory();
+    return;
+  }
+  if (route.phase === 'settings') {
+    renderScenarioSelectors();
+    renderPersonaDropdown();
+    renderSettingsRecordList();
+    renderDoctrineEditor();
+    showPhase('settings', { skipRoute: true });
     return;
   }
   if (route.personaId && route.personaId !== state.selectedPersonaId) {

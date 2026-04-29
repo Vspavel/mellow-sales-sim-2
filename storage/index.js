@@ -83,7 +83,7 @@ function summarizeEvaluationRun(raw) {
   };
 }
 
-function createFileStorage({ dataDir, sessionsDir, personasFile, logsDir, hintMemoryFile, hintRecencyFile, sdrHintTuningFile, artifactsDir, promptMemoryRunsDir, evaluationRunsDir }) {
+function createFileStorage({ dataDir, sessionsDir, personasFile, doctrinesFile, logsDir, hintMemoryFile, hintRecencyFile, sdrHintTuningFile, artifactsDir, promptMemoryRunsDir, evaluationRunsDir }) {
   return {
     driver: 'file',
     async init() {
@@ -104,6 +104,17 @@ function createFileStorage({ dataDir, sessionsDir, personasFile, logsDir, hintMe
     async savePersonas(personas) {
       writeJson(personasFile, personas);
       return personas;
+    },
+    async loadDoctrineConfig({ seedFactory }) {
+      const parsed = readJson(doctrinesFile);
+      if (parsed && typeof parsed === 'object') return parsed;
+      const seeded = seedFactory();
+      writeJson(doctrinesFile, seeded);
+      return seeded;
+    },
+    async saveDoctrineConfig(config) {
+      writeJson(doctrinesFile, config);
+      return config;
     },
     async loadSession(sessionId) {
       return readJson(path.join(sessionsDir, `${sessionId}.json`));
@@ -380,6 +391,20 @@ async function createPostgresStorage(config) {
         );
       }
       return personas;
+    },
+
+    async loadDoctrineConfig({ seedFactory }) {
+      const isEmpty = (value) => !value || typeof value !== 'object' || Object.keys(value).length === 0;
+      const current = await getKv('doctrine_config', null);
+      if (!isEmpty(current)) return current;
+      const seeded = seedFactory();
+      await putKv('doctrine_config', seeded);
+      return seeded;
+    },
+
+    async saveDoctrineConfig(config) {
+      await putKv('doctrine_config', config);
+      return config;
     },
 
     async loadSession(sessionId) {

@@ -20,6 +20,7 @@ const promptMemoryRunsDir = path.join(dataDir, 'prompt_memory_runs');
 const evaluationRunsDir = path.join(dataDir, 'evaluation_runs');
 const artifactsDir = path.join(dataDir, 'artifacts');
 const personasFile = path.join(dataDir, 'personas.json');
+const doctrinesFile = path.join(dataDir, 'doctrine_config.json');
 const promptArtifactsFile = path.join(__dirname, '..', 'mellow-sales-sim-v1-artifacts.md');
 const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
 
@@ -27,6 +28,7 @@ const storage = await createStorage({
   dataDir,
   sessionsDir,
   personasFile,
+  doctrinesFile,
   logsDir,
   hintMemoryFile,
   hintRecencyFile,
@@ -839,6 +841,302 @@ function isDeprecatedPersona(persona = null) {
   return Boolean(persona?.deprecated || persona?.merged_into);
 }
 
+const DEFAULT_SIDE_DOCTRINES = {
+  demand: {
+    id: 'demand',
+    label: 'Demand side',
+    description: 'Corporate buyers selecting Mellow as business infrastructure.',
+    objective: 'Simulate business-side buying conversations for companies evaluating Mellow products.',
+    value_frame: 'Operational reliability, ownership clarity, compliance infrastructure, and reduced manual burden.',
+    success_criteria: ['Qualified next step with a business buyer', 'Fit-confirming call or review', 'No overclaiming beyond Mellow control'],
+    tone_rules: ['Executive', 'Precise', 'Infrastructure-grade'],
+    allowed_moves: ['signal-led opener', 'diagnostic question', 'bounded proof', 'bounded next step'],
+    forbidden_moves: ['consumer language', 'lifestyle pitch', 'broad generic demo invite']
+  },
+  supply: {
+    id: 'supply',
+    label: 'Supply side',
+    description: 'Independent contractors and small teams using Mellow to find work and get paid globally.',
+    objective: 'Simulate contractor-side conversations where the user evaluates Mellow as growth and monetization infrastructure.',
+    value_frame: 'Project access, income activation, cross-border simplicity, and contractor control.',
+    success_criteria: ['Activation next step', 'Product fit confirmation', 'Low-friction continuation into onboarding or usage'],
+    tone_rules: ['Clear', 'Useful', 'Low-bureaucracy'],
+    allowed_moves: ['practical clarification', 'utility proof', 'activation prompt'],
+    forbidden_moves: ['enterprise procurement language', 'heavy compliance opener', 'unnecessary formality']
+  }
+};
+
+const DEFAULT_PRODUCT_DOCTRINES = {
+  scout: {
+    id: 'scout', side: 'demand', label: 'Scout', description: 'AI contractor sourcing for business-side project leaders.',
+    objective: 'Help buyers assess whether Scout reduces sourcing time and improves shortlist quality.',
+    value_frame: 'Manager time compression, shortlist quality, sourcing delegation, and project speed.',
+    proof_policy: ['scoring logic', 'speed to shortlist', 'quality of candidates', 'delegation economics'],
+    ask_policy: ['request review', 'calibration call', 'trial request'],
+    success_criteria: ['Agreement to review sourcing fit', 'Request submission or shortlist follow-up'],
+    forbidden_moves: ['treat as HR ATS', 'promise hiring outcome certainty']
+  },
+  cm: {
+    id: 'cm', side: 'demand', label: 'CM', description: 'Contractor Management for easy-geo contractor operations.',
+    objective: 'Show how CM reduces contractor admin and creates a cleaner operating layer.',
+    value_frame: 'Operational visibility, cleaner workflows, lower admin load, and migration path to CoR where needed.',
+    proof_policy: ['workflow simplification', 'visibility', 'time saved', 'cleaner contractor management'],
+    ask_policy: ['workflow review', 'fit call', 'light implementation review'],
+    success_criteria: ['Agreement to workflow review or product walkthrough'],
+    forbidden_moves: ['sell as CoR', 'lead with fear instead of workflow value']
+  },
+  cor: {
+    id: 'cor', side: 'demand', label: 'CoR', description: 'Contractor of Record for cross-border contractor payments and control.',
+    objective: 'Qualify and convert business buyers around reliability, boundary clarity, and payment/control infrastructure.',
+    value_frame: 'Reliability, ownership, auditability, and hard-geo payment infrastructure.',
+    proof_policy: ['case snippet', 'one-screen proof', 'calculator snapshot'],
+    ask_policy: ['bounded review call', 'written proof first', 'narrow next step'],
+    success_criteria: ['Agreement to review call or concrete next step'],
+    forbidden_moves: ['promise misclassification protection', 'generic fintech pitch']
+  },
+  radar: {
+    id: 'radar', side: 'supply', label: 'Radar', description: 'Contractor-side project discovery and career agent.',
+    objective: 'Help contractors see Radar as a useful acquisition layer for finding relevant projects.',
+    value_frame: 'Project discovery, relevance, speed, and contractor-side opportunity visibility.',
+    proof_policy: ['relevance', 'time saved', 'signal quality', 'fit of projects'],
+    ask_policy: ['activation step', 'signup', 'profile completion'],
+    success_criteria: ['Activation step or product try'],
+    forbidden_moves: ['enterprise procurement framing', 'treat like CoR pitch']
+  },
+  global_invoicing: {
+    id: 'global_invoicing', side: 'supply', label: 'Global Invoicing', description: 'Cross-border invoicing and payment infrastructure for contractors and small teams.',
+    objective: 'Show contractors and teamlancers how Mellow helps them invoice and get paid globally with less friction.',
+    value_frame: 'Get paid globally, simplify invoicing, reduce operational drag, improve income legitimacy.',
+    proof_policy: ['payment flow clarity', 'cross-border ease', 'time saved', 'income regularity'],
+    ask_policy: ['onboarding review', 'activation step', 'trial setup'],
+    success_criteria: ['Agreement to try or review onboarding'],
+    forbidden_moves: ['treat like enterprise finance sale']
+  }
+};
+
+const DEFAULT_DIALOGUE_TYPE_DOCTRINES = {
+  inbound: {
+    id: 'inbound', label: 'Inbound', description: 'Buyer or user initiated or already expressed interest.',
+    objective: 'Convert existing intent into a concrete qualified next step.',
+    value_frame: 'Clarify fit quickly and remove friction to the next useful step.',
+    tone_rules: ['More direct', 'Less context-setting', 'Assume existing intent'],
+    allowed_moves: ['diagnose quickly', 'answer directly', 'move to bounded next step'],
+    forbidden_moves: ['cold-outbound opener logic', 'unnecessary re-introduction']
+  },
+  outbound: {
+    id: 'outbound', label: 'Outbound', description: 'Seller initiated based on signal or cold/warm trigger.',
+    objective: 'Earn the right to continue through signal-led relevance and useful first contact.',
+    value_frame: 'Value in the first touch, signal relevance, respectful pressure, and bounded asks.',
+    tone_rules: ['Permission-aware', 'Signal-led', 'No generic pitch'],
+    allowed_moves: ['signal opener', 'narrow diagnosis', 'bounded proof', 'light next step'],
+    forbidden_moves: ['assume too much context', 'aggressive meeting push on turn 1']
+  }
+};
+
+const DEFAULT_ENVIRONMENT_DOCTRINES = {
+  messenger: {
+    id: 'messenger', label: 'Messenger', description: 'Short-form conversational environment like chat or DM.',
+    objective: 'Keep momentum in short turns with high specificity.',
+    value_frame: 'Compression, relevance, and low-friction dialogue.',
+    tone_rules: ['Short', 'Conversational', 'Compressed'],
+    allowed_moves: ['single-point response', 'light ask', 'short proof'],
+    forbidden_moves: ['email-style long paragraphs', 'multi-topic blocks']
+  },
+  email: {
+    id: 'email', label: 'Email', description: 'Formal asynchronous written communication.',
+    objective: 'Deliver a self-contained message with enough context to earn a reply.',
+    value_frame: 'Structured clarity, explicit framing, and calm follow-through.',
+    tone_rules: ['Formal', 'Self-contained', 'Paragraph-based'],
+    allowed_moves: ['clear subject', 'structured paragraph', 'single concrete ask'],
+    forbidden_moves: ['chat shorthand', 'fragmented replies']
+  }
+};
+
+const DEFAULT_GROUP_DOCTRINES = {
+  finance: {
+    id: 'finance', side: 'demand', product: 'cor', dialogue_types: ['outbound'], environments: ['messenger', 'email'],
+    label: 'Finance', description: 'CFO / finance-led business buyers evaluating economics, control, and responsibility.',
+    objective: 'Prove control, economics, and boundary clarity without overclaiming.',
+    value_frame: 'Visible total cost, control boundary, auditability, incident path.',
+    proof_policy: ['mechanics first', 'economics next', 'bounded written proof before broad ask when needed'],
+    ask_policy: ['narrow finance review', 'written proof to review call'],
+    success_criteria: ['Agreement to review call or written proof review'],
+    forbidden_moves: ['generic compliance language', 'misclassification overclaim']
+  },
+  legal: {
+    id: 'legal', side: 'demand', product: 'cor', dialogue_types: ['outbound'], environments: ['messenger', 'email'],
+    label: 'Legal', description: 'Legal or counsel buyers focused on defensibility and scope.',
+    objective: 'Demonstrate scope clarity, safeguards, and document trail.',
+    value_frame: 'Defensibility, control zone, documentation, audit trail.',
+    proof_policy: ['document boundary', 'control zone', 'process safeguards'],
+    ask_policy: ['written review first', 'narrow legal review'],
+    success_criteria: ['Agreement to review documentation or legal fit call'],
+    forbidden_moves: ['broad promises', 'hand-wavy compliance claims']
+  },
+  ops_recovery: {
+    id: 'ops_recovery', side: 'demand', product: 'cor', dialogue_types: ['outbound'], environments: ['messenger', 'email'],
+    label: 'Ops / recovery', description: 'Operational buyers after payment failure or process instability.',
+    objective: 'Show calmer operating model and recovery ownership.',
+    value_frame: 'Operational relief, incident ownership, smoother workflow.',
+    proof_policy: ['owner model', 'incident path', 'workflow relief'],
+    ask_policy: ['narrow operational walkthrough'],
+    success_criteria: ['Agreement to recovery-fit or workflow review'],
+    forbidden_moves: ['finance-heavy pitch', 'generic product tour']
+  },
+  transition_winback: {
+    id: 'transition_winback', side: 'demand', product: 'cor', dialogue_types: ['outbound'], environments: ['messenger', 'email'],
+    label: 'Transition / winback', description: 'Re-entry, transition, or narrow-slice reconsideration.',
+    objective: 'Rebuild fit around a narrow slice without reopening the whole old story.',
+    value_frame: 'Safer slice, narrower move, cleaner ownership.',
+    proof_policy: ['slice fit', 'transition safety', 'owner model'],
+    ask_policy: ['bounded slice review'],
+    success_criteria: ['Agreement to narrow review of a new slice'],
+    forbidden_moves: ['broad comeback pitch', 'pretend history did not happen']
+  },
+  custom: {
+    id: 'custom', side: 'demand', product: 'cor', dialogue_types: ['outbound'], environments: ['messenger', 'email'],
+    label: 'Custom', description: 'Profiles outside the main doctrinal families.',
+    objective: 'Keep a clean scenario-specific buyer logic without forcing it into a wrong family.',
+    value_frame: 'Scenario fit, concrete relevance, respectful next step.',
+    proof_policy: ['context-specific proof'],
+    ask_policy: ['bounded next step'],
+    success_criteria: ['Scenario-fit next step'],
+    forbidden_moves: ['force into wrong doctrine family']
+  },
+  supply_activation: {
+    id: 'supply_activation', side: 'supply', product: 'radar', dialogue_types: ['inbound', 'outbound'], environments: ['messenger', 'email'],
+    label: 'Supply activation', description: 'Contractor-side activation and relevance group for Radar.',
+    objective: 'Help a contractor see immediate utility and activate the product.',
+    value_frame: 'Relevant opportunities, low-friction activation, career momentum.',
+    proof_policy: ['relevance', 'fit of projects', 'time saved'],
+    ask_policy: ['activation prompt'],
+    success_criteria: ['Activation step'],
+    forbidden_moves: ['enterprise buyer logic']
+  },
+  supply_invoicing: {
+    id: 'supply_invoicing', side: 'supply', product: 'global_invoicing', dialogue_types: ['inbound', 'outbound'], environments: ['messenger', 'email'],
+    label: 'Supply invoicing', description: 'Contractor-side invoicing and getting-paid scenarios.',
+    objective: 'Move the user toward onboarding and first payment flow understanding.',
+    value_frame: 'Cross-border invoicing clarity, payment simplicity, contractor control.',
+    proof_policy: ['payment flow clarity', 'onboarding simplicity'],
+    ask_policy: ['onboarding review', 'activation step'],
+    success_criteria: ['Onboarding or try step'],
+    forbidden_moves: ['enterprise procurement framing']
+  }
+};
+
+function normalizeDoctrineFieldList(value, fallback = []) {
+  const list = Array.isArray(value) ? value : fallback;
+  return list.map((item) => String(item || '').trim()).filter(Boolean);
+}
+
+function normalizeDoctrineRecord(record, fallback = {}) {
+  const merged = { ...fallback, ...(record || {}) };
+  return {
+    ...merged,
+    id: String(merged.id || fallback.id || '').trim(),
+    label: String(merged.label || '').trim(),
+    description: String(merged.description || '').trim(),
+    objective: String(merged.objective || '').trim(),
+    value_frame: String(merged.value_frame || '').trim(),
+    proof_policy: normalizeDoctrineFieldList(merged.proof_policy, fallback.proof_policy || []),
+    ask_policy: normalizeDoctrineFieldList(merged.ask_policy, fallback.ask_policy || []),
+    success_criteria: normalizeDoctrineFieldList(merged.success_criteria, fallback.success_criteria || []),
+    tone_rules: normalizeDoctrineFieldList(merged.tone_rules, fallback.tone_rules || []),
+    allowed_moves: normalizeDoctrineFieldList(merged.allowed_moves, fallback.allowed_moves || []),
+    forbidden_moves: normalizeDoctrineFieldList(merged.forbidden_moves, fallback.forbidden_moves || []),
+  };
+}
+
+function seedDoctrineConfig() {
+  const profiles = {};
+  for (const persona of Object.values(personas || {})) {
+    if (isDeprecatedPersona(persona)) continue;
+    profiles[persona.id] = {
+      id: persona.id,
+      label: persona.name,
+      description: persona.intro || persona.role,
+      side: 'demand',
+      product: 'cor',
+      dialogue_types: ['outbound'],
+      environments: ['messenger', 'email'],
+      group_id: persona.doctrine_family || getDoctrineFamilyForPersonaId(persona.id, persona.archetype || ''),
+      role: persona.role,
+      objective: 'Preserve the individual buyer behavior and objections of this profile.',
+      value_frame: persona.intro || persona.role,
+      tone_rules: normalizeDoctrineFieldList(persona.prompt_style || []),
+      forbidden_moves: normalizeDoctrineFieldList(persona.prompt_objections || []),
+    };
+  }
+  return {
+    sides: DEFAULT_SIDE_DOCTRINES,
+    products: DEFAULT_PRODUCT_DOCTRINES,
+    dialogue_types: DEFAULT_DIALOGUE_TYPE_DOCTRINES,
+    environments: DEFAULT_ENVIRONMENT_DOCTRINES,
+    groups: DEFAULT_GROUP_DOCTRINES,
+    profiles,
+  };
+}
+
+function normalizeDoctrineConfig(raw) {
+  const safe = raw && typeof raw === 'object' ? raw : {};
+  const normalizeMap = (source, defaults) => Object.fromEntries(
+    Object.entries(defaults).map(([id, fallback]) => {
+      const current = source?.[id] || {};
+      const base = normalizeDoctrineRecord({ ...current, id }, { ...fallback, id });
+      if ('side' in fallback || 'side' in current) base.side = String(current.side || fallback.side || '').trim();
+      if ('product' in fallback || 'product' in current) base.product = String(current.product || fallback.product || '').trim();
+      if ('group_id' in current) base.group_id = String(current.group_id || '').trim();
+      if ('role' in current) base.role = String(current.role || '').trim();
+      base.dialogue_types = normalizeDoctrineFieldList(current.dialogue_types, fallback.dialogue_types || []);
+      base.environments = normalizeDoctrineFieldList(current.environments, fallback.environments || []);
+      return [id, base];
+    })
+  );
+  const defaults = seedDoctrineConfig();
+  const profileIds = new Set([...Object.keys(defaults.profiles || {}), ...Object.keys(safe.profiles || {})]);
+  const profiles = Object.fromEntries([...profileIds].map((id) => {
+    const fallback = defaults.profiles?.[id] || { id, label: id, side: 'demand', product: 'cor', dialogue_types: ['outbound'], environments: ['messenger', 'email'], group_id: 'custom' };
+    const current = safe.profiles?.[id] || {};
+    const base = normalizeDoctrineRecord({ ...current, id }, fallback);
+    base.side = String(current.side || fallback.side || 'demand').trim();
+    base.product = String(current.product || fallback.product || 'cor').trim();
+    base.group_id = String(current.group_id || fallback.group_id || 'custom').trim();
+    base.role = String(current.role || fallback.role || '').trim();
+    base.dialogue_types = normalizeDoctrineFieldList(current.dialogue_types, fallback.dialogue_types || ['outbound']);
+    base.environments = normalizeDoctrineFieldList(current.environments, fallback.environments || ['messenger', 'email']);
+    return [id, base];
+  }));
+  return {
+    sides: normalizeMap(safe.sides, defaults.sides),
+    products: normalizeMap(safe.products, defaults.products),
+    dialogue_types: normalizeMap(safe.dialogue_types, defaults.dialogue_types),
+    environments: normalizeMap(safe.environments, defaults.environments),
+    groups: normalizeMap(safe.groups, defaults.groups),
+    profiles,
+  };
+}
+
+function doctrineProfileForPersona(personaId) {
+  return doctrineConfig?.profiles?.[personaId] || null;
+}
+
+function enrichPersonaWithScenario(persona) {
+  const profile = doctrineProfileForPersona(persona.id) || {};
+  const groupId = profile.group_id || persona.doctrine_family || 'custom';
+  const group = doctrineConfig?.groups?.[groupId] || null;
+  return {
+    ...persona,
+    market_side: profile.side || 'demand',
+    product: profile.product || 'cor',
+    dialogue_types: profile.dialogue_types?.length ? profile.dialogue_types : ['outbound'],
+    environments: profile.environments?.length ? profile.environments : ['messenger', 'email'],
+    group_id: groupId,
+    group_label: group?.label || getDoctrineFamilyLabel(groupId),
+    profile_label: profile.label || persona.name,
+  };
+}
+
 function detectMessageLanguage(text, fallback = 'en') {
   const value = String(text || '');
   const cyrillic = (value.match(/[А-Яа-яЁё]/g) || []).length;
@@ -1018,6 +1316,12 @@ async function savePersonaStore() {
 }
 
 let personas = await loadPersonaStore();
+let doctrineConfig = normalizeDoctrineConfig(await storage.loadDoctrineConfig({ seedFactory: seedDoctrineConfig }));
+
+async function saveDoctrineConfig() {
+  doctrineConfig = normalizeDoctrineConfig(doctrineConfig);
+  await storage.saveDoctrineConfig(doctrineConfig);
+}
 
 app.use(express.json());
 app.get('/version.json', (_req, res) => {
@@ -1049,7 +1353,7 @@ async function saveSession(session) {
   return session;
 }
 
-function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'messenger', randomizerConfig = null, language = 'en', difficultyTier = 1 } = {}) {
+function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'messenger', randomizerConfig = null, language = 'en', difficultyTier = 1, scenarioSelection = null } = {}) {
   personaId = getCanonicalPersonaId(personaId);
   if (!personaId || !personas[personaId]) {
     throw new Error('Unknown personaId');
@@ -1073,6 +1377,7 @@ function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'mes
     trigger: null,
     language: lang,
     dialogue_type: resolvedDialogueType,
+    scenario_selection: scenarioSelection || null,
     difficulty_tier: tier,
     scenario_type: 'first_contact_to_discovery',
     sde_card_id: card.card_id,
@@ -9787,11 +10092,32 @@ function assess(session) {
 // ==================== API ROUTES ====================
 
 app.get('/api/personas', (_req, res) => {
-  res.json(Object.values(personas).filter((persona) => !isDeprecatedPersona(persona)).map((persona) => ({
-    ...persona,
-    doctrine_family: persona.doctrine_family || getDoctrineFamilyForPersonaId(persona.id, persona.archetype || ''),
-    doctrine_family_label: getDoctrineFamilyLabel(persona.doctrine_family || getDoctrineFamilyForPersonaId(persona.id, persona.archetype || '')),
-  })));
+  res.json(Object.values(personas).filter((persona) => !isDeprecatedPersona(persona)).map((persona) => {
+    const enriched = enrichPersonaWithScenario(persona);
+    return {
+      ...enriched,
+      doctrine_family: persona.doctrine_family || getDoctrineFamilyForPersonaId(persona.id, persona.archetype || ''),
+      doctrine_family_label: getDoctrineFamilyLabel(persona.doctrine_family || getDoctrineFamilyForPersonaId(persona.id, persona.archetype || '')),
+    };
+  }));
+});
+
+app.get('/api/doctrine-config', (_req, res) => {
+  res.json(doctrineConfig);
+});
+
+app.patch('/api/doctrine-config/:layer/:id', async (req, res) => {
+  const layer = String(req.params.layer || '').trim();
+  const id = String(req.params.id || '').trim();
+  if (!['sides', 'products', 'dialogue_types', 'environments', 'groups', 'profiles'].includes(layer)) {
+    return res.status(400).json({ error: 'Unknown doctrine layer' });
+  }
+  if (!id) return res.status(400).json({ error: 'Doctrine id is required' });
+  const current = doctrineConfig?.[layer]?.[id];
+  if (!current) return res.status(404).json({ error: 'Doctrine record not found' });
+  doctrineConfig[layer][id] = { ...current, ...(req.body || {}), id };
+  await saveDoctrineConfig();
+  res.json(doctrineConfig[layer][id]);
 });
 
 app.post('/api/personas/extract-from-prompt', (req, res) => {
@@ -9827,7 +10153,24 @@ app.post('/api/personas', async (req, res) => {
   }, personaId);
   personas[persona.id] = persona;
   await savePersonaStore();
-  res.status(201).json(persona);
+  doctrineConfig.profiles[persona.id] = {
+    ...(doctrineConfig.profiles[persona.id] || {}),
+    id: persona.id,
+    label: persona.name,
+    description: persona.intro || persona.role,
+    side: String(payload.market_side || payload.side || doctrineConfig.profiles[persona.id]?.side || 'demand'),
+    product: String(payload.product || doctrineConfig.profiles[persona.id]?.product || 'cor'),
+    dialogue_types: Array.isArray(payload.dialogue_types) ? payload.dialogue_types : (doctrineConfig.profiles[persona.id]?.dialogue_types || ['outbound']),
+    environments: Array.isArray(payload.environments) ? payload.environments : (doctrineConfig.profiles[persona.id]?.environments || ['messenger', 'email']),
+    group_id: String(payload.group_id || doctrineConfig.profiles[persona.id]?.group_id || persona.doctrine_family || 'custom'),
+    role: persona.role,
+    objective: doctrineConfig.profiles[persona.id]?.objective || 'Preserve the individual buyer behavior and objections of this profile.',
+    value_frame: doctrineConfig.profiles[persona.id]?.value_frame || (persona.intro || persona.role),
+    tone_rules: doctrineConfig.profiles[persona.id]?.tone_rules || (persona.prompt_style || []),
+    forbidden_moves: doctrineConfig.profiles[persona.id]?.forbidden_moves || (persona.prompt_objections || []),
+  };
+  await saveDoctrineConfig();
+  res.status(201).json(enrichPersonaWithScenario(persona));
 });
 
 app.patch('/api/personas/:id', async (req, res) => {
@@ -9844,7 +10187,20 @@ app.patch('/api/personas/:id', async (req, res) => {
 
   personas[persona.id] = nextPersona;
   await savePersonaStore();
-  res.json(nextPersona);
+  doctrineConfig.profiles[persona.id] = {
+    ...(doctrineConfig.profiles[persona.id] || {}),
+    id: persona.id,
+    label: nextPersona.name,
+    description: nextPersona.intro || nextPersona.role,
+    side: String(payload.market_side || payload.side || doctrineConfig.profiles[persona.id]?.side || 'demand'),
+    product: String(payload.product || doctrineConfig.profiles[persona.id]?.product || 'cor'),
+    dialogue_types: Array.isArray(payload.dialogue_types) ? payload.dialogue_types : (doctrineConfig.profiles[persona.id]?.dialogue_types || ['outbound']),
+    environments: Array.isArray(payload.environments) ? payload.environments : (doctrineConfig.profiles[persona.id]?.environments || ['messenger', 'email']),
+    group_id: String(payload.group_id || doctrineConfig.profiles[persona.id]?.group_id || nextPersona.doctrine_family || 'custom'),
+    role: nextPersona.role,
+  };
+  await saveDoctrineConfig();
+  res.json(enrichPersonaWithScenario(nextPersona));
 });
 
 app.delete('/api/personas/:id', async (req, res) => {
@@ -9852,6 +10208,8 @@ app.delete('/api/personas/:id', async (req, res) => {
   if (!persona) return res.status(404).json({ error: 'Persona not found' });
   delete personas[req.params.id];
   await savePersonaStore();
+  delete doctrineConfig.profiles[req.params.id];
+  await saveDoctrineConfig();
   res.json({ ok: true, id: req.params.id });
 });
 
@@ -9870,7 +10228,7 @@ function normalizeRandomizerConfig(raw) {
 }
 
 app.post('/api/sessions', async (req, res) => {
-  const { personaId, sellerId = 'pavel', dialogueType = 'messenger', randomizerConfig: rawConfig, language, difficultyTier } = req.body || {};
+  const { personaId, sellerId = 'pavel', dialogueType = 'messenger', randomizerConfig: rawConfig, language, difficultyTier, scenarioSelection = null } = req.body || {};
   if (!personaId || !personas[personaId]) {
     return res.status(400).json({ error: 'Unknown personaId' });
   }
@@ -9881,6 +10239,7 @@ app.post('/api/sessions', async (req, res) => {
     randomizerConfig: rawConfig,
     language,
     difficultyTier,
+    scenarioSelection,
   });
   await saveSession(session);
   res.json(session);
