@@ -1474,23 +1474,47 @@ function shouldUseRawEmailText(text, lang = 'ru') {
 
 function buildEmailSignalAwareOpeners(session, lang = 'ru') {
   const card = session?.sde_card || {};
+  const persona = personaMeta(session) || {};
   const companyName = String(card?.company?.name || 'the company').trim();
   const contactName = String(card?.contact?.name || session?.bot_name || 'there').trim();
   const firstName = contactName.split(/\s+/)[0] || contactName;
   const rawWhatHappened = sanitizeEmailHintText(String(card?.what_happened || '').trim(), lang);
   const rawProbablePain = sanitizeEmailHintText(String(card?.probable_pain || '').trim(), lang);
+  const rawFirstTouchHint = sanitizeEmailHintText(String(card?.first_touch_hint || '').trim(), lang);
   const whatHappened = shouldUseRawEmailText(rawWhatHappened, lang) ? rawWhatHappened : '';
   const probablePain = shouldUseRawEmailText(rawProbablePain, lang) ? rawProbablePain : '';
+  const firstTouchHint = shouldUseRawEmailText(rawFirstTouchHint, lang) ? rawFirstTouchHint : '';
   const product = getRecommendedProduct(session) === 'cor' ? 'Mellow CoR' : 'Mellow CM';
+
+  const financeContextEn = `${product} is relevant only if it gives a cleaner control boundary, audit trail, and a more explainable contractor path before the next finance review.`;
+  const legalContextEn = `${product} is relevant only if it makes scope, safeguards, and document trail more defensible in writing, not if it adds another vague vendor layer.`;
+  const opsContextEn = `${product} is relevant only if it removes manual coordination, gives a clear owner path, and makes the workflow calmer under pressure.`;
+  const financeQuestionEn = 'Is this already creating finance pressure internally, or is the issue still mostly hidden?';
+  const legalQuestionEn = 'Is the bigger concern for you scope boundary, document trail, or how this would hold up in review?';
+  const opsQuestionEn = 'Where is the sharpest pressure right now: payment coordination, exception handling, or internal follow-up load?';
+
+  const financeContextRu = `${product} имеет смысл только если даёт более чистую зону контроля, понятный audit trail и объяснимую contractor-схему перед следующим финансовым разбором.`;
+  const legalContextRu = `${product} имеет смысл только если делает границы, safeguards и документный след более защищаемыми в письменном виде, а не добавляет ещё один размытый vendor-слой.`;
+  const opsContextRu = `${product} имеет смысл только если убирает ручную координацию, даёт понятную owner-модель и делает процесс спокойнее под давлением.`;
+  const financeQuestionRu = 'Это уже создаёт давление внутри finance, или проблема пока ещё скрыта?';
+  const legalQuestionRu = 'Для вас сейчас главнее граница ответственности, документный след или защищаемость схемы на review?';
+  const opsQuestionRu = 'Где сейчас самая острая нагрузка: координация выплат, разбор исключений или внутренние follow-up?';
+
+  const archetype = persona.archetype || 'finance';
+  const contextEn = archetype === 'legal' ? legalContextEn : archetype === 'ops' ? opsContextEn : financeContextEn;
+  const questionEn = archetype === 'legal' ? legalQuestionEn : archetype === 'ops' ? opsQuestionEn : financeQuestionEn;
+  const contextRu = archetype === 'legal' ? legalContextRu : archetype === 'ops' ? opsContextRu : financeContextRu;
+  const questionRu = archetype === 'legal' ? legalQuestionRu : archetype === 'ops' ? opsQuestionRu : financeQuestionRu;
+
   if (lang === 'en') {
     return [
-      `${firstName}, I noticed a concrete signal at ${companyName}: ${whatHappened || 'the contractor workflow is under new pressure'}. This usually matters when the team needs a cleaner control and operating path, not a broad tool pitch. Is this already a live issue on your side?`,
-      `${firstName}, from the outside it looks like ${companyName} is dealing with ${probablePain || whatHappened || 'a contractor-flow control problem'}. ${product} is only relevant if it helps reduce that pressure in a concrete way. Would it be useful to compare this against your current setup?`,
+      `${firstName}, I noticed a concrete signal at ${companyName}: ${whatHappened || probablePain || 'the contractor workflow is under new pressure'}. ${contextEn} ${questionEn}`,
+      `${firstName}, from the outside it looks like ${companyName} may be dealing with ${probablePain || whatHappened || 'a contractor control problem'}. ${firstTouchHint || contextEn} ${questionEn}`,
     ].map((line) => sanitizeEmailHintText(line, 'en')).filter(Boolean);
   }
   return [
-    `${firstName}, увидела у ${companyName} конкретный сигнал: ${whatHappened || 'в contractor flow появился новый рабочий риск'}. Обычно это становится важным, когда команде нужна более чистая схема контроля и исполнения, а не ещё один общий инструмент. Это уже живая проблема у вас внутри?`,
-    `${firstName}, со стороны это выглядит так, будто у ${companyName} сейчас узел в теме ${probablePain || whatHappened || 'контроля и управляемости contractor flow'}. ${product} имеет смысл обсуждать только если это реально снимает именно это давление. Это сейчас один из ваших приоритетных вопросов?`,
+    `${firstName}, увидела у ${companyName} конкретный сигнал: ${whatHappened || probablePain || 'в contractor flow появилось новое давление'}. ${contextRu} ${questionRu}`,
+    `${firstName}, со стороны это выглядит так, будто у ${companyName} сейчас узел в теме ${probablePain || whatHappened || 'контроля и управляемости contractor flow'}. ${firstTouchHint || contextRu} ${questionRu}`,
   ].map((line) => sanitizeEmailHintText(line, 'ru')).filter(Boolean);
 }
 
@@ -1502,10 +1526,10 @@ function toEmailSellerMessage(base, session) {
   const cleanedBase = sanitizeEmailHintText(String(base || '').trim(), lang).replace(new RegExp(`^${firstName},?\\s*`, 'i'), '').trim();
   const sentences = splitIntoSentences(cleanedBase);
   const intro = sentences.slice(0, 2).join(' ');
-  const ask = sentences.slice(2).join(' ') || 'Would it make sense to compare this against your current flow?';
-  const greeting = `Hi ${contactName},`;
+  const ask = sentences.slice(2).join(' ') || (lang === 'en' ? 'Would it make sense to compare this against your current flow?' : 'Есть ли смысл коротко сверить это с вашим текущим процессом?');
+  const greeting = lang === 'en' ? `Hi ${contactName},` : `Здравствуйте, ${contactName}.`;
   const body = [intro, ask].filter(Boolean).join('\n\n');
-  const signature = 'Best,\nPavel';
+  const signature = lang === 'en' ? 'Best,\nPavel' : 'С уважением,\nPavel';
   if ((session?.meta?.bot_turns || 0) === 0 && sellerMessages(session).length === 0) {
     return `Subject: ${buildEmailSubject(session)}\n\n${greeting}\n\n${body}\n\n${signature}`;
   }
@@ -1517,6 +1541,7 @@ function toEmailBuyerReply(base, session) {
   const signer = String(persona?.name || session?.bot_name || 'Buyer').trim().split(/\s+/)[0] || 'Buyer';
   const rawSellerName = String(session?.seller_username || session?.seller_id || 'Pavel').trim() || 'Pavel';
   const sellerName = rawSellerName.charAt(0).toUpperCase() + rawSellerName.slice(1);
+  const lang = session?.language === 'en' ? 'en' : 'ru';
 
   // Use email_prompt as the primary guidance source (emailPersonaGuidance returns it if set)
   const guidance = emailPersonaGuidance(session);
@@ -1534,10 +1559,12 @@ function toEmailBuyerReply(base, session) {
     guidanceLower.includes('finance') || guidanceLower.includes('precise') ||
     guidanceLower.includes('restrained');
 
-  // Opener: use email_prompt opener directive if present, else derive from formality
+  // Opener: use email_prompt opener directive if present, else derive from formality + language
   const openerMatch = customEmailPrompt.match(/opener:\s*([^\n.]+\.?)/i);
   const opener = openerMatch
     ? openerMatch[1].trim()
+    : lang === 'ru'
+    ? (isFormal ? 'Спасибо за письмо.' : 'Спасибо, что написали.')
     : isFormal
     ? 'Thank you for the note.'
     : 'Thanks for reaching out.';
@@ -1546,6 +1573,8 @@ function toEmailBuyerReply(base, session) {
   const signoffMatch = customEmailPrompt.match(/(?:sign.?off|closing):\s*([^\n]+)/i);
   const closing = signoffMatch
     ? `${signoffMatch[1].trim()}\n${signer}`
+    : lang === 'ru'
+    ? (isFormal ? `С уважением,\n${signer}` : `Спасибо,\n${signer}`)
     : isFormal
     ? `Regards,\n${signer}`
     : `Best,\n${signer}`;
@@ -1653,7 +1682,11 @@ function normalizeSellerLanguage(text, lang = 'ru') {
 
 function adaptTextToDialogue(base, session, role) {
   const lang = session?.language === 'en' ? 'en' : 'ru';
-  const normalizedBase = role === 'seller' ? normalizeSellerLanguage(base, lang) : base;
+  const baseText = String(base || '').trim();
+  const preserveSellerText = role === 'seller' && isEmailMode(session) && detectMessageLanguage(baseText, lang) === lang;
+  const normalizedBase = role === 'seller'
+    ? (preserveSellerText ? baseText : normalizeSellerLanguage(baseText, lang))
+    : baseText;
   if (!isEmailMode(session)) return normalizedBase;
   return role === 'seller' ? toEmailSellerMessage(normalizedBase, session) : toEmailBuyerReply(normalizedBase, session);
 }
@@ -1729,12 +1762,12 @@ async function saveSession(session) {
   return session;
 }
 
-function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'messenger', randomizerConfig = null, language = 'en', difficultyTier = 1, scenarioSelection = null } = {}) {
+function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'messenger', randomizerConfig = null, language = null, difficultyTier = 1, scenarioSelection = null } = {}) {
   personaId = getCanonicalPersonaId(personaId);
   if (!personaId || !personas[personaId]) {
     throw new Error('Unknown personaId');
   }
-  const lang = language === 'ru' || language === 'en' ? language : 'en';
+  const explicitLanguage = language === 'ru' || language === 'en' ? language : null;
   const tier = Math.max(1, Math.min(3, parseInt(difficultyTier, 10) || 1));
   const normalizedScenarioSelection = scenarioSelection && typeof scenarioSelection === 'object'
     ? {
@@ -1752,6 +1785,13 @@ function createSalesSession({ personaId, sellerId = 'pavel', dialogueType = 'mes
     signal_types: normalizedScenarioSelection?.signal_type ? [String((doctrineConfig?.signal_types?.[normalizedScenarioSelection.signal_type]?.id || normalizedScenarioSelection.signal_type).toUpperCase())] : randomizerConfig?.signal_types,
   });
   const card = pickCard(personaId, normalizedRandomizerConfig);
+  const inferredLanguage = detectMessageLanguage([
+    card?.what_happened,
+    card?.probable_pain,
+    card?.first_touch_hint,
+    card?.rendered_text,
+  ].filter(Boolean).join(' '), 'en');
+  const lang = explicitLanguage || inferredLanguage || 'en';
   const sessionSeed = buildPersonaSeed(personaId);
   const persona = personas[personaId];
   const resolvedDialogueType = normalizeDialogueType(dialogueType);
@@ -2152,7 +2192,57 @@ function isHintRecordAfterAnalyticsBaseline(record) {
 }
 
 function analyticsReasonLabel(reason = '') {
-  return String(reason || 'unknown').replace(/_/g, ' ');
+  const key = String(reason || 'unknown');
+  return {
+    mechanics_engaged: 'Problem engaged',
+    economics_engaged: 'Economics engaged',
+    written_step_requested: 'Written step requested',
+    written_step_accepted: 'Written step accepted',
+    written_step_then_call: 'Written step before call',
+    review_call_ready: 'Review call ready',
+    meeting_booked: 'Meeting booked',
+    artifact_only: 'Written proof accepted',
+    artifact_then_call: 'Written proof unlocked a call path',
+    narrow_walkthrough: 'Buyer was ready for a bounded walkthrough',
+    buyer_disengaged: 'Buyer disengaged',
+    artifact_accepted_but_not_converted: 'Written proof did not convert',
+    artifact_then_call_not_landed: 'Async proof did not turn into a call',
+    walkthrough_ready_but_not_booked: 'Walkthrough interest did not become a meeting',
+    no_ask_made: 'No concrete ask was made',
+    premature_ask: 'Ask came too early',
+    trust_deficit: 'Trust stayed too low',
+    unresolved_concerns: 'Core concern stayed unresolved',
+    ask_not_landed: 'Ask did not land',
+    unknown: 'Unknown pattern',
+  }[key] || key.replace(/_/g, ' ');
+}
+
+function analyticsReasonSummary(reason = '', { tone = 'neutral', stage = '' } = {}) {
+  const key = String(reason || 'unknown');
+  const summaries = {
+    artifact_only: 'The buyer accepted a bounded written artifact once the mechanics felt concrete enough to review asynchronously.',
+    artifact_then_call: 'Written proof reduced enough uncertainty to justify moving from async review into a live conversation.',
+    narrow_walkthrough: 'The conversation became specific enough that a narrow workflow review felt worth the buyer’s time.',
+    meeting_booked: 'Trust, relevance, and next-step clarity were strong enough to secure calendar time.',
+    buyer_disengaged: 'The conversation lost relevance or demanded too much too early, so the buyer stopped engaging.',
+    artifact_accepted_but_not_converted: 'Interest stayed at the written-review layer because the seller did not convert it into a concrete live next step.',
+    artifact_then_call_not_landed: 'The buyer was open to written proof, but the jump from async review to scheduled call stayed too soft or vague.',
+    walkthrough_ready_but_not_booked: 'The buyer showed readiness for a bounded review, but the close never became specific enough to lock time.',
+    no_ask_made: 'The seller created some movement but never converted it into an explicit next-step ask.',
+    premature_ask: 'The ask arrived before enough context, trust, or proof had been earned.',
+    trust_deficit: 'Claims were not credible enough yet for the buyer to risk a next step.',
+    unresolved_concerns: 'A live objection stayed open, so progress stalled on unresolved risk.',
+    ask_not_landed: 'There was enough conversation to ask, but the ask was weakly timed, too broad, or insufficiently tied to buyer pain.',
+  };
+  if (summaries[key]) return summaries[key];
+  if (tone === 'win' && stage) return `This stage moved when the seller gave the buyer enough clarity and safety to progress beyond ${analyticsReasonLabel(stage).toLowerCase()}.`;
+  if (tone === 'lose' && stage) return `This stage stalled because the buyer did not get enough proof or control to move beyond ${analyticsReasonLabel(stage).toLowerCase()}.`;
+  return `${analyticsReasonLabel(key)} shaped the outcome in this slice.`;
+}
+
+function buildReasonListSentence(items = [], fallback = 'no clear dominant pattern yet') {
+  if (!items.length) return fallback;
+  return items.map((item) => item.summary || analyticsReasonLabel(item.reason || item.label || '')).join(' ');
 }
 
 function incrementCounter(map, key, amount = 1) {
@@ -2160,11 +2250,11 @@ function incrementCounter(map, key, amount = 1) {
   map[key] = (map[key] || 0) + amount;
 }
 
-function topReasons(map = {}, limit = 5) {
+function topReasons(map = {}, limit = 5, options = {}) {
   return Object.entries(map)
     .sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])))
     .slice(0, limit)
-    .map(([reason, count]) => ({ reason, label: analyticsReasonLabel(reason), count }));
+    .map(([reason, count]) => ({ reason, label: analyticsReasonLabel(reason), count, summary: analyticsReasonSummary(reason, options) }));
 }
 
 function analyticsStageReasonMaps() {
@@ -2499,14 +2589,19 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     const entered = sliceStageCounts[stage] || 0;
     const nextStage = funnelStages[index + 1] || null;
     const nextCount = nextStage ? (sliceStageCounts[nextStage] || 0) : null;
+    const winReasons = topReasons(filteredStageReasonMaps[stage]?.win || {}, 3, { tone: 'win', stage });
+    const loseReasons = topReasons(filteredStageReasonMaps[stage]?.lose || {}, 3, { tone: 'lose', stage });
     return {
       stage,
       entered,
       next_stage: nextStage,
       next_count: nextCount,
       conversion_to_next: nextStage && entered ? Number((nextCount / entered).toFixed(3)) : null,
-      win_reasons: topReasons(filteredStageReasonMaps[stage]?.win || {}, 3),
-      lose_reasons: topReasons(filteredStageReasonMaps[stage]?.lose || {}, 3),
+      win_reasons: winReasons,
+      lose_reasons: loseReasons,
+      summary: entered
+        ? `${analyticsReasonLabel(stage)}${nextStage ? ` moved ${(nextCount / entered * 100).toFixed(1)}% of entered runs forward` : ' marks completed wins'}. ${winReasons[0]?.summary || 'No dominant forward driver yet.'} ${loseReasons[0]?.summary || 'No dominant blocker yet.'}`
+        : `${analyticsReasonLabel(stage)} has no runs in this slice yet.`,
     };
   });
 
@@ -2517,20 +2612,22 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     acc[key] = (acc[key] || 0) + 1;
     return acc;
   }, {});
+  const topWinReasons = topReasons(winReasonCounts, 5, { tone: 'win' });
+  const topLoseReasons = topReasons(filteredFailureBreakdown, 5, { tone: 'lose' });
 
   const analyticalBrief = {
     overall: filteredFinished.length
-      ? `Slice first-reply rate is ${(filteredFirstBuyerReplyRate * 100).toFixed(1)}% and win rate is ${(filteredMeetingRate * 100).toFixed(1)}% across ${filteredFinished.length} finished runs. Main wins come from ${topReasons(winReasonCounts, 3).map((item) => item.label).join(', ') || 'meeting-booked states'}, while main losses come from ${topReasons(filteredFailureBreakdown, 3).map((item) => item.label).join(', ') || 'no dominant failure reason yet'}.`
+      ? `Across ${filteredFinished.length} finished runs, first reply rate is ${(filteredFirstBuyerReplyRate * 100).toFixed(1)}% and meeting-booked rate is ${(filteredMeetingRate * 100).toFixed(1)}%. Wins concentrate where the conversation creates enough specificity for a bounded next step: ${buildReasonListSentence(topWinReasons.slice(0, 2))} Main drop-off comes from execution gaps rather than silence alone: ${buildReasonListSentence(topLoseReasons.slice(0, 2))}`
       : 'No finished runs match the current slice yet.',
-    average_win_reasons: topReasons(winReasonCounts, 5),
-    average_lose_reasons: topReasons(filteredFailureBreakdown, 5),
+    average_win_reasons: topWinReasons,
+    average_lose_reasons: topLoseReasons,
     first_buyer_reply_rate: filteredFirstBuyerReplyRate,
     stage_summaries: funnel.map((stage) => ({
       stage: stage.stage,
       entered: stage.entered,
       conversion_to_next: stage.conversion_to_next,
       summary: stage.entered
-        ? `${analyticsReasonLabel(stage.stage)} entered ${stage.entered} runs${stage.conversion_to_next !== null ? ` and converted ${(stage.conversion_to_next * 100).toFixed(1)}% to the next stage` : ''}.`
+        ? `${analyticsReasonLabel(stage.stage)} captured ${stage.entered} runs${stage.conversion_to_next !== null ? ` and moved ${(stage.conversion_to_next * 100).toFixed(1)}% forward` : ''}. ${stage.win_reasons[0]?.summary || 'No dominant forward driver yet.'} ${stage.lose_reasons[0]?.summary || 'No dominant blocker yet.'}`
         : `${analyticsReasonLabel(stage.stage)} has no runs in this slice yet.`,
       win_reasons: stage.win_reasons,
       lose_reasons: stage.lose_reasons,
@@ -3609,10 +3706,60 @@ function buildStageBoundSuggestion(session, lang = 'ru') {
   const sellerTurnCount = sellerMessages(session).length;
   const latestBuyer = latestBuyerReplyText(session).toLowerCase();
   const legalPersona = ['internal_legal', 'external_legal', 'olga'].includes(persona?.id);
+  const asksScopeBoundary = /where.*scope|scope.*end|границ[аы].*ответствен|зона контроля|what exactly mellow control|what exactly does mellow control|what sits within mellow|где у mellow заканчивается|что именно mellow контролирует|что именно mellow берет|what is in your scope|what's in your scope|первый вопрос.*где у mellow|first question.*where does mellow|where does mellow end|where mellow ends|где заканчивается зона контроля|где заканчивается ваша зона|boundary/.test(latestBuyer);
+  const asksOpsOwner = /owner|кто owner|manual coordination|ручн.*координац|что именно меняется в процессе|what exactly changes|incident|когда что-то ломается|what comes out of manual coordination|mechanic|механик/.test(latestBuyer);
+
+  const asksForArtifactNow = /пришлите|присылайте|жду письмо|жду материалы|workflow note|boundary note|one-screen|одним экраном|коротк.*записк|коротк.*note|send.*note|send.*memo|send it|waiting for your email|waiting for the materials|когда скинете|when will you send|когда отправите|посмотрю|review call|короткий review call/.test(latestBuyer);
+
+  if (isEmailMode(session) && sellerTurnCount === 1 && legalPersona) {
+    if (lang === 'en') {
+      return `Concretely, Mellow takes KYC, contractor documents, the payout chain, and the audit trail on that chain. What stays on your side is legal judgment, policy, and any misclassification decision. If useful, I can send this as a one-screen boundary note for review.`;
+    }
+    return `Конкретно: Mellow берёт на себя KYC, contractor documents, payout chain и audit trail по этой цепочке. На вашей стороне остаются legal judgment, policy и любые misclassification decisions. Если полезно, я могу прислать это одним экраном как boundary note для review.`;
+  }
+
+  if (isEmailMode(session) && sellerTurnCount >= 2 && asksForArtifactNow) {
+    if (legalPersona) {
+      return lang === 'en'
+        ? `One-screen version: Mellow owns KYC, contractor documents, the payout chain, and the audit trail on that chain, while your side keeps legal judgment, policy, and any misclassification decision. If that boundary reads clean, we can use a short 15-minute review only for open points.`
+        : `Версия в одном экране: Mellow ведёт KYC, contractor documents, payout chain и audit trail по этой цепочке, а на вашей стороне остаются legal judgment, policy и любые misclassification decisions. Если такая граница выглядит чисто, дальше можно взять короткий 15-минутный review только по open points.`;
+    }
+    if ((persona?.archetype || '') === 'ops') {
+      return lang === 'en'
+        ? `Short workflow note: status chasing and incident bouncing come out, one Mellow owner takes payout operations and incident path, and your team keeps approval and prioritization. If that looks grounded, we can use a short 15-minute workflow review on your case.`
+        : `Короткая workflow note: из процесса уходят chase за статусами и плавающий owner при сбое, один owner со стороны Mellow ведёт payout operations и incident path, а у вашей команды остаются approval и приоритизация. Если это выглядит приземлённо, дальше можно взять короткий 15-минутный workflow review на вашем кейсе.`;
+    }
+    if (['cm_winback', 'direct_contract_transition', 'grey_pain_switcher', 'panic_churn_ops'].includes(persona?.id)) {
+      return lang === 'en'
+        ? `Here is the narrow written version. The fit is not a broad restart, but one bounded slice: a smaller contractor contour, clearer owner model, and a safer path for exceptions than before. If that logic looks clean, the next step can be a short 15-minute review only on that slice.`
+        : `Вот узкая письменная версия. Fit здесь не в широком перезапуске, а в одном bounded slice: меньший contractor contour, более ясная owner-модель и более безопасный путь для исключений, чем раньше. Если эта логика выглядит чисто, следующим шагом может быть короткий 15-минутный review только по этому slice.`;
+    }
+    return lang === 'en'
+      ? `Here is the short written version. Mellow covers the control boundary, the document path, and the payment chain mechanics in one accountable contour, while your side keeps approval and policy decisions. If that reads clean, the next step can be a short 15-minute review on open points only.`
+      : `Вот короткая письменная версия. Mellow собирает в один accountable contour границу контроля, документный путь и механику payment chain, а на вашей стороне остаются approval и policy decisions. Если это выглядит чисто, следующим шагом может быть короткий 15-минутный review только по open points.`;
+  }
+
+  if (isEmailMode(session) && sellerTurnCount >= 1 && asksScopeBoundary) {
+    if (lang === 'en') {
+      return legalPersona
+        ? `Concretely, Mellow takes KYC, contractor documents, the payout chain, and the audit trail on that chain. What stays on your side is legal judgment, policy, and any misclassification decision. If useful, I can send this as a one-screen boundary note for review.`
+        : `Concretely, Mellow owns KYC, contractor documents, the payout chain itself, incident handling on that chain, and the audit trail around it. What stays on your side is approval, budget, and internal legal or policy decisions. If useful, I can send this as a one-screen boundary note for your review.`;
+    }
+    return legalPersona
+      ? `Конкретно: Mellow берёт на себя KYC, contractor documents, payout chain и audit trail по этой цепочке. На вашей стороне остаются legal judgment, policy и любые misclassification decisions. Если полезно, я могу прислать это одним экраном как boundary note для review.`
+      : `Конкретно: Mellow ведёт KYC, contractor documents, саму payout chain, incident handling на этой цепочке и audit trail вокруг неё. На вашей стороне остаются approval, budget и внутренние legal / policy decisions. Если полезно, я могу прислать это одним экраном как boundary note для review.`;
+  }
+
+  if (isEmailMode(session) && sellerTurnCount >= 1 && asksOpsOwner) {
+    if (lang === 'en') {
+      return `What comes out of manual coordination is status chasing, fragmented handoffs, and incident ownership floating between teams. With Mellow, one owner sits on payout operations, contractor communication, and the incident path when something breaks. If useful, I can send a short workflow map for your exact case.`;
+    }
+    return `Из ручной координации уходит chase за статусами, кусочная передача между командами и плавающий owner при сбое. С Mellow один owner сидит на payout operations, contractor communication и incident path, если что-то ломается. Если полезно, я могу прислать короткую workflow map именно под ваш кейс.`;
+  }
 
   if (legalPersona && ['artifact_only', 'artifact_then_call', 'narrow_walkthrough'].includes(policy.acceptanceState)) {
-    const asksForSendTiming = /when will you send|when can you send|когда пришл[её]те|когда отправите|waiting for the materials|waiting for your email|жду материалы|жду письмо/.test(latestBuyer);
-    const conditionallyOpenToReview = /if it'?s clean|if the logic holds|if it works|найд[её]м 15 минут|можно созвониться|if.*review call|если.*созвон|если.*review call/.test(latestBuyer);
+    const asksForSendTiming = /when will you send|when can you send|когда пришл[её]те|когда отправите|waiting for the materials|waiting for your email|жду материалы|жду письмо|присылайте|посмотрю/.test(latestBuyer);
+    const conditionallyOpenToReview = /if it'?s clean|if the logic holds|if it works|найд[её]м 15 минут|можно созвониться|if.*review call|если.*созвон|если.*review call|найд[её]м время/.test(latestBuyer);
     if (asksForSendTiming || conditionallyOpenToReview) {
       if (lang === 'en') {
         return `I'll send the one-page memo today with scope boundary, documents, safeguards, and one incident-path example. If it reads clean on your side, let's tentatively hold 15 minutes tomorrow just for open points, and you can confirm or move it after review. Would 11:30 or 15:00 work better?`;
@@ -6273,6 +6420,39 @@ function evaluateBuyerStateDelta(session, sellerText) {
   };
 }
 
+function emailFirstReplyFallback(session) {
+  const lang = session.language === 'ru' ? 'ru' : 'en';
+  const persona = personaMeta(session) || {};
+  if ((persona.archetype || '') === 'legal') {
+    return lang === 'ru'
+      ? pick([
+          'Если идти дальше, мне сразу нужна ясность по границе ответственности. Что именно в зоне Mellow, а что остаётся на нашей стороне?',
+          'Пока вижу потенциальную релевантность. Но первый вопрос простой: где у Mellow заканчивается зона контроля?',
+        ])
+      : pick([
+          'If we continue, I need scope clarity first. What exactly sits within Mellow, and what stays on our side?',
+        ]);
+  }
+  if ((persona.archetype || '') === 'ops') {
+    return lang === 'ru'
+      ? pick([
+          'Если это правда релевантно, скажите конкретно: что именно уходит из ручной координации и кто owner, когда что-то ломается?',
+          'Потенциально в тему. Но мне нужна механика, не общие слова: что именно меняется в процессе?',
+        ])
+      : pick([
+          'Potentially relevant, but I need the mechanism, not the pitch. What exactly comes out of manual coordination and who owns incidents?',
+        ]);
+  }
+  return lang === 'ru'
+    ? pick([
+        'Потенциально это в тему. Но чтобы продолжать, мне нужна чёткая граница: что именно Mellow контролирует, а что нет?',
+        'Вижу, почему вы написали. Теперь без общих слов: где зона контроля Mellow и как это выглядит на практике?',
+      ])
+    : pick([
+        'Potentially relevant. To continue, I need the control boundary clearly: what exactly does Mellow own, and what does it not?',
+      ]);
+}
+
 function stateDrivenReplyOverride(session, sellerText) {
   const buyerState = normalizeBuyerState(session?.buyer_state || buildInitialBuyerState(session), session);
   const lang = session.language === 'ru' ? 'ru' : 'en';
@@ -6336,6 +6516,28 @@ function stateDrivenReplyOverride(session, sellerText) {
   }
 
   if ((buyerState.conversation_capacity <= 0 || buyerState.disengagement_risk >= 0.9) && !session.meta._memo_requested) {
+    if (isEmailMode(session) && (session.meta?.bot_turns || 0) === 0) {
+      return emailFirstReplyFallback(session);
+    }
+    if (isEmailMode(session) && (session.meta?.bot_turns || 0) === 1) {
+      const persona = personaMeta(session) || {};
+      if ((persona.archetype || '') === 'legal') {
+        session.meta._memo_requested = true;
+        return lang === 'ru'
+          ? 'Ок, пришлите это одним экраном письменно: граница ответственности, документы и incident path. Если формулировки чистые, дальше уже можно решать, нужен ли короткий review call.'
+          : 'Ok, send that in one screen: responsibility boundary, documents, and incident path. If the wording is clean, we can decide whether a short review call is worth it.';
+      }
+      if ((persona.archetype || '') === 'ops') {
+        session.meta._memo_requested = true;
+        return lang === 'ru'
+          ? 'Ок, тогда пришлите короткую workflow note: что уходит из ручной координации, кто owner при сбое и что команда видит заранее. Если это выглядит приземлённо, продолжим.'
+          : 'Ok, then send a short workflow note: what comes out of manual coordination, who owns incidents, and what the team sees in advance. If that looks grounded, we can continue.';
+      }
+      session.meta._memo_requested = true;
+      return lang === 'ru'
+        ? 'Ок, тогда пришлите это коротко письменно: зона контроля, документы, payment chain и что остаётся на нашей стороне. Если логика выглядит чисто, продолжим уже по review path.'
+        : 'Ok, then send this briefly in writing: control boundary, documents, payment chain, and what stays on our side. If the logic looks clean, we can continue on a review path.';
+    }
     return null;
   }
 
@@ -8997,6 +9199,15 @@ async function generateSellerSuggestion(session, lang = null, snapshot = null, s
   const effectiveLang = lang === 'en' || lang === 'ru'
     ? lang
     : (session.language === 'en' ? 'en' : 'ru');
+  const sellerTurnCountEarly = session.transcript.filter((m) => m.role === 'seller').length;
+  const earlyPolicy = getHintPolicyContext(session);
+
+  if (isEmailMode(session) && sellerTurnCountEarly > 0) {
+    const emailStageBound = buildStageBoundSuggestion(session, effectiveLang === 'en' ? 'en' : 'ru');
+    if (typeof emailStageBound === 'string' && emailStageBound.trim()) {
+      return adaptTextToDialogue(emailStageBound, session, 'seller');
+    }
+  }
 
   // Step 6+7: LLM hint generation with exploration policy
   const llmHint = await generateLlmHint(session, effectiveLang, snapshot, strategy, uiStrategy);
@@ -9019,8 +9230,8 @@ async function generateSellerSuggestion(session, lang = null, snapshot = null, s
     return adaptTextToDialogue(resolved, session, 'seller');
   }
 
-  const sellerTurnCount = session.transcript.filter((m) => m.role === 'seller').length;
-  const policy = getHintPolicyContext(session);
+  const sellerTurnCount = sellerTurnCountEarly;
+  const policy = earlyPolicy;
   const botTurnCount = session.meta.bot_turns || 0;
   const persona = personaMeta(session);
   const concern = getActiveConcern(session);

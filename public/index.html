@@ -278,7 +278,6 @@
             <div class="run-header-copy">
               <p class="phase-label">Conversation cockpit</p>
               <h1>Run the conversation</h1>
-              <p class="lead">One active scenario, one clear next move, one central conversation surface.</p>
             </div>
             <div class="run-meta">
               <div class="run-meta-top">
@@ -286,9 +285,6 @@
                 <span id="channelBadge" class="channel-badge channel-badge--messenger">Messenger</span>
               </div>
               <span class="muted run-focus" id="runFocus"></span>
-            </div>
-            <div class="detail-actions">
-              <button id="backToSetupBtn" class="ghost-btn" type="button">Change scenario</button>
             </div>
           </header>
 
@@ -324,18 +320,12 @@
             <section class="cockpit-main">
               <section class="conversation-stage-card conversation-stage-card--messaging">
                 <div class="run-insight-head conversation-stage-head">
-                  <div>
-                    <p class="phase-label">Live conversation</p>
-                    <p class="muted conversation-stage-subtitle">This is the primary work surface. Run the deal through the message exchange itself.</p>
-                  </div>
+                  <p class="phase-label">Live conversation</p>
                 </div>
 
                 <div class="conversation-thread-shell">
                   <div class="conversation-thread-head">
-                    <div>
-                      <strong class="conversation-thread-title">Message exchange</strong>
-                      <p class="muted conversation-thread-meta">Keep it natural, specific, and useful.</p>
-                    </div>
+                    <strong class="conversation-thread-title">Message exchange</strong>
                   </div>
 
                   <div id="transcript" class="transcript transcript--cockpit" aria-live="polite"></div>
@@ -408,14 +398,6 @@
                       <p class="phase-label">Buyer brief</p>
                     </div>
                     <div id="buyerBriefPanel"></div>
-                  </section>
-
-                  <section class="run-insight-card run-insight-card--compact" id="runSignalCard">
-                    <div class="run-insight-head">
-                      <p class="phase-label">Why this conversation exists</p>
-                      <span id="runSignalBadge" class="channel-badge channel-badge--messenger">Selected by session</span>
-                    </div>
-                    <div id="runSignalPanel"></div>
                   </section>
 
                   <section class="run-insight-card run-insight-card--compact">

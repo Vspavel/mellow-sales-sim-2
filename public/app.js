@@ -613,20 +613,24 @@ function renderStageReasons(funnel = []) {
     analyticsStageReasons.innerHTML = '<p class="muted">No stage-transition data for this slice yet.</p>';
     return;
   }
+  const renderReasonItems = (items = [], emptyText) => items.length
+    ? `<ul class="stage-reason-list">${items.map((item) => `<li><strong>${escapeHtml(item.label)}</strong>${item.count ? ` <span class="muted">· ${escapeHtml(String(item.count))}</span>` : ''}${item.summary ? `<p class="muted">${escapeHtml(item.summary)}</p>` : ''}</li>`).join('')}</ul>`
+    : `<p class="muted">${emptyText}</p>`;
   analyticsStageReasons.innerHTML = `<div class="stage-reason-stack">${funnel.map((stage) => `
     <article class="stage-reason-card">
       <div class="stage-reason-head">
         <strong>${escapeHtml(String(stage.stage || '').replace(/_/g, ' '))}</strong>
         <span class="muted">${stage.conversion_to_next === null || stage.conversion_to_next === undefined ? 'Final stage' : `To next: ${formatPercent(stage.conversion_to_next)}`}</span>
       </div>
+      ${stage.summary ? `<p class="stage-reason-summary">${escapeHtml(stage.summary)}</p>` : ''}
       <div class="stage-reason-grid">
         <div>
           <p class="phase-label">What moved it forward</p>
-          ${(stage.win_reasons || []).length ? `<ul class="stage-reason-list">${stage.win_reasons.map((item) => `<li><strong>${escapeHtml(item.label)}</strong>${item.count ? ` <span class="muted">· ${escapeHtml(String(item.count))}</span>` : ''}</li>`).join('')}</ul>` : '<p class="muted">No clear win reasons captured.</p>'}
+          ${renderReasonItems(stage.win_reasons || [], 'No clear forward driver captured yet.')}
         </div>
         <div>
           <p class="phase-label">What blocked progress</p>
-          ${(stage.lose_reasons || []).length ? `<ul class="stage-reason-list">${stage.lose_reasons.map((item) => `<li><strong>${escapeHtml(item.label)}</strong>${item.count ? ` <span class="muted">· ${escapeHtml(String(item.count))}</span>` : ''}</li>`).join('')}</ul>` : '<p class="muted">No clear loss reasons captured.</p>'}
+          ${renderReasonItems(stage.lose_reasons || [], 'No clear blocker captured yet.')}
         </div>
       </div>
     </article>
@@ -963,8 +967,6 @@ function renderBuyerStateLivePanel() {
       : 'Baseline before first seller turn';
   }
 
-  const hasSellerTurns = sellerMessages().length > 0;
-
   buyerStateLivePanel.innerHTML = `
     <div class="buyer-state-summary buyer-state-summary--live">
       <p class="readiness-summary">${escapeHtml(readinessLabel)}</p>
@@ -987,7 +989,7 @@ function renderBuyerStateLivePanel() {
           `;
         }).join('')}
       </div>
-      <details class="buyer-state-breakdown"${hasSellerTurns ? '' : ' open'}>
+      <details class="buyer-state-breakdown">
         <summary>State breakdown</summary>
         <div class="buyer-state-grid">
           ${LIVE_BUYER_STATE_DIMENSIONS.map(([key, label]) => {
@@ -1106,6 +1108,19 @@ function signalTypeOptionLabel(id = '') {
     || 'General';
 }
 
+function signalSystemMessage() {
+  const card = state.session?.sde_card;
+  if (!card) return null;
+  const signalLabel = signalTypeOptionLabel(card.signal_type || state.selectedSignalType || 'general');
+  const core = card.rendered_text || card.what_happened || '';
+  const pain = card.probable_pain ? `Pressure point: ${card.probable_pain}.` : '';
+  const hint = (!sellerMessages().length && card.first_touch_hint) ? `First angle: ${card.first_touch_hint}.` : '';
+  return {
+    role: 'system',
+    text: [`Signal: ${signalLabel}.`, core, pain, hint].filter(Boolean).join(' '),
+  };
+}
+
 function filteredSignalTypes() {
   const doctrineSignals = doctrineEntries('signal_types').filter((signal) => {
     if (signal.side && signal.side !== state.selectedSide) return false;
@@ -1143,10 +1158,6 @@ function filteredGroups() {
       if ((persona.group_id || persona.doctrine_family || 'custom') !== group.id) return false;
       if (Array.isArray(persona.dialogue_types) && persona.dialogue_types.length && !persona.dialogue_types.includes(state.selectedScenarioDialogueType)) return false;
       if (Array.isArray(persona.environments) && persona.environments.length && !persona.environments.includes(state.dialogueType)) return false;
-      if (state.selectedSignalType && state.selectedSignalType !== 'general') {
-        const available = Array.isArray(persona.available_signal_types) ? persona.available_signal_types.map(normalizeSignalTypeId) : [];
-        if (available.length && !available.includes(normalizeSignalTypeId(state.selectedSignalType))) return false;
-      }
       return true;
     });
 
@@ -1158,10 +1169,6 @@ function filteredPersonas() {
   return state.personas.filter((persona) => {
     if (persona.market_side !== state.selectedSide) return false;
     if (persona.product !== state.selectedProduct) return false;
-    if (state.selectedSignalType && state.selectedSignalType !== 'general') {
-      const available = Array.isArray(persona.available_signal_types) ? persona.available_signal_types.map(normalizeSignalTypeId) : [];
-      if (available.length && !available.includes(normalizeSignalTypeId(state.selectedSignalType))) return false;
-    }
     if (Array.isArray(persona.dialogue_types) && persona.dialogue_types.length && !persona.dialogue_types.includes(state.selectedScenarioDialogueType)) return false;
     if (Array.isArray(persona.environments) && persona.environments.length && !persona.environments.includes(state.dialogueType)) return false;
     if (state.selectedGroupId && persona.group_id !== state.selectedGroupId) return false;
@@ -1539,6 +1546,8 @@ function updateRunState() {
 
 function renderTranscript() {
   transcript.innerHTML = '';
+  const leadSystemMessage = signalSystemMessage();
+  if (leadSystemMessage) transcript.appendChild(bubble(leadSystemMessage));
   (state.session?.transcript || []).forEach((m) => transcript.appendChild(bubble(m)));
   transcript.scrollTop = transcript.scrollHeight;
   updateRunState();
