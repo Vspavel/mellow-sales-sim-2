@@ -7,6 +7,16 @@ const state = {
   selectedSignalType: 'general',
   selectedScenarioDialogueType: 'outbound',
   selectedGroupId: '',
+  workspaceFilters: {
+    side: 'demand',
+    product: 'cor',
+    salesType: 'outbound',
+    instrument: 'messenger',
+    personaMode: 'general',
+    groupId: '',
+    personaId: '',
+    signalType: 'general',
+  },
   settingsMode: 'doctrine',
   settingsLayer: 'sides',
   settingsRecordId: '',
@@ -85,8 +95,11 @@ const analyticsProductFilter = document.getElementById('analyticsProductFilter')
 const analyticsSignalTypeFilter = document.getElementById('analyticsSignalTypeFilter');
 const analyticsSalesTypeFilter = document.getElementById('analyticsSalesTypeFilter');
 const analyticsInstrumentFilter = document.getElementById('analyticsInstrumentFilter');
+const analyticsPersonaModeFilter = document.getElementById('analyticsPersonaModeFilter');
 const analyticsGroupFilter = document.getElementById('analyticsGroupFilter');
+const analyticsPersonaFilter = document.getElementById('analyticsPersonaFilter');
 const analyticsAggregateBy = document.getElementById('analyticsAggregateBy');
+const analyticsExactSliceNote = document.getElementById('analyticsExactSliceNote');
 const filterPersona = document.getElementById('filterPersona');
 const filterOutcome = document.getElementById('filterOutcome');
 const filterVerdict = document.getElementById('filterVerdict');
@@ -194,6 +207,20 @@ const doctrineSuccessCriteriaInput = document.getElementById('doctrineSuccessCri
 const doctrineAllowedMovesInput = document.getElementById('doctrineAllowedMoves');
 const doctrineForbiddenMovesInput = document.getElementById('doctrineForbiddenMoves');
 const doctrineToneRulesInput = document.getElementById('doctrineToneRules');
+const sliceWorkbench = document.getElementById('sliceWorkbench');
+const legacyDoctrineSettings = document.getElementById('legacyDoctrineSettings');
+const sliceWorkbenchTitle = document.getElementById('sliceWorkbenchTitle');
+const saveSliceWorkbenchBtn = document.getElementById('saveSliceWorkbenchBtn');
+const sliceWorkbenchMeta = document.getElementById('sliceWorkbenchMeta');
+const sliceWorkbenchEditor = document.getElementById('sliceWorkbenchEditor');
+const workbenchSideFilter = document.getElementById('workbenchSideFilter');
+const workbenchProductFilter = document.getElementById('workbenchProductFilter');
+const workbenchSalesTypeFilter = document.getElementById('workbenchSalesTypeFilter');
+const workbenchInstrumentFilter = document.getElementById('workbenchInstrumentFilter');
+const workbenchPersonaModeFilter = document.getElementById('workbenchPersonaModeFilter');
+const workbenchGroupFilter = document.getElementById('workbenchGroupFilter');
+const workbenchPersonaFilter = document.getElementById('workbenchPersonaFilter');
+const workbenchSignalTypeFilter = document.getElementById('workbenchSignalTypeFilter');
 
 const navPhaseButtons = [
   [navRunBtn, 'run'],
@@ -638,26 +665,25 @@ function renderStageReasons(funnel = []) {
 }
 
 function applyAnalyticsFilters() {
-  const sideVal = analyticsSideFilter?.value || '';
-  const productVal = analyticsProductFilter?.value || '';
-  const signalTypeVal = analyticsSignalTypeFilter?.value || '';
-  const salesTypeVal = analyticsSalesTypeFilter?.value || '';
-  const instrumentVal = analyticsInstrumentFilter?.value || '';
-  const groupVal = analyticsGroupFilter?.value || '';
+  const personaModeVal = analyticsPersonaModeFilter?.value || 'general';
+  const nextFilters = syncWorkspaceFilterState({
+    side: analyticsSideFilter?.value || '',
+    product: analyticsProductFilter?.value || '',
+    salesType: analyticsSalesTypeFilter?.value || '',
+    instrument: analyticsInstrumentFilter?.value || '',
+    personaMode: personaModeVal,
+    groupId: analyticsGroupFilter?.value || '',
+    personaId: analyticsPersonaFilter?.value || '',
+    signalType: analyticsSignalTypeFilter?.value || 'general',
+  });
   const aggregateByVal = analyticsAggregateBy?.value || 'average';
   const personaVal = filterPersona?.value || '';
   const outcomeVal = filterOutcome?.value || '';
   const verdictVal = filterVerdict?.value || '';
 
   loadAnalytics({
-    side: sideVal || undefined,
-    product: productVal || undefined,
-    signalType: signalTypeVal || undefined,
-    salesType: salesTypeVal || undefined,
-    instrument: instrumentVal || undefined,
-    groupId: groupVal || undefined,
+    ...nextFilters,
     aggregateBy: aggregateByVal || undefined,
-    personaId: personaVal || undefined,
     outcome: outcomeVal || undefined,
     verdict: verdictVal || undefined,
   }).catch((err) => {
@@ -683,6 +709,7 @@ async function loadAnalytics(options = {}) {
   if (options.signalType) params.set('signalType', options.signalType);
   if (options.salesType) params.set('salesType', options.salesType);
   if (options.instrument) params.set('instrument', options.instrument);
+  if (options.personaMode) params.set('personaMode', options.personaMode);
   if (options.groupId) params.set('groupId', options.groupId);
   if (options.aggregateBy) params.set('aggregateBy', options.aggregateBy);
   if (options.personaId) params.set('personaId', options.personaId);
@@ -704,14 +731,18 @@ async function loadAnalytics(options = {}) {
     el.innerHTML = `<option value="">${placeholder}</option>` + items.map((item) => `<option value="${escapeHtml(item.id)}"${item.id === current ? ' selected' : ''}>${escapeHtml(item.label || item.id)}</option>`).join('');
   };
 
-  renderFilterSelect(analyticsSideFilter, doctrineEntries('sides'), options.side || '', 'All sides');
-  const sideForProducts = options.side || '';
-  renderFilterSelect(analyticsProductFilter, doctrineEntries('products').filter((item) => !sideForProducts || item.side === sideForProducts), options.product || '', 'All products');
-  const productForSignals = options.product || '';
-  renderFilterSelect(analyticsSignalTypeFilter, doctrineEntries('signal_types').filter((item) => (!sideForProducts || item.side === sideForProducts) && (!productForSignals || item.product === productForSignals)), options.signalType || '', 'All signal types');
-  renderFilterSelect(analyticsSalesTypeFilter, doctrineEntries('dialogue_types'), options.salesType || '', 'All sales types');
-  renderFilterSelect(analyticsInstrumentFilter, doctrineEntries('environments'), options.instrument || '', 'All instruments');
-  renderFilterSelect(analyticsGroupFilter, doctrineEntries('groups').filter((item) => (!sideForProducts || item.side === sideForProducts) && (!productForSignals || item.product === productForSignals)), options.groupId || '', 'All groups');
+  syncWorkspaceFilterState({
+    side: options.side || state.workspaceFilters.side,
+    product: options.product || state.workspaceFilters.product,
+    salesType: options.salesType || state.workspaceFilters.salesType,
+    instrument: options.instrument || state.workspaceFilters.instrument,
+    personaMode: options.personaMode || state.workspaceFilters.personaMode,
+    groupId: options.groupId || state.workspaceFilters.groupId,
+    personaId: options.personaId || state.workspaceFilters.personaId,
+    signalType: options.signalType || state.workspaceFilters.signalType,
+  });
+  renderWorkspaceFilterControls('analytics');
+  if (analyticsPersonaModeFilter) analyticsPersonaModeFilter.value = state.workspaceFilters.personaMode;
   if (analyticsAggregateBy) analyticsAggregateBy.value = options.aggregateBy || 'average';
 
   // Populate persona filter
@@ -782,8 +813,9 @@ async function loadAnalytics(options = {}) {
   renderStageReasons(funnel);
 
   const brief = data.slice?.analytical_brief;
-  renderReasonList(analyticsWinReasons, brief?.average_win_reasons || [], 'No aggregated win reasons for this slice yet.', { tone: 'win' });
-  renderReasonList(analyticsLoseReasons, brief?.average_lose_reasons || [], 'No aggregated loss reasons for this slice yet.', { tone: 'lose' });
+  if (analyticsExactSliceNote) {
+    analyticsExactSliceNote.innerHTML = `<p class="analytics-brief-text">${escapeHtml(brief?.exact_slice_note || 'No exact-slice note yet.')}</p>`;
+  }
 
   if (analyticsBrief) {
     analyticsBrief.innerHTML = brief ? `
@@ -1206,6 +1238,194 @@ function renderSelectOptions(selectEl, items, valueKey = 'id', labelKey = 'label
     opt.textContent = item[labelKey] || item[valueKey];
     selectEl.appendChild(opt);
   });
+}
+
+function canonicalWorkspaceFilters(overrides = {}) {
+  const next = { ...state.workspaceFilters, ...overrides };
+  return {
+    side: next.side || 'demand',
+    product: next.product || 'cor',
+    salesType: next.salesType || 'outbound',
+    instrument: next.instrument || 'messenger',
+    personaMode: ['general', 'group', 'persona'].includes(next.personaMode) ? next.personaMode : 'general',
+    groupId: next.personaMode === 'group' ? (next.groupId || '') : '',
+    personaId: next.personaMode === 'persona' ? (next.personaId || '') : '',
+    signalType: next.signalType || 'general',
+  };
+}
+
+function personaOptionsForWorkspace(filters = state.workspaceFilters) {
+  const current = canonicalWorkspaceFilters(filters);
+  return state.personas.filter((persona) => {
+    if (persona.market_side !== current.side) return false;
+    if (persona.product !== current.product) return false;
+    if (Array.isArray(persona.dialogue_types) && persona.dialogue_types.length && !persona.dialogue_types.includes(current.salesType)) return false;
+    if (Array.isArray(persona.environments) && persona.environments.length && !persona.environments.includes(current.instrument)) return false;
+    return true;
+  });
+}
+
+function groupOptionsForWorkspace(filters = state.workspaceFilters) {
+  const current = canonicalWorkspaceFilters(filters);
+  const personaOptions = personaOptionsForWorkspace(current);
+  const groupIds = [...new Set(personaOptions.map((persona) => persona.group_id || 'custom'))];
+  return groupIds.map((id) => ({ id, label: state.doctrineConfig?.groups?.[id]?.label || id }));
+}
+
+function signalOptionsForWorkspace(filters = state.workspaceFilters) {
+  const current = canonicalWorkspaceFilters(filters);
+  const doctrineSignals = doctrineEntries('signal_types').filter((item) => {
+    if (item.side && item.side !== current.side) return false;
+    if (item.product && item.product !== current.product) return false;
+    return true;
+  }).map((item) => ({ id: item.id, label: item.label || item.id }));
+  const personaSignals = current.personaMode === 'persona'
+    ? [...new Set(state.personas.find((persona) => persona.id === current.personaId)?.available_signal_types || [])].map((id) => ({ id, label: signalTypeOptionLabel(id) }))
+    : [];
+  const merged = [{ id: 'general', label: 'General' }];
+  [...doctrineSignals, ...personaSignals].forEach((item) => {
+    if (!merged.some((existing) => existing.id === item.id)) merged.push(item);
+  });
+  return merged;
+}
+
+function syncWorkspaceFilterState(overrides = {}) {
+  const next = canonicalWorkspaceFilters(overrides);
+  const products = doctrineEntries('products').filter((item) => item.side === next.side);
+  if (!products.some((item) => item.id === next.product)) next.product = products[0]?.id || 'cor';
+
+  const personas = personaOptionsForWorkspace(next);
+  const groups = groupOptionsForWorkspace(next);
+  if (next.personaMode === 'group' && !groups.some((item) => item.id === next.groupId)) next.groupId = groups[0]?.id || '';
+  if (next.personaMode === 'persona' && !personas.some((item) => item.id === next.personaId)) next.personaId = personas[0]?.id || '';
+
+  const signals = signalOptionsForWorkspace(next);
+  if (!signals.some((item) => item.id === next.signalType)) next.signalType = 'general';
+  state.workspaceFilters = next;
+  return next;
+}
+
+function renderWorkspaceFilterControls(prefix = 'analytics') {
+  const filters = syncWorkspaceFilterState();
+  const map = prefix === 'workbench'
+    ? {
+        side: workbenchSideFilter,
+        product: workbenchProductFilter,
+        salesType: workbenchSalesTypeFilter,
+        instrument: workbenchInstrumentFilter,
+        personaMode: workbenchPersonaModeFilter,
+        group: workbenchGroupFilter,
+        persona: workbenchPersonaFilter,
+        signal: workbenchSignalTypeFilter,
+      }
+    : {
+        side: analyticsSideFilter,
+        product: analyticsProductFilter,
+        salesType: analyticsSalesTypeFilter,
+        instrument: analyticsInstrumentFilter,
+        personaMode: analyticsPersonaModeFilter,
+        group: analyticsGroupFilter,
+        persona: analyticsPersonaFilter,
+        signal: analyticsSignalTypeFilter,
+      };
+
+  renderSelectOptions(map.side, doctrineEntries('sides'), 'id', 'label');
+  map.side.value = filters.side;
+  renderSelectOptions(map.product, doctrineEntries('products').filter((item) => item.side === filters.side), 'id', 'label');
+  map.product.value = filters.product;
+  renderSelectOptions(map.salesType, doctrineEntries('dialogue_types'), 'id', 'label');
+  map.salesType.value = filters.salesType;
+  renderSelectOptions(map.instrument, doctrineEntries('environments'), 'id', 'label');
+  map.instrument.value = filters.instrument;
+  if (map.personaMode) map.personaMode.value = filters.personaMode;
+  renderSelectOptions(map.group, groupOptionsForWorkspace(filters), 'id', 'label', 'Persona group');
+  map.group.value = filters.groupId || '';
+  renderSelectOptions(map.persona, personaOptionsForWorkspace(filters).map((item) => ({ id: item.id, label: item.name })), 'id', 'label', 'Persona');
+  map.persona.value = filters.personaId || '';
+  renderSelectOptions(map.signal, signalOptionsForWorkspace(filters), 'id', 'label');
+  map.signal.value = filters.signalType;
+  if (map.group) map.group.classList.toggle('hidden', filters.personaMode !== 'group');
+  if (map.persona) map.persona.classList.toggle('hidden', filters.personaMode !== 'persona');
+}
+
+async function loadPlaybooks(filters = state.workspaceFilters) {
+  const current = syncWorkspaceFilterState(filters);
+  const params = new URLSearchParams({
+    side: current.side,
+    product: current.product,
+    salesType: current.salesType,
+    instrument: current.instrument,
+    personaMode: current.personaMode,
+    signalType: current.signalType,
+  });
+  if (current.groupId) params.set('groupId', current.groupId);
+  if (current.personaId) params.set('personaId', current.personaId);
+  return api(`api/playbooks?${params}`);
+}
+
+function workbenchScopeLabel(filters = state.workspaceFilters) {
+  if (filters.personaMode === 'persona') return state.personas.find((persona) => persona.id === filters.personaId)?.name || 'persona';
+  if (filters.personaMode === 'group') return state.doctrineConfig?.groups?.[filters.groupId]?.label || 'persona group';
+  return 'general slice';
+}
+
+function renderSliceWorkbenchEditor(payload) {
+  if (!sliceWorkbenchEditor) return;
+  const filters = syncWorkspaceFilterState(payload?.filters || state.workspaceFilters);
+  const title = state.settingsMode === 'signal' ? 'Signals slice' : 'Doctrine slice';
+  if (sliceWorkbenchTitle) sliceWorkbenchTitle.textContent = title;
+  if (sliceWorkbenchMeta) sliceWorkbenchMeta.textContent = `${filters.side} → ${filters.product} → ${filters.salesType} → ${filters.instrument} → ${workbenchScopeLabel(filters)} → ${filters.signalType}`;
+
+  if (state.settingsMode === 'signal') {
+    const entries = payload?.signals?.entries || [];
+    sliceWorkbenchEditor.innerHTML = `<div class="reason-list">${entries.map((entry, index) => `
+      <article class="reason-card">
+        <div class="reason-card-head"><strong>${escapeHtml(signalTypeOptionLabel(entry.signal_type || `signal_${index + 1}`))}</strong></div>
+        <label class="field-group"><span class="field-label">Conversation initiation</span><textarea class="text-input playbook-signal-input" data-signal-type="${escapeHtml(entry.signal_type)}" rows="5">${escapeHtml(entry.conversation_initiation || '')}</textarea></label>
+      </article>`).join('')}</div>`;
+    return;
+  }
+
+  const stages = payload?.doctrine?.stages || [];
+  sliceWorkbenchEditor.innerHTML = `<div class="stage-reason-stack">${stages.map((stage) => `
+    <article class="stage-reason-card">
+      <div class="stage-reason-head"><strong>${escapeHtml(acceptanceStageLabel(stage.stage) || stage.stage.replace(/_/g, ' '))}</strong></div>
+      <label class="field-group"><span class="field-label">Seller behavior doctrine</span><textarea class="text-input playbook-stage-behavior" data-stage="${escapeHtml(stage.stage)}" rows="4">${escapeHtml(stage.seller_behavior || '')}</textarea></label>
+      <label class="field-group"><span class="field-label">Tone of voice</span><textarea class="text-input playbook-stage-tone" data-stage="${escapeHtml(stage.stage)}" rows="3">${escapeHtml(stage.tone_of_voice || '')}</textarea></label>
+    </article>`).join('')}</div>`;
+}
+
+async function refreshSliceWorkbench() {
+  renderWorkspaceFilterControls('workbench');
+  const payload = await loadPlaybooks();
+  renderSliceWorkbenchEditor(payload);
+}
+
+async function saveSliceWorkbench() {
+  if (!saveSliceWorkbenchBtn) return;
+  saveSliceWorkbenchBtn.disabled = true;
+  try {
+    const filters = syncWorkspaceFilterState();
+    if (state.settingsMode === 'signal') {
+      const entries = [...sliceWorkbenchEditor.querySelectorAll('.playbook-signal-input')].map((node) => ({
+        signal_type: node.dataset.signalType,
+        conversation_initiation: node.value.trim(),
+      }));
+      await api('api/playbooks/signals', { method: 'PATCH', body: JSON.stringify({ filters, entries }) });
+    } else {
+      const stages = [...sliceWorkbenchEditor.querySelectorAll('.playbook-stage-behavior')].map((node) => ({
+        stage: node.dataset.stage,
+        seller_behavior: node.value.trim(),
+        tone_of_voice: sliceWorkbenchEditor.querySelector(`.playbook-stage-tone[data-stage="${CSS.escape(node.dataset.stage)}"]`)?.value?.trim() || '',
+      }));
+      await api('api/playbooks/doctrine', { method: 'PATCH', body: JSON.stringify({ filters, stages }) });
+    }
+    await refreshSliceWorkbench();
+  } catch (error) {
+    alert(`Failed to save slice guidance: ${error.message}`);
+  } finally {
+    saveSliceWorkbenchBtn.disabled = false;
+  }
 }
 
 function renderScenarioSelectors() {
@@ -1731,6 +1951,9 @@ function renderAssessment(fromHistory = false) {
 async function loadPersonas() {
   if (!state.doctrineConfig) await loadDoctrineConfig();
   state.personas = await api('api/personas');
+  syncWorkspaceFilterState();
+  renderWorkspaceFilterControls('analytics');
+  renderWorkspaceFilterControls('workbench');
   ensureScenarioSelection();
   renderScenarioSelectors();
   renderPersonaDropdown();
@@ -1897,9 +2120,20 @@ function setSettingsMode(mode) {
   settingsModeSignalBtn?.classList.toggle('is-active', state.settingsMode === 'signal');
   settingsModePersonaBtn?.classList.toggle('is-active', state.settingsMode === 'persona');
   settingsLayerField?.classList.toggle('settings-layer-hidden', !meta.showLayerSelect);
+  legacyDoctrineSettings?.classList.toggle('hidden', state.settingsMode !== 'persona');
+  sliceWorkbench?.classList.toggle('hidden', state.settingsMode === 'persona');
+  settingsRecordList?.classList.toggle('hidden', state.settingsMode !== 'persona');
+  settingsLayerField?.classList.toggle('hidden', state.settingsMode !== 'persona');
   if (meta.showLayerSelect && settingsLayerSelect) settingsLayerSelect.value = state.settingsLayer;
-  renderSettingsRecordList();
-  renderDoctrineEditor();
+  if (state.settingsMode === 'persona') {
+    renderSettingsRecordList();
+    renderDoctrineEditor();
+  } else {
+    renderWorkspaceFilterControls('workbench');
+    refreshSliceWorkbench().catch((error) => {
+      if (sliceWorkbenchMeta) sliceWorkbenchMeta.textContent = error.message || 'Failed to load slice workbench';
+    });
+  }
 }
 
 function currentDoctrineRecord() {
@@ -2154,7 +2388,24 @@ analyticsProductFilter?.addEventListener('change', applyAnalyticsFilters);
 analyticsSignalTypeFilter?.addEventListener('change', applyAnalyticsFilters);
 analyticsSalesTypeFilter?.addEventListener('change', applyAnalyticsFilters);
 analyticsInstrumentFilter?.addEventListener('change', applyAnalyticsFilters);
+analyticsPersonaModeFilter?.addEventListener('change', applyAnalyticsFilters);
 analyticsGroupFilter?.addEventListener('change', applyAnalyticsFilters);
+analyticsPersonaFilter?.addEventListener('change', applyAnalyticsFilters);
+saveSliceWorkbenchBtn?.addEventListener('click', saveSliceWorkbench);
+[workbenchSideFilter, workbenchProductFilter, workbenchSalesTypeFilter, workbenchInstrumentFilter, workbenchPersonaModeFilter, workbenchGroupFilter, workbenchPersonaFilter, workbenchSignalTypeFilter]
+  .forEach((node) => node?.addEventListener('change', async () => {
+    syncWorkspaceFilterState({
+      side: workbenchSideFilter?.value || state.workspaceFilters.side,
+      product: workbenchProductFilter?.value || state.workspaceFilters.product,
+      salesType: workbenchSalesTypeFilter?.value || state.workspaceFilters.salesType,
+      instrument: workbenchInstrumentFilter?.value || state.workspaceFilters.instrument,
+      personaMode: workbenchPersonaModeFilter?.value || state.workspaceFilters.personaMode,
+      groupId: workbenchGroupFilter?.value || '',
+      personaId: workbenchPersonaFilter?.value || '',
+      signalType: workbenchSignalTypeFilter?.value || 'general',
+    });
+    await refreshSliceWorkbench();
+  }));
 analyticsAggregateBy?.addEventListener('change', applyAnalyticsFilters);
 sortDialogues?.addEventListener('change', () => {
   // Sort within currently loaded items without re-fetching

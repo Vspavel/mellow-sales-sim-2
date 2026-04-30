@@ -1165,6 +1165,60 @@ function normalizeDoctrineEmailAdditions(value, fallback = {}) {
   };
 }
 
+const PLAYBOOK_STAGE_ORDER = ['mechanics_engaged', 'economics_engaged', 'written_step_requested', 'written_step_accepted', 'written_step_then_call', 'review_call_ready'];
+
+function normalizePlaybookStageEntry(entry, fallbackStage = 'mechanics_engaged') {
+  const stage = String(entry?.stage || fallbackStage).trim() || fallbackStage;
+  return {
+    stage,
+    seller_behavior: String(entry?.seller_behavior || '').trim(),
+    tone_of_voice: String(entry?.tone_of_voice || '').trim(),
+  };
+}
+
+function normalizePlaybookSignalEntry(entry, fallbackSignal = 'general') {
+  const signalType = normalizeSignalTypeId(entry?.signal_type || fallbackSignal || 'general');
+  return {
+    signal_type: signalType,
+    conversation_initiation: String(entry?.conversation_initiation || '').trim(),
+  };
+}
+
+function normalizePlaybookRecord(record, kind = 'doctrine') {
+  const personaMode = ['general', 'group', 'persona'].includes(String(record?.persona_mode || '').trim())
+    ? String(record.persona_mode).trim()
+    : record?.persona_id ? 'persona' : record?.group_id ? 'group' : 'general';
+  return {
+    id: String(record?.id || '').trim() || crypto.randomUUID(),
+    side: String(record?.side || 'demand').trim() || 'demand',
+    product: String(record?.product || 'cor').trim() || 'cor',
+    sales_type: String(record?.sales_type || 'outbound').trim() || 'outbound',
+    environment: String(record?.environment || 'messenger').trim() || 'messenger',
+    persona_mode: personaMode,
+    group_id: personaMode === 'group' ? String(record?.group_id || '').trim() : '',
+    persona_id: personaMode === 'persona' ? getCanonicalPersonaId(String(record?.persona_id || '').trim()) : '',
+    signal_type: normalizeSignalTypeId(record?.signal_type || 'general'),
+    stages: kind === 'doctrine'
+      ? PLAYBOOK_STAGE_ORDER.map((stage) => {
+          const current = (Array.isArray(record?.stages) ? record.stages : []).find((item) => String(item?.stage || '').trim() === stage);
+          return normalizePlaybookStageEntry(current, stage);
+        })
+      : [],
+    entries: kind === 'signals'
+      ? (Array.isArray(record?.entries) ? record.entries : []).map((entry) => normalizePlaybookSignalEntry(entry)).filter(Boolean)
+      : [],
+    updated_at: String(record?.updated_at || '').trim() || null,
+  };
+}
+
+function normalizeDoctrinePlaybooks(raw) {
+  const safe = raw && typeof raw === 'object' ? raw : {};
+  return {
+    doctrine_records: Array.isArray(safe.doctrine_records) ? safe.doctrine_records.map((record) => normalizePlaybookRecord(record, 'doctrine')) : [],
+    signal_records: Array.isArray(safe.signal_records) ? safe.signal_records.map((record) => normalizePlaybookRecord(record, 'signals')) : [],
+  };
+}
+
 function normalizeDoctrineRecord(record, fallback = {}) {
   const merged = { ...fallback, ...(record || {}) };
   return {
@@ -1329,6 +1383,7 @@ function normalizeDoctrineConfig(raw) {
     environments: normalizeMap(safe.environments, defaults.environments),
     groups: normalizeMap(safe.groups, defaults.groups),
     profiles,
+    playbooks: normalizeDoctrinePlaybooks(safe.playbooks),
   };
 }
 
@@ -1390,6 +1445,255 @@ function inferScenarioSelection(session = null) {
     group: existing.group || enriched?.group_id || 'custom',
     profile: existing.profile || personaId || session?.bot_id || '',
   };
+}
+
+function normalizeSliceFilters(raw = {}) {
+  const side = String(raw.side || 'demand').trim() || 'demand';
+  const product = String(raw.product || 'cor').trim() || 'cor';
+  const salesType = String(raw.sales_type || raw.salesType || raw.dialogue_type || 'outbound').trim() || 'outbound';
+  const environment = normalizeDialogueType(raw.environment || raw.instrument || 'messenger');
+  const personaMode = ['general', 'group', 'persona'].includes(String(raw.persona_mode || raw.personaMode || '').trim())
+    ? String(raw.persona_mode || raw.personaMode).trim()
+    : raw.persona_id || raw.personaId ? 'persona' : raw.group_id || raw.groupId ? 'group' : 'general';
+  const groupId = personaMode === 'group' ? String(raw.group_id || raw.groupId || '').trim() : '';
+  const personaId = personaMode === 'persona' ? getCanonicalPersonaId(String(raw.persona_id || raw.personaId || '').trim()) : '';
+  const signalType = normalizeSignalTypeId(raw.signal_type || raw.signalType || 'general');
+  return {
+    side,
+    product,
+    sales_type: salesType,
+    environment,
+    persona_mode: personaMode,
+    group_id: groupId,
+    persona_id: personaId,
+    signal_type: signalType,
+  };
+}
+
+function sliceFilterKey(filters = {}) {
+  const normalized = normalizeSliceFilters(filters);
+  return [
+    normalized.side,
+    normalized.product,
+    normalized.sales_type,
+    normalized.environment,
+    normalized.persona_mode,
+    normalized.group_id || 'general',
+    normalized.persona_id || 'general',
+    normalized.signal_type,
+  ].join('::');
+}
+
+function firstPersonaForGroup(filters = {}) {
+  const normalized = normalizeSliceFilters(filters);
+  return Object.values(personas || {})
+    .filter((persona) => !isDeprecatedPersona(persona))
+    .map((persona) => enrichPersonaWithScenario(persona))
+    .find((persona) => {
+      if (persona.market_side !== normalized.side) return false;
+      if (persona.product !== normalized.product) return false;
+      if (normalized.persona_mode === 'group' && (persona.group_id || 'custom') !== normalized.group_id) return false;
+      return true;
+    }) || null;
+}
+
+function compileDoctrineForFilters(filters = {}) {
+  const normalized = normalizeSliceFilters(filters);
+  const personaId = normalized.persona_mode === 'persona' ? normalized.persona_id : '';
+  const persona = personaId ? personas?.[personaId] : null;
+  const fallbackPersona = !persona && normalized.persona_mode === 'group' ? firstPersonaForGroup(normalized) : null;
+  const profile = doctrineProfileForPersona(personaId || fallbackPersona?.id || '') || {};
+  const scenario = {
+    side: normalized.side,
+    product: normalized.product,
+    signal_type: normalized.signal_type,
+    dialogue_type: normalized.sales_type,
+    environment: normalized.environment,
+    group: normalized.persona_mode === 'group' ? normalized.group_id : (profile.group_id || fallbackPersona?.group_id || 'custom'),
+    profile: personaId || fallbackPersona?.id || '',
+  };
+  const stack = [
+    doctrineConfig?.sides?.[scenario.side || 'demand'],
+    doctrineConfig?.products?.[scenario.product || 'cor'],
+    doctrineConfig?.dialogue_types?.[scenario.dialogue_type || 'outbound'],
+    doctrineConfig?.environments?.[scenario.environment || 'messenger'],
+    doctrineConfig?.groups?.[scenario.group || 'custom'],
+    doctrineConfig?.signal_types?.[scenario.signal_type || 'general'],
+    profile,
+  ].filter(Boolean);
+  return stack.reduce((acc, layer) => ({
+    objective: String(layer.objective || acc.objective || '').trim(),
+    value_frame: String(layer.value_frame || acc.value_frame || '').trim(),
+    proof_policy: mergeDoctrineList(acc.proof_policy || [], layer.proof_policy || []),
+    ask_policy: mergeDoctrineList(acc.ask_policy || [], layer.ask_policy || []),
+    tone_rules: mergeDoctrineList(acc.tone_rules || [], layer.tone_rules || []),
+    forbidden_moves: mergeDoctrineList(acc.forbidden_moves || [], layer.forbidden_moves || []),
+    layers: [...(acc.layers || []), layer.id].filter(Boolean),
+  }), { layers: [] });
+}
+
+function playbookScopeLabel(filters = {}) {
+  const normalized = normalizeSliceFilters(filters);
+  if (normalized.persona_mode === 'persona') {
+    return personas?.[normalized.persona_id]?.name || normalized.persona_id || 'selected persona';
+  }
+  if (normalized.persona_mode === 'group') {
+    return doctrineConfig?.groups?.[normalized.group_id]?.label || normalized.group_id || 'selected group';
+  }
+  return doctrineConfig?.products?.[normalized.product]?.label || normalized.product || 'selected slice';
+}
+
+function fallbackDoctrineStages(filters = {}) {
+  const normalized = normalizeSliceFilters(filters);
+  const compiled = compileDoctrineForFilters(normalized);
+  const signalLabel = doctrineConfig?.signal_types?.[normalized.signal_type]?.label || 'General signal';
+  const scopeLabel = playbookScopeLabel(normalized);
+  const toneLine = (compiled.tone_rules || []).slice(0, 3).join(', ') || 'Calm, specific, controlled.';
+  const proofLine = (compiled.proof_policy || []).slice(0, 2).join(', ') || 'one concrete proof layer';
+  const askLine = (compiled.ask_policy || []).slice(0, 2).join(', ') || 'one bounded next step';
+  const valueFrame = compiled.value_frame || 'a concrete business reason to continue';
+  const objective = compiled.objective || 'move the conversation one disciplined step forward';
+  const stageTemplates = {
+    mechanics_engaged: {
+      seller_behavior: `Open through the exact ${signalLabel.toLowerCase()} context for ${scopeLabel}. Show you understand the trigger before explaining product value, and keep the conversation anchored in ${valueFrame}.`,
+      tone_of_voice: toneLine,
+    },
+    economics_engaged: {
+      seller_behavior: `Translate the problem into business logic. Explain what changes operationally or commercially, use ${proofLine}, and keep the scope narrow enough to support ${objective}.`,
+      tone_of_voice: toneLine,
+    },
+    written_step_requested: {
+      seller_behavior: `Offer a compact written proof that is easy to review asynchronously. The material should clarify ownership, value, and risk boundaries without turning into a broad deck.`,
+      tone_of_voice: toneLine,
+    },
+    written_step_accepted: {
+      seller_behavior: `Confirm what the buyer accepted, hold the line on the agreed proof, and avoid reopening old arguments. Use the accepted material to earn the next bounded move.`,
+      tone_of_voice: toneLine,
+    },
+    written_step_then_call: {
+      seller_behavior: `Bridge from written proof into a short working review. Keep the ask disciplined, tie it to the already accepted proof, and frame the call as decision support rather than a generic demo.`,
+      tone_of_voice: toneLine,
+    },
+    review_call_ready: {
+      seller_behavior: `Ask for the next step directly and narrowly. Use ${askLine}, preserve clarity on scope, and stop selling once the buyer is ready to review.`,
+      tone_of_voice: toneLine,
+    },
+  };
+  return PLAYBOOK_STAGE_ORDER.map((stage) => ({ stage, ...stageTemplates[stage] }));
+}
+
+function allowedSignalsForFilters(filters = {}) {
+  const normalized = normalizeSliceFilters(filters);
+  const profileSignals = normalized.persona_mode === 'persona' && personas?.[normalized.persona_id]
+    ? [...new Set((personas[normalized.persona_id].cards || []).map((card) => normalizeSignalTypeId(card?.signal_type)).filter(Boolean))]
+    : [];
+  const doctrineSignals = Object.values(doctrineConfig?.signal_types || {})
+    .filter((signal) => (!signal.side || signal.side === normalized.side) && (!signal.product || signal.product === normalized.product))
+    .map((signal) => signal.id);
+  const merged = [...new Set(['general', ...profileSignals, ...doctrineSignals])];
+  return merged;
+}
+
+function fallbackSignalEntries(filters = {}) {
+  const normalized = normalizeSliceFilters(filters);
+  const compiled = compileDoctrineForFilters(normalized);
+  const scopeLabel = playbookScopeLabel(normalized);
+  const valueFrame = compiled.value_frame || 'a real operating improvement';
+  const toneLine = (compiled.tone_rules || []).slice(0, 3).join(', ') || 'Calm, specific, relevant.';
+  const signalIds = normalized.signal_type !== 'general' ? [normalized.signal_type] : allowedSignalsForFilters(normalized);
+  return signalIds.map((signalType) => {
+    const signalLabel = doctrineConfig?.signal_types?.[signalType]?.label || analyticsReasonLabel(signalType);
+    const signalDescription = doctrineConfig?.signal_types?.[signalType]?.description || 'a concrete trigger';
+    return {
+      signal_type: signalType,
+      conversation_initiation: `Start with the observed ${signalLabel.toLowerCase()} context for ${scopeLabel}. The first message should connect that trigger to ${valueFrame}, open with one concrete observation, and close with one bounded question. Avoid a generic company intro, broad product tour, or vague meeting push. Tone: ${toneLine}. Signal context: ${signalDescription}`,
+    };
+  });
+}
+
+function findPlaybookRecord(records = [], filters = {}) {
+  const normalized = normalizeSliceFilters(filters);
+  const candidates = (Array.isArray(records) ? records : []).filter((record) => {
+    if (record.side !== normalized.side) return false;
+    if (record.product !== normalized.product) return false;
+    if (record.sales_type !== normalized.sales_type) return false;
+    if (record.environment !== normalized.environment) return false;
+    if (record.persona_mode === 'persona' && record.persona_id && normalized.persona_id !== record.persona_id) return false;
+    if (record.persona_mode === 'group' && record.group_id && normalized.group_id !== record.group_id) return false;
+    if (record.persona_mode === 'general' && normalized.persona_mode !== 'general') return true;
+    return true;
+  });
+  const scored = candidates.map((record) => {
+    let score = 0;
+    if (record.persona_mode === normalized.persona_mode) score += 8;
+    else if (record.persona_mode === 'general') score += 2;
+    if (record.group_id && record.group_id === normalized.group_id) score += 4;
+    if (record.persona_id && record.persona_id === normalized.persona_id) score += 6;
+    if (record.signal_type === normalized.signal_type) score += 5;
+    else if (record.signal_type === 'general') score += 1;
+    return { record, score };
+  }).sort((a, b) => b.score - a.score || String(b.record.updated_at || '').localeCompare(String(a.record.updated_at || '')));
+  return scored[0]?.record || null;
+}
+
+function resolveDoctrinePlaybook(filters = {}) {
+  const normalized = normalizeSliceFilters(filters);
+  const record = findPlaybookRecord(doctrineConfig?.playbooks?.doctrine_records || [], normalized);
+  const stages = record?.stages?.length ? record.stages : fallbackDoctrineStages(normalized);
+  return {
+    filters: normalized,
+    record_id: record?.id || null,
+    resolved_from: record ? normalizeSliceFilters(record) : normalized,
+    stages,
+  };
+}
+
+function resolveSignalPlaybook(filters = {}) {
+  const normalized = normalizeSliceFilters(filters);
+  const record = findPlaybookRecord(doctrineConfig?.playbooks?.signal_records || [], normalized);
+  const fallbackEntries = fallbackSignalEntries(normalized);
+  const entries = record?.entries?.length ? record.entries : fallbackEntries;
+  const filteredEntries = normalized.signal_type === 'general'
+    ? entries.filter((entry) => allowedSignalsForFilters(normalized).includes(entry.signal_type))
+    : entries.filter((entry) => entry.signal_type === normalized.signal_type);
+  return {
+    filters: normalized,
+    record_id: record?.id || null,
+    resolved_from: record ? normalizeSliceFilters(record) : normalized,
+    entries: filteredEntries.length ? filteredEntries : fallbackEntries.filter((entry) => normalized.signal_type === 'general' || entry.signal_type === normalized.signal_type),
+  };
+}
+
+function upsertDoctrinePlaybook(filters = {}, stages = []) {
+  const normalized = normalizeSliceFilters(filters);
+  const records = doctrineConfig.playbooks?.doctrine_records || [];
+  const existingIndex = records.findIndex((record) => sliceFilterKey(record) === sliceFilterKey(normalized));
+  const nextRecord = normalizePlaybookRecord({
+    ...(existingIndex >= 0 ? records[existingIndex] : {}),
+    ...normalized,
+    stages,
+    updated_at: now(),
+  }, 'doctrine');
+  if (existingIndex >= 0) records[existingIndex] = nextRecord;
+  else records.push(nextRecord);
+  doctrineConfig.playbooks.doctrine_records = records;
+  return nextRecord;
+}
+
+function upsertSignalPlaybook(filters = {}, entries = []) {
+  const normalized = normalizeSliceFilters(filters);
+  const records = doctrineConfig.playbooks?.signal_records || [];
+  const existingIndex = records.findIndex((record) => sliceFilterKey(record) === sliceFilterKey(normalized));
+  const nextRecord = normalizePlaybookRecord({
+    ...(existingIndex >= 0 ? records[existingIndex] : {}),
+    ...normalized,
+    entries,
+    updated_at: now(),
+  }, 'signals');
+  if (existingIndex >= 0) records[existingIndex] = nextRecord;
+  else records.push(nextRecord);
+  doctrineConfig.playbooks.signal_records = records;
+  return nextRecord;
 }
 
 function detectMessageLanguage(text, fallback = 'en') {
@@ -2344,7 +2648,7 @@ function sessionHasFirstBuyerReply(session) {
   return false;
 }
 
-async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = null, outcomeFilter = null, verdictFilter = null, sideFilter = null, productFilter = null, signalTypeFilter = null, salesTypeFilter = null, instrumentFilter = null, groupFilter = null, aggregateBy = 'average' } = {}) {
+async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = null, outcomeFilter = null, verdictFilter = null, sideFilter = null, productFilter = null, signalTypeFilter = null, salesTypeFilter = null, instrumentFilter = null, groupFilter = null, personaModeFilter = null, aggregateBy = 'average' } = {}) {
   const sessions = await listStoredSessions();
   const baselineSessions = sessions.filter(isAfterAnalyticsBaseline);
   const finished = baselineSessions.filter((session) => session.status === 'finished');
@@ -2532,10 +2836,11 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     if (personaFilter && pid !== personaFilter) return false;
     if (sideFilter && scenario.side !== sideFilter) return false;
     if (productFilter && scenario.product !== productFilter) return false;
-    if (signalTypeFilter && scenario.signal_type !== signalTypeFilter) return false;
+    if (signalTypeFilter && signalTypeFilter !== 'general' && scenario.signal_type !== signalTypeFilter) return false;
     if (salesTypeFilter && scenario.dialogue_type !== salesTypeFilter) return false;
     if (instrumentFilter && scenario.environment !== instrumentFilter) return false;
     if (groupFilter && scenario.group !== groupFilter) return false;
+    if (personaModeFilter === 'general' && (groupFilter || personaFilter)) return false;
     return true;
   });
   if (outcomeFilter === 'booked') filteredFinished = filteredFinished.filter(sessionHasMeetingBooked);
@@ -2701,6 +3006,9 @@ async function buildAnalyticsSummary({ limit = 100, offset = 0, personaFilter = 
     overall: filteredFinished.length
       ? `Across ${filteredFinished.length} finished runs, first reply rate is ${(filteredFirstBuyerReplyRate * 100).toFixed(1)}% and meeting-booked rate is ${(filteredMeetingRate * 100).toFixed(1)}%. Wins concentrate where the conversation creates enough specificity for a bounded next step: ${buildReasonListSentence(topWinReasons.slice(0, 2))} Main drop-off comes from execution gaps rather than silence alone: ${buildReasonListSentence(topLoseReasons.slice(0, 2))}`
       : 'No finished runs match the current slice yet.',
+    exact_slice_note: filteredFinished.length
+      ? `For this exact slice, we win when ${buildReasonListSentence(topWinReasons.slice(0, 2))}. We get refusals when ${buildReasonListSentence(topLoseReasons.slice(0, 2))}.`
+      : 'No finished runs match this exact slice yet, so there is no stable win or refusal pattern to explain.',
     average_win_reasons: topWinReasons,
     average_lose_reasons: topLoseReasons,
     first_buyer_reply_rate: filteredFirstBuyerReplyRate,
@@ -11059,6 +11367,40 @@ app.get('/api/doctrine-config', (_req, res) => {
   res.json(doctrineConfig);
 });
 
+app.get('/api/playbooks', (req, res) => {
+  const filters = normalizeSliceFilters({
+    side: req.query.side,
+    product: req.query.product,
+    salesType: req.query.salesType,
+    instrument: req.query.instrument,
+    personaMode: req.query.personaMode,
+    groupId: req.query.groupId,
+    personaId: req.query.personaId,
+    signalType: req.query.signalType,
+  });
+  res.json({
+    filters,
+    doctrine: resolveDoctrinePlaybook(filters),
+    signals: resolveSignalPlaybook(filters),
+  });
+});
+
+app.patch('/api/playbooks/doctrine', async (req, res) => {
+  const filters = normalizeSliceFilters(req.body?.filters || {});
+  const stages = Array.isArray(req.body?.stages) ? req.body.stages : [];
+  const record = upsertDoctrinePlaybook(filters, stages);
+  await saveDoctrineConfig();
+  res.json({ ok: true, record, doctrine: resolveDoctrinePlaybook(filters) });
+});
+
+app.patch('/api/playbooks/signals', async (req, res) => {
+  const filters = normalizeSliceFilters(req.body?.filters || {});
+  const entries = Array.isArray(req.body?.entries) ? req.body.entries : [];
+  const record = upsertSignalPlaybook(filters, entries);
+  await saveDoctrineConfig();
+  res.json({ ok: true, record, signals: resolveSignalPlaybook(filters) });
+});
+
 app.patch('/api/doctrine-config/:layer/:id', async (req, res) => {
   const layer = String(req.params.layer || '').trim();
   const id = String(req.params.id || '').trim();
@@ -11207,6 +11549,7 @@ app.get('/api/sessions/:id', async (req, res) => {
 app.get('/api/analytics', async (req, res) => {
   const limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 100));
   const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
+  const personaModeFilter = req.query.personaMode ? String(req.query.personaMode) : null;
   const personaFilter = req.query.personaId ? getCanonicalPersonaId(String(req.query.personaId)) : null;
   const outcomeFilter = req.query.outcome ? String(req.query.outcome) : null;
   const verdictFilter = req.query.verdict ? String(req.query.verdict) : null;
@@ -11217,7 +11560,7 @@ app.get('/api/analytics', async (req, res) => {
   const instrumentFilter = req.query.instrument ? String(req.query.instrument) : null;
   const groupFilter = req.query.groupId ? String(req.query.groupId) : null;
   const aggregateBy = req.query.aggregateBy ? String(req.query.aggregateBy) : 'average';
-  res.json(await buildAnalyticsSummary({ limit, offset, personaFilter, outcomeFilter, verdictFilter, sideFilter, productFilter, signalTypeFilter, salesTypeFilter, instrumentFilter, groupFilter, aggregateBy }));
+  res.json(await buildAnalyticsSummary({ limit, offset, personaFilter, outcomeFilter, verdictFilter, sideFilter, productFilter, signalTypeFilter, salesTypeFilter, instrumentFilter, groupFilter, personaModeFilter, aggregateBy }));
 });
 
 app.get('/api/hint-memory/summary', (req, res) => {
