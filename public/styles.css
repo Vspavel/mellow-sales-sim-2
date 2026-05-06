@@ -1,6 +1,49 @@
 /* Mellow design tokens — aligned with @mellow.io/ds 0.5.0 + Brandbook 2024.
-   Display font: Fraunces (substitute for PP Neue World — license pending).
-   Body font: Inter Tight (substitute for Suisse Int'l — license pending). */
+   Display font: PP Neue World (Pangram Pangram) — primary brand typeface.
+   Body font:    Suisse Int'l   (Swiss Typefaces) — secondary brand typeface. */
+
+@font-face {
+  font-family: 'PP Neue World';
+  src: url('/fonts/PPNeueWorld-Regular.woff2') format('woff2'),
+       url('/fonts/PPNeueWorld-Regular.woff')  format('woff');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Suisse Int\'l';
+  src: url('/fonts/SuisseIntl-Regular.woff2') format('woff2'),
+       url('/fonts/SuisseIntl-Regular.woff')  format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse Int\'l';
+  src: url('/fonts/SuisseIntl-RegularItalic.woff2') format('woff2'),
+       url('/fonts/SuisseIntl-RegularItalic.woff')  format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse Int\'l';
+  src: url('/fonts/SuisseIntl-Medium.woff2') format('woff2'),
+       url('/fonts/SuisseIntl-Medium.woff')  format('woff');
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse Int\'l';
+  src: url('/fonts/SuisseIntl-MediumItalic.woff2') format('woff2'),
+       url('/fonts/SuisseIntl-MediumItalic.woff')  format('woff');
+  font-weight: 500 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
   /* Brand surfaces */
@@ -45,8 +88,8 @@
   --shadow-md: 0 4px 6px -1px rgba(35,34,34,0.08), 0 2px 4px -2px rgba(35,34,34,0.06);
   --shadow-lg: 0 10px 24px -8px rgba(35,34,34,0.12), 0 6px 12px -6px rgba(35,34,34,0.08);
   /* Typography */
-  --font-display: 'Fraunces', 'PP Neue World', 'Times New Roman', serif;
-  --font-body: 'Inter Tight', 'Suisse Int\'l', system-ui, -apple-system, sans-serif;
+  --font-display: 'PP Neue World', 'Times New Roman', serif;
+  --font-body: 'Suisse Int\'l', system-ui, -apple-system, sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; }
@@ -56,7 +99,6 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100dvh;
-  font-feature-settings: 'ss01', 'cv11';
 }
 /* Subtle Mellow V-stripe signature anchored to the page background */
 body::before {
@@ -112,15 +154,13 @@ button:disabled { opacity: 0.45; cursor: default; }
   align-items: baseline;
   gap: 0.04em;
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 400;
   font-style: normal;
   font-size: 1.95rem;
   line-height: 1;
   letter-spacing: -0.025em;
   color: var(--text);
-  font-feature-settings: 'ss01', 'liga', 'dlig';
-  font-optical-sizing: auto;
-  font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+  font-feature-settings: 'liga', 'dlig';
 }
 .mellow-logo__word { font-style: normal; }
 .mellow-logo__mark {
