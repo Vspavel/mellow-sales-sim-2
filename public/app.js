@@ -1522,7 +1522,7 @@ function setDialogueType(type, options = {}) {
 
 function renderSignalCard() {
   const { sde_card: card, bot_name } = state.session;
-  const heatCls = 'heat-badge heat-' + (card.heat || 'low');
+  const heatCls = 'heat-badge heat-' + (card.heat || 'warm');
   const dontItems = (card.dont_do || []).map(d => escapeHtml(d)).join(' · ');
   signalCard.innerHTML = `
     <div class="signal-header">

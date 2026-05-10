@@ -343,9 +343,9 @@ button:disabled { opacity: 0.45; cursor: default; }
 .signal-persona { font-weight: 700; color: var(--text); }
 .signal-type-tag { color: var(--muted); }
 .heat-badge { padding: 2px 8px; border-radius: 999px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
-.heat-high { background: #fee2e2; color: #dc2626; }
-.heat-medium { background: #fef9c3; color: #92400e; }
-.heat-low { background: #f0fdf4; color: #15803d; }
+.heat-hot { background: #fee2e2; color: #dc2626; }
+.heat-warm { background: #fef9c3; color: #92400e; }
+.heat-cold { background: #f0fdf4; color: #15803d; }
 .signal-window { color: var(--muted); margin-left: auto; font-size: 0.75rem; }
 .signal-lead { font-size: 0.95rem; line-height: 1.65; color: var(--text); margin-bottom: 12px; font-weight: 500; }
 .signal-context { font-size: 0.88rem; line-height: 1.6; color: var(--text); margin-bottom: 12px; }
