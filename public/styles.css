@@ -337,17 +337,23 @@ button:disabled { opacity: 0.45; cursor: default; }
 .required-fields-list li { display: flex; flex-direction: column; gap: 3px; font-size: 0.88rem; }
 .required-fields-list span { color: var(--muted); }
 
-/* Signal card */
+/* Signal card — message-first */
 .signal-card { background: var(--surface-subtle); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
-.meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 10px; margin-bottom: 14px; }
-.meta-item { display: flex; flex-direction: column; gap: 3px; }
-.meta-item strong { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-.detail-cols { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; }
-.detail-section h3 { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; }
-.detail-row { margin-bottom: 10px; }
-.detail-row strong { font-size: 0.72rem; color: var(--muted); display: block; }
-.detail-row span, .detail-row p, .context-note { font-size: 0.88rem; line-height: 1.5; }
-.dont-list { margin: 4px 0 0; padding-left: 16px; color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+.signal-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; font-size: 0.78rem; }
+.signal-persona { font-weight: 700; color: var(--text); }
+.signal-type-tag { color: var(--muted); }
+.heat-badge { padding: 2px 8px; border-radius: 999px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.heat-hot { background: #fee2e2; color: #dc2626; }
+.heat-warm { background: #fef9c3; color: #92400e; }
+.heat-cold { background: #f0fdf4; color: #15803d; }
+.signal-window { color: var(--muted); margin-left: auto; font-size: 0.75rem; }
+.signal-lead { font-size: 0.95rem; line-height: 1.65; color: var(--text); margin-bottom: 12px; font-weight: 500; }
+.signal-context { font-size: 0.88rem; line-height: 1.6; color: var(--text); margin-bottom: 12px; }
+.signal-context p { margin-bottom: 4px; }
+.signal-hint { color: var(--muted); font-style: italic; }
+.signal-footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 10px; }
+.signal-company { font-weight: 600; color: var(--text); }
+.signal-constraints { margin-left: auto; font-size: 0.75rem; }
 
 /* Run panel */
 .panel-header--run { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 18px; }

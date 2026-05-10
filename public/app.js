@@ -1522,27 +1522,24 @@ function setDialogueType(type, options = {}) {
 
 function renderSignalCard() {
   const { sde_card: card, bot_name } = state.session;
+  const heatCls = 'heat-badge heat-' + (card.heat || 'warm');
+  const dontItems = (card.dont_do || []).map(d => escapeHtml(d)).join(' · ');
   signalCard.innerHTML = `
-    <div class="meta-grid">
-      <div class="meta-item"><strong>Persona</strong><span>${escapeHtml(bot_name)}</span></div>
-      <div class="meta-item"><strong>Signal</strong><span>${escapeHtml(signalTypeLabel(card.signal_type))}</span></div>
-      <div class="meta-item"><strong>Outreach window</strong><span>${escapeHtml(card.outreach_window)}</span></div>
-      <div class="meta-item"><strong>Heat</strong><span>${escapeHtml(heatLabel(card.heat))}</span></div>
+    <div class="signal-header">
+      <span class="signal-persona">${escapeHtml(bot_name)}</span>
+      <span class="signal-type-tag">${escapeHtml(signalTypeLabel(card.signal_type))}</span>
+      <span class="${heatCls}">${escapeHtml(heatLabel(card.heat))}</span>
+      <span class="signal-window">${escapeHtml(card.outreach_window)}</span>
     </div>
-    <div class="detail-cols">
-      <div class="detail-section">
-        <h3>Context</h3>
-        <div class="detail-row"><strong>What happened</strong><span>${escapeHtml(card.what_happened)}</span></div>
-        <div class="detail-row"><strong>Probable pain</strong><span>${escapeHtml(card.probable_pain)}</span></div>
-        <div class="detail-row"><strong>First touch hint</strong><span>${escapeHtml(card.first_touch_hint)}</span></div>
-        <p class="context-note">${escapeHtml(card.rendered_text)}</p>
-      </div>
-      <div class="detail-section">
-        <h3>Boundaries</h3>
-        <div class="detail-row"><strong>Company</strong><span>${escapeHtml(card.company.name)}, ${escapeHtml(card.company.industry)}, ${escapeHtml(card.company.size)}</span></div>
-        <div class="detail-row"><strong>Channel</strong><span>${escapeHtml(card.recommended_channel)}</span></div>
-        <div class="detail-row"><strong>Don't do</strong><ul class="dont-list">${(card.dont_do || []).map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>
-      </div>
+    <p class="signal-lead">${escapeHtml(card.rendered_text || card.what_happened)}</p>
+    <div class="signal-context">
+      <p>${escapeHtml(card.what_happened)} ${escapeHtml(card.probable_pain)}</p>
+      <p class="signal-hint">${escapeHtml(card.first_touch_hint)}</p>
+    </div>
+    <div class="signal-footer">
+      <span class="signal-company">${escapeHtml(card.company.name)}, ${escapeHtml(card.company.industry)}</span>
+      <span class="signal-channel">${escapeHtml(card.recommended_channel)}</span>
+      ${dontItems ? '<span class="signal-constraints">Avoid: ' + dontItems + '</span>' : ''}
     </div>
   `;
 }
